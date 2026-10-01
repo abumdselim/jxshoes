@@ -35,7 +35,7 @@ export default function RootLayout({
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>
-      <body className={`${hindSiliguri.className} antialiased min-h-screen flex flex-col bg-slate-50 text-slate-900 pb-20 md:pb-0 font-sans overflow-x-hidden selection:bg-orange-500 selection:text-white`}>
+      <body className={`${hindSiliguri.className} antialiased min-h-screen flex flex-col bg-slate-50 text-slate-900 pb-20 md:pb-0 font-sans overflow-x-clip selection:bg-orange-500 selection:text-white`}>
         <CartProvider>
           {children}
           <CartDrawer />

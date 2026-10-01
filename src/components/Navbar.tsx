@@ -41,7 +41,8 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm shadow-slate-900/5 transition-all">
       {/* Top Banner (Admin Controlled) */}
       <div className="bg-slate-900 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
         <Zap className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
@@ -149,5 +150,9 @@ export default function Navbar() {
         )}
       </div>
     </header>
+
+    {/* Spacer so page content begins neatly below the fixed navbar */}
+    <div className="h-[96px] sm:h-[112px] flex-shrink-0" aria-hidden="true" />
+  </>
   );
 }
