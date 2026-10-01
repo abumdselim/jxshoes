@@ -5,8 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/utils';
-import { Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
-import CartIcon from '@/components/CartIcon';
+import { Trash2, Plus, Minus, ArrowRight, ShoppingCart } from 'lucide-react';
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, subtotal, totalItems } = useCart();
@@ -17,16 +16,16 @@ export default function CartPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1">
         <h1 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-orange-600 text-white flex items-center justify-center shadow-md shadow-orange-600/30">
-            <CartIcon className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200/80 text-orange-600 flex items-center justify-center shadow-xs">
+            <ShoppingCart className="w-6 h-6 text-orange-600" />
           </div>
           <span>আপনার কার্ট ({totalItems} টি পণ্য)</span>
         </h1>
 
         {cart.length === 0 ? (
           <div className="bg-white rounded-3xl border border-slate-200 p-16 text-center shadow-sm">
-            <div className="w-20 h-20 rounded-full bg-orange-600 text-white flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-600/30">
-              <CartIcon className="w-10 h-10 text-white" />
+            <div className="w-20 h-20 rounded-full bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center mx-auto mb-4">
+              <ShoppingCart className="w-10 h-10 text-orange-600" />
             </div>
             <h2 className="text-xl font-bold text-slate-800">আপনার ব্যাগটি এখন খালি</h2>
             <p className="text-sm text-slate-500 mt-2">নতুন কালেকশন থেকে আপনার পছন্দের জুতা বা ব্যাগ যোগ করুন।</p>

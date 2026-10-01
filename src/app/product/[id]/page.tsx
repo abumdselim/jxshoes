@@ -10,8 +10,7 @@ import { Product } from '@/types';
 import { initialProducts } from '@/lib/initialData';
 import { formatPrice } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
-import { ShoppingBag, Truck, RotateCcw, ShieldCheck, Star, Check, ArrowLeft, Zap, Heart } from 'lucide-react';
-import CartIcon from '@/components/CartIcon';
+import { ShoppingBag, Truck, RotateCcw, ShieldCheck, Star, Check, ArrowLeft, Zap, Heart, ShoppingCart } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -324,11 +323,11 @@ export default function ProductDetailPage() {
           <div className="flex items-center gap-2 flex-1 justify-end">
             <button
               onClick={handleAddToCart}
-              className="p-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-md shadow-orange-600/30 transition-all active:scale-95 flex items-center justify-center"
-              title="কার্টে যোগ করুন"
-              aria-label="কার্টে যোগ করুন"
+              className="p-3 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 font-bold border border-orange-200 transition-colors flex items-center justify-center"
+              title="কার্টে রাখুন"
+              aria-label="কার্টে রাখুন"
             >
-              <CartIcon className="w-5 h-5 text-white" />
+              <ShoppingCart className="w-5 h-5 text-orange-600" />
             </button>
             <button
               onClick={handleBuyNow}

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Home, LayoutGrid, Search, Headphones, X, ArrowRight, Sparkles } from 'lucide-react';
-import CartIcon from '@/components/CartIcon';
+import { Home, LayoutGrid, Search, Headphones, X, ArrowRight, Sparkles, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { usePathname, useRouter } from 'next/navigation';
 import { initialStoreSettings } from '@/lib/initialData';
@@ -164,21 +163,21 @@ export default function MobileBottomNav() {
             <span className="text-[10px] tracking-tight">খুঁজুন</span>
           </button>
 
-          {/* Tab 4: Cart (Solid Orange Button with White Cart Icon & Counter Badge) */}
+          {/* Tab 4: Cart */}
           <button
             onClick={() => setIsCartOpen(true)}
-            className="flex flex-col items-center justify-center gap-0.5 py-0.5 group"
+            className="flex flex-col items-center justify-center gap-1 py-1 rounded-xl text-slate-500 hover:text-orange-600 transition-colors relative group"
             aria-label="কার্ট"
           >
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-orange-600 text-white shadow-md shadow-orange-600/30 group-hover:bg-orange-700 group-hover:scale-105 active:scale-95 transition-all">
-              <CartIcon className="w-5 h-5 text-white" />
+            <div className="relative">
+              <ShoppingCart className="w-5 h-5 text-slate-600 group-hover:text-orange-600 transition-colors" />
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[19px] h-[19px] px-1 bg-slate-900 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-xs animate-bounce">
+                <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 bg-orange-600 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs animate-bounce">
                   {totalItems}
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-extrabold text-orange-600">কার্ট</span>
+            <span className="text-[10px] tracking-tight font-medium text-slate-600 group-hover:text-orange-600">কার্ট</span>
           </button>
 
           {/* Tab 5: Customer Support Hotline */}
