@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, Menu, X, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, ArrowRight, PhoneCall } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
@@ -79,28 +79,29 @@ export default function Navbar() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5" />
           </form>
 
-          {/* Actions: Cart & Mobile Menu */}
-          <div className="flex items-center gap-3">
-            {/* Cart Button */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 transition-all border border-orange-200/80 shadow-xs group"
-              aria-label="View Cart"
-            >
-              <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600 group-hover:scale-110 transition-transform" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-600 text-white text-[11px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-
+          {/* Actions: Mobile Menu Toggle & Cart Button */}
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg text-slate-600 hover:text-slate-900"
+              className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              aria-label="মেনু খুলুন"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+
+            {/* Cart Button (Always positioned at the far right corner for mobile thumb reach) */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 transition-all border border-orange-200/80 shadow-xs group"
+              aria-label="শপিং ব্যাগ দেখুন"
+            >
+              <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600 group-hover:scale-110 transition-transform" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-orange-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse">
+                  {totalItems}
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -122,9 +123,12 @@ export default function Navbar() {
               <a href="/" className="px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">হোম (সব প্রোডাক্ট)</a>
               <a href="/?category=shoes" className="px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">জুতা (Shoes)</a>
               <a href="/?category=bags" className="px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">ব্যাগ (Bags)</a>
-              <a href="/admin" className="px-3 py-2 rounded-lg bg-orange-50 text-orange-600 font-semibold flex items-center justify-between">
-                <span>এডমিন প্যানেল</span>
-                <ArrowRight className="w-4 h-4" />
+              <a
+                href={`tel:${settings.hotline || '01712-345678'}`}
+                className="px-3 py-2.5 rounded-lg bg-orange-50 text-orange-600 font-bold flex items-center justify-between"
+              >
+                <span>হটলাইন: {settings.hotline || '01712-345678'}</span>
+                <PhoneCall className="w-4 h-4" />
               </a>
             </div>
           </div>

@@ -1,13 +1,24 @@
 'use client';
 
-import React from 'react';
-import { Home, Grid, ShoppingBag, ShieldCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Home, Grid, ShoppingBag, PhoneCall } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { usePathname } from 'next/navigation';
+import { initialStoreSettings } from '@/lib/initialData';
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const { totalItems, setIsCartOpen } = useCart();
+  const [hotline, setHotline] = useState(initialStoreSettings.hotline || '01712-345678');
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.hotline) setHotline(data.hotline);
+      })
+      .catch(() => {});
+  }, []);
 
   // If in admin dashboard, product detail (which has its own sticky CTA), or checkout, hide bottom nav
   const isAdmin = pathname.startsWith('/admin');
@@ -17,8 +28,9 @@ export default function MobileBottomNav() {
   if (isAdmin || isProduct || isCheckout) return null;
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 z-40 py-2 px-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 z-40 py-2 px-3 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
       <div className="flex items-center justify-around max-w-md mx-auto">
+        {/* Home */}
         <a
           href="/"
           className={`flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors ${
@@ -29,6 +41,7 @@ export default function MobileBottomNav() {
           <span className="text-[10px]">হোম</span>
         </a>
 
+        {/* Collections */}
         <a
           href="/#catalog"
           className="flex flex-col items-center gap-1 py-1 px-3 text-slate-500 hover:text-slate-800 transition-colors"
@@ -40,26 +53,28 @@ export default function MobileBottomNav() {
         {/* Cart Trigger */}
         <button
           onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center gap-1 py-1 px-3 text-slate-500 hover:text-slate-800 transition-colors"
+          className="relative flex flex-col items-center gap-1 py-1 px-3 text-orange-600 transition-all group"
+          aria-label="শপিং ব্যাগ"
         >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 text-orange-600" />
+            <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600 group-hover:scale-110 transition-transform" />
             {totalItems > 0 && (
-              <span className="absolute -top-1.5 -right-2 w-4 h-4 bg-orange-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce">
+              <span className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 bg-orange-600 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-bounce shadow-xs">
                 {totalItems}
               </span>
             )}
           </div>
-          <span className="text-[10px] text-slate-700 font-semibold">ব্যাগ ({totalItems})</span>
+          <span className="text-[10px] font-bold text-orange-600">ব্যাগ</span>
         </button>
 
-        {/* Admin Link */}
+        {/* Hotline Link */}
         <a
-          href="/admin"
+          href={`tel:${hotline}`}
           className="flex flex-col items-center gap-1 py-1 px-3 text-slate-500 hover:text-orange-600 transition-colors"
+          title={`হটলাইন: ${hotline}`}
         >
-          <ShieldCheck className="w-5 h-5 text-orange-600" />
-          <span className="text-[10px]">এডমিন</span>
+          <PhoneCall className="w-5 h-5 text-slate-600" />
+          <span className="text-[10px]">হটলাইন</span>
         </a>
       </div>
     </div>
