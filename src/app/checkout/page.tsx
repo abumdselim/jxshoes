@@ -471,8 +471,9 @@ export default function CheckoutPage() {
                 )}
               </button>
 
-              <div className="text-center text-xs text-slate-400">
-                🔒 আপনার সকল তথ্য নিরাপদ ও সুরক্ষিত রাখা হয়
+              <div className="text-center text-xs text-slate-400 inline-flex items-center justify-center gap-1.5 w-full">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                <span>আপনার সকল তথ্য নিরাপদ ও সুরক্ষিত রাখা হয়</span>
               </div>
             </div>
           </div>

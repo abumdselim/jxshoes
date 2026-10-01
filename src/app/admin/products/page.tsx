@@ -294,8 +294,8 @@ export default function AdminProductsPage() {
             className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none"
           >
             <option value="all">সকল পণ্য ({products.length})</option>
-            <option value="shoes">👟 জুতা (Shoes)</option>
-            <option value="bags">🎒 ব্যাগ (Bags)</option>
+            <option value="shoes">জুতা (Shoes)</option>
+            <option value="bags">ব্যাগ (Bags)</option>
           </select>
         </div>
       </div>
@@ -539,8 +539,8 @@ export default function AdminProductsPage() {
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold"
                   >
-                    <option value="shoes">👟 জুতা (Shoes)</option>
-                    <option value="bags">🎒 ব্যাগ (Bags)</option>
+                    <option value="shoes">জুতা (Shoes)</option>
+                    <option value="bags">ব্যাগ (Bags)</option>
                   </select>
                 </div>
 

@@ -28,7 +28,8 @@ import {
   X,
   Check,
   Building,
-  RefreshCw
+  RefreshCw,
+  ArrowRight
 } from 'lucide-react';
 
 export default function AdminInventoryPage() {
@@ -438,8 +439,8 @@ export default function AdminInventoryPage() {
                 className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none"
               >
                 <option value="all">সকল ক্যাটাগরি</option>
-                <option value="shoes">👟 জুতা (Shoes)</option>
-                <option value="bags">🎒 ব্যাগ (Bags)</option>
+                <option value="shoes">জুতা (Shoes)</option>
+                <option value="bags">ব্যাগ (Bags)</option>
               </select>
 
               <select
@@ -449,8 +450,8 @@ export default function AdminInventoryPage() {
               >
                 <option value="all">সকল স্টক অবস্থা</option>
                 <option value="instock">পর্যাপ্ত স্টক (&gt;5)</option>
-                <option value="lowstock">⚠️ লো স্টক (১-৫)</option>
-                <option value="outofstock">❌ স্টক শেষ (০)</option>
+                <option value="lowstock">লো স্টক (১-৫)</option>
+                <option value="outofstock">স্টক শেষ (০)</option>
               </select>
             </div>
           </div>
@@ -730,7 +731,7 @@ export default function AdminInventoryPage() {
                       </td>
                       <td className="py-3.5 px-6 text-xs font-mono">
                         <span className="text-slate-400">{m.previousStock}</span>
-                        <span className="mx-1 text-slate-300">➔</span>
+                        <ArrowRight className="w-3.5 h-3.5 text-slate-400 inline mx-1.5" />
                         <span className="font-bold text-slate-800">{m.newStock}</span>
                       </td>
                       <td className="py-3.5 px-6 text-xs text-slate-600">

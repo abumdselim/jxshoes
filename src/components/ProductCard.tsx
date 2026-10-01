@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Product } from '@/types';
 import { formatPrice } from '@/lib/utils';
-import { ShoppingBag, Eye, Star, Check } from 'lucide-react';
+import { ShoppingBag, Eye, Star, Check, Flame } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
@@ -61,8 +61,9 @@ export default function ProductCard({ product }: ProductCardProps) {
             </span>
           )}
           {product.isFeatured && (
-            <span className="bg-orange-600 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full shadow-md tracking-tight">
-              হট ডিল 🔥
+            <span className="bg-orange-600 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-full shadow-md tracking-tight inline-flex items-center gap-1">
+              <Flame className="w-3 h-3 text-amber-300" />
+              <span>হট ডিল</span>
             </span>
           )}
         </div>

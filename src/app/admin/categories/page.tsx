@@ -175,9 +175,9 @@ export default function AdminCategoriesPage() {
                   onChange={(e) => setFormData({ ...formData, parentType: e.target.value as any })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none font-bold"
                 >
-                  <option value="shoes">👟 জুতা (Shoes)</option>
-                  <option value="bags">🎒 ব্যাগ (Bags)</option>
-                  <option value="accessories">🕶️ এক্সেসরিজ ও বেল্ট (Accessories)</option>
+                  <option value="shoes">জুতা (Shoes)</option>
+                  <option value="bags">ব্যাগ (Bags)</option>
+                  <option value="accessories">এক্সেসরিজ ও বেল্ট (Accessories)</option>
                 </select>
               </div>
 

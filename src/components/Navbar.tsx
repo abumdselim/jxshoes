@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, ShieldCheck, Menu, X, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Search, ShieldCheck, Menu, X, ArrowRight, Zap } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
@@ -44,7 +44,8 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
       {/* Top Banner (Admin Controlled) */}
       <div className="bg-slate-900 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
-        <span>{settings.announcementText || '⚡ ক্যাশ অন ডেলিভারি সুবিধা | সারা বাংলাদেশে দ্রুত হোম ডেলিভারি!'}</span>
+        <Zap className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
+        <span>{(settings.announcementText || 'ক্যাশ অন ডেলিভারি সুবিধা | সারা বাংলাদেশে দ্রুত হোম ডেলিভারি!').replace(/^[\u26a1\s]+/, '')}</span>
         {settings.announcementSecondary && (
           <span className="hidden md:inline text-orange-400 font-semibold">{settings.announcementSecondary}</span>
         )}

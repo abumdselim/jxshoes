@@ -67,7 +67,7 @@ export const initialStoreSettings: StoreSettings = {
   hotline: "01712-345678",
   email: "support@jxshoes.com",
   address: "বাড়ি ২৪, রোড ৭, ধানমন্ডি, ঢাকা - ১২০৯",
-  announcementText: "⚡ ক্যাশ অন ডেলিভারি সুবিধা | সারা বাংলাদেশে দ্রুত হোম ডেলিভারি!",
+  announcementText: "ক্যাশ অন ডেলিভারি সুবিধা | সারা বাংলাদেশে দ্রুত হোম ডেলিভারি!",
   announcementSecondary: "• সাইজ বা কালার পরিবর্তন গ্যারান্টি",
   insideDhakaFee: 60,
   outsideDhakaFee: 120,

@@ -5,6 +5,7 @@ export const runtime = 'edge';
 import React, { useEffect, useState, use } from 'react';
 import { Order } from '@/types';
 import { formatPrice } from '@/lib/utils';
+import { Printer, MapPin, Phone, Globe, AlertCircle, Sparkles } from 'lucide-react';
 
 /* ── helpers ── */
 function formatDateBn(dateStr: string) {
@@ -71,7 +72,7 @@ export default function InvoicePage({
   if (notFound || !order) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
-        <div className="text-4xl">😕</div>
+        <AlertCircle className="w-14 h-14 text-slate-400" />
         <div className="text-slate-600 font-bold">অর্ডার পাওয়া যায়নি</div>
         <a
           href="/admin/orders"
@@ -147,10 +148,10 @@ export default function InvoicePage({
                     <div className="text-orange-100 text-xs">প্রিমিয়াম কোয়ালিটি ফুটওয়্যার ও ব্যাগ</div>
                   </div>
                 </div>
-                <div className="mt-3 text-[11px] text-orange-100 space-y-0.5">
-                  <div>📍 ঢাকা, বাংলাদেশ</div>
-                  <div>📞 01XXXXXXXXX</div>
-                  <div>🌐 jxbd.pages.dev</div>
+                <div className="mt-3 text-[11px] text-orange-100 space-y-1">
+                  <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>ঢাকা, বাংলাদেশ</span></div>
+                  <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>01XXXXXXXXX</span></div>
+                  <div className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>jxbd.pages.dev</span></div>
                 </div>
               </div>
 
@@ -183,10 +184,10 @@ export default function InvoicePage({
               <div>
                 <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">প্রাপক / Recipient</div>
                 <div className="font-black text-slate-900 text-base">{order.customerName}</div>
-                <div className="text-slate-500 text-xs mt-1 space-y-0.5">
-                  <div>📞 {order.phone}</div>
-                  <div>📍 {order.address}</div>
-                  <div className="font-semibold text-slate-700">{order.city}</div>
+                <div className="text-slate-500 text-xs mt-1.5 space-y-1">
+                  <div className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-slate-400 flex-shrink-0" /> <span>{order.phone}</span></div>
+                  <div className="flex items-start gap-1.5"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /> <span>{order.address}</span></div>
+                  <div className="font-semibold text-slate-700 pl-4">{order.city}</div>
                 </div>
               </div>
 
@@ -285,7 +286,10 @@ export default function InvoicePage({
 
           {/* ── Footer ── */}
           <div className="bg-slate-900 px-8 py-5 text-center">
-            <div className="text-orange-400 font-black text-sm mb-1">ধন্যবাদ আপনার কেনাকাটার জন্য! 🎉</div>
+            <div className="text-orange-400 font-black text-sm mb-1 flex items-center justify-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>ধন্যবাদ আপনার কেনাকাটার জন্য!</span>
+            </div>
             <div className="text-slate-400 text-[11px]">
               পণ্য পেয়ে সমস্যা হলে ৪৮ ঘণ্টার মধ্যে যোগাযোগ করুন। হটলাইন: 01XXXXXXXXX
             </div>
@@ -306,9 +310,10 @@ export default function InvoicePage({
           </a>
           <button
             onClick={handlePrint}
-            className="px-8 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-colors shadow-lg shadow-orange-600/30"
+            className="px-8 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-colors shadow-lg shadow-orange-600/30 flex items-center gap-2"
           >
-            🖨️ প্রিন্ট / PDF সেভ করুন
+            <Printer className="w-4 h-4" />
+            <span>প্রিন্ট / PDF সেভ করুন</span>
           </button>
         </div>
       </div>

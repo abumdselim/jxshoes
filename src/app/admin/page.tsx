@@ -12,7 +12,8 @@ import {
   Plus,
   AlertTriangle,
   CheckCircle,
-  Truck
+  Truck,
+  Footprints
 } from 'lucide-react';
 
 export default function AdminDashboardPage() {
@@ -166,7 +167,7 @@ export default function AdminDashboardPage() {
           <div className="space-y-3">
             <div>
               <div className="flex justify-between text-xs font-semibold mb-1">
-                <span>👟 জুতা (Shoes)</span>
+                <span className="inline-flex items-center gap-1.5"><Footprints className="w-3.5 h-3.5 text-orange-600" /> জুতা (Shoes)</span>
                 <span>{shoeCount} মডেল ({Math.round((shoeCount / products.length) * 100)}%)</span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
@@ -179,7 +180,7 @@ export default function AdminDashboardPage() {
 
             <div>
               <div className="flex justify-between text-xs font-semibold mb-1">
-                <span>🎒 ব্যাগ (Bags)</span>
+                <span className="inline-flex items-center gap-1.5"><ShoppingBag className="w-3.5 h-3.5 text-amber-500" /> ব্যাগ (Bags)</span>
                 <span>{bagCount} মডেল ({Math.round((bagCount / products.length) * 100)}%)</span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
