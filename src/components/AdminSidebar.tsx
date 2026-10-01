@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
+  Boxes,
   Layers,
   ShoppingCart,
   Megaphone,
@@ -27,6 +28,12 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       href: '/admin',
       icon: LayoutDashboard,
       active: pathname === '/admin',
+    },
+    {
+      label: 'ইনভেন্টরি ও স্টক (ERP)',
+      href: '/admin/inventory',
+      icon: Boxes,
+      active: pathname.startsWith('/admin/inventory'),
     },
     {
       label: 'প্রোডাক্ট ম্যানেজমেন্ট',

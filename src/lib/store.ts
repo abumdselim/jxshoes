@@ -5,7 +5,9 @@ import {
   StoreSettings,
   HeroBannerSettings,
   FlashDealSettings,
-  Coupon
+  Coupon,
+  InventoryMovement,
+  ProductVariant
 } from '@/types';
 import {
   initialProducts,
@@ -14,7 +16,8 @@ import {
   initialStoreSettings,
   initialHeroBanner,
   initialFlashDeal,
-  initialCoupons
+  initialCoupons,
+  initialInventoryMovements
 } from './initialData';
 
 export interface FullStoreData {
@@ -25,6 +28,7 @@ export interface FullStoreData {
   heroBanner: HeroBannerSettings;
   flashDeal: FlashDealSettings;
   coupons: Coupon[];
+  inventoryMovements: InventoryMovement[];
 }
 
 const CF_KV_NAMESPACE_ID = process.env.CLOUDFLARE_KV_ID || '';
@@ -41,6 +45,7 @@ let cachedData: FullStoreData = {
   heroBanner: initialHeroBanner,
   flashDeal: initialFlashDeal,
   coupons: initialCoupons,
+  inventoryMovements: initialInventoryMovements,
 };
 
 let hasFetchedKV = false;
@@ -66,6 +71,7 @@ export async function getStoreData(): Promise<FullStoreData> {
           heroBanner: parsed.heroBanner || initialHeroBanner,
           flashDeal: parsed.flashDeal || initialFlashDeal,
           coupons: parsed.coupons || initialCoupons,
+          inventoryMovements: parsed.inventoryMovements || initialInventoryMovements,
         };
         hasFetchedKV = true;
         return cachedData;
@@ -115,28 +121,65 @@ export async function saveProduct(product: Partial<Product> & { name: string; pr
   const isNew = !product.id;
   const newId = isNew ? `prod-${Date.now()}` : product.id!;
 
+  const existingIndex = data.products.findIndex(p => p.id === newId);
+  const existingProd = existingIndex >= 0 ? data.products[existingIndex] : null;
+
+  const defaultCategory = product.category || existingProd?.category || 'shoes';
+  const prefix = defaultCategory === 'bags' ? 'BG' : 'SH';
+  const randomCode = Math.floor(100 + Math.random() * 900);
+  const autoSku = `JX-${prefix}-${randomCode}`;
+  const autoBarcode = `890100${Date.now().toString().slice(-6)}`;
+
+  const calculatedStock = product.variants && product.variants.length > 0
+    ? product.variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0)
+    : (product.stockCount !== undefined ? Number(product.stockCount) : (existingProd?.stockCount ?? 10));
+
   const fullProduct: Product = {
     id: newId,
+    sku: product.sku?.trim() || existingProd?.sku || autoSku,
+    barcode: product.barcode?.trim() || existingProd?.barcode || autoBarcode,
     name: product.name,
     slug: product.slug || product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     description: product.description || '',
     price: Number(product.price),
+    costPrice: product.costPrice !== undefined ? Number(product.costPrice) : (existingProd?.costPrice ?? Math.round(Number(product.price) * 0.65)),
     originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined,
-    category: product.category || 'shoes',
-    subCategory: product.subCategory || 'General',
-    sizes: product.sizes && product.sizes.length > 0 ? product.sizes : ['Standard'],
-    colors: product.colors && product.colors.length > 0 ? product.colors : [{ name: 'Black', hex: '#000000' }],
-    images: product.images && product.images.length > 0 ? product.images : [
+    category: defaultCategory,
+    subCategory: product.subCategory || existingProd?.subCategory || 'General',
+    sizes: product.sizes && product.sizes.length > 0 ? product.sizes : (existingProd?.sizes ?? ['Standard']),
+    colors: product.colors && product.colors.length > 0 ? product.colors : (existingProd?.colors ?? [{ name: 'Black', hex: '#000000' }]),
+    images: product.images && product.images.length > 0 ? product.images : (existingProd?.images ?? [
       'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800'
-    ],
-    inStock: product.inStock !== undefined ? product.inStock : true,
-    stockCount: product.stockCount !== undefined ? Number(product.stockCount) : 10,
+    ]),
+    inStock: calculatedStock > 0 && (product.inStock !== undefined ? product.inStock : true),
+    stockCount: calculatedStock,
+    minStockAlert: product.minStockAlert !== undefined ? Number(product.minStockAlert) : (existingProd?.minStockAlert ?? 5),
+    supplier: product.supplier?.trim() || existingProd?.supplier || 'প্রধান সরবরাহকারী',
+    variants: product.variants || existingProd?.variants || [],
     isFeatured: Boolean(product.isFeatured),
-    rating: product.rating || 5.0,
-    createdAt: product.createdAt || new Date().toISOString(),
+    rating: product.rating || existingProd?.rating || 5.0,
+    createdAt: product.createdAt || existingProd?.createdAt || new Date().toISOString(),
   };
 
-  const existingIndex = data.products.findIndex(p => p.id === newId);
+  // If new product was created, log initial stock in inventory movements
+  if (isNew) {
+    if (!data.inventoryMovements) data.inventoryMovements = [];
+    data.inventoryMovements.unshift({
+      id: `mov-${Date.now()}`,
+      productId: fullProduct.id,
+      productName: fullProduct.name,
+      sku: fullProduct.sku,
+      type: 'RESTOCK',
+      quantity: fullProduct.stockCount,
+      previousStock: 0,
+      newStock: fullProduct.stockCount,
+      unitCost: fullProduct.costPrice,
+      supplierOrInvoice: fullProduct.supplier,
+      note: 'নতুন প্রোডাক্ট হিসেবে প্রাথমিক স্টক এন্ট্রি',
+      createdAt: new Date().toISOString()
+    });
+  }
+
   if (existingIndex >= 0) {
     data.products[existingIndex] = { ...data.products[existingIndex], ...fullProduct };
   } else {
@@ -156,6 +199,129 @@ export async function deleteProduct(id: string): Promise<boolean> {
     return true;
   }
   return false;
+}
+
+// ================== INVENTORY MANAGEMENT ==================
+export async function getInventoryMovements(): Promise<InventoryMovement[]> {
+  const data = await getStoreData();
+  return (data.inventoryMovements || []).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+export async function recordInventoryMovement(
+  movement: Omit<InventoryMovement, 'id' | 'createdAt'>
+): Promise<InventoryMovement> {
+  const data = await getStoreData();
+  if (!data.inventoryMovements) data.inventoryMovements = [];
+
+  const newMovement: InventoryMovement = {
+    ...movement,
+    id: `mov-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    createdAt: new Date().toISOString(),
+  };
+
+  data.inventoryMovements.unshift(newMovement);
+  await saveStoreData(data);
+  return newMovement;
+}
+
+export async function restockProduct(
+  productId: string,
+  quantity: number,
+  unitCost?: number,
+  supplierOrInvoice?: string,
+  note?: string,
+  variantId?: string
+): Promise<Product | null> {
+  const data = await getStoreData();
+  const prod = data.products.find(p => p.id === productId);
+  if (!prod) return null;
+
+  const prevStock = prod.stockCount;
+  const addedQty = Math.max(1, Number(quantity));
+  prod.stockCount = prevStock + addedQty;
+  prod.inStock = true;
+
+  if (unitCost !== undefined && Number(unitCost) > 0) {
+    prod.costPrice = Number(unitCost);
+  }
+
+  let variantInfo = '';
+  if (variantId && prod.variants) {
+    const v = prod.variants.find(item => item.id === variantId);
+    if (v) {
+      v.stock = (v.stock || 0) + addedQty;
+      variantInfo = `সাইজ: ${v.size}, কালার: ${v.color}`;
+    }
+  }
+
+  if (!data.inventoryMovements) data.inventoryMovements = [];
+  data.inventoryMovements.unshift({
+    id: `mov-${Date.now()}`,
+    productId: prod.id,
+    productName: prod.name,
+    sku: prod.sku,
+    variantInfo: variantInfo || undefined,
+    type: 'RESTOCK',
+    quantity: addedQty,
+    previousStock: prevStock,
+    newStock: prod.stockCount,
+    unitCost: prod.costPrice,
+    supplierOrInvoice: supplierOrInvoice || prod.supplier || 'চালান / ইনভেন্টরি পারচেস',
+    note: note || 'নতুন চালান বা স্টক ইন এন্ট্রি',
+    createdAt: new Date().toISOString()
+  });
+
+  await saveStoreData(data);
+  return prod;
+}
+
+export async function adjustProductStock(
+  productId: string,
+  newStock: number,
+  reason: 'DAMAGE' | 'RETURN' | 'ADJUSTMENT',
+  note?: string,
+  variantId?: string
+): Promise<Product | null> {
+  const data = await getStoreData();
+  const prod = data.products.find(p => p.id === productId);
+  if (!prod) return null;
+
+  const prevStock = prod.stockCount;
+  const targetStock = Math.max(0, Number(newStock));
+  const delta = targetStock - prevStock;
+  prod.stockCount = targetStock;
+  prod.inStock = targetStock > 0;
+
+  let variantInfo = '';
+  if (variantId && prod.variants) {
+    const v = prod.variants.find(item => item.id === variantId);
+    if (v) {
+      v.stock = Math.max(0, (v.stock || 0) + delta);
+      variantInfo = `সাইজ: ${v.size}, কালার: ${v.color}`;
+    }
+  }
+
+  if (!data.inventoryMovements) data.inventoryMovements = [];
+  data.inventoryMovements.unshift({
+    id: `mov-${Date.now()}`,
+    productId: prod.id,
+    productName: prod.name,
+    sku: prod.sku,
+    variantInfo: variantInfo || undefined,
+    type: reason,
+    quantity: delta,
+    previousStock: prevStock,
+    newStock: targetStock,
+    unitCost: prod.costPrice,
+    supplierOrInvoice: 'শপ ইনভেন্টরি অ্যাডজাস্টমেন্ট',
+    note: note || (reason === 'DAMAGE' ? 'ড্যামেজ বা নষ্ট পণ্য বাদ' : reason === 'RETURN' ? 'কাস্টমার রিটার্ন ইন' : 'ফিজিক্যাল স্টক অডিট অ্যাডজাস্টমেন্ট'),
+    createdAt: new Date().toISOString()
+  });
+
+  await saveStoreData(data);
+  return prod;
 }
 
 // ================== ORDERS ==================
@@ -181,6 +347,43 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
     status: 'Pending',
     createdAt: new Date().toISOString(),
   };
+
+  // Deduct stock for each ordered item and record inventory movements
+  if (!data.inventoryMovements) data.inventoryMovements = [];
+  for (const item of orderData.items) {
+    const prod = data.products.find(p => p.id === item.productId);
+    if (prod) {
+      const prevStock = prod.stockCount;
+      prod.stockCount = Math.max(0, prod.stockCount - item.quantity);
+      prod.inStock = prod.stockCount > 0;
+
+      // Also deduct from variant if present
+      if (prod.variants && prod.variants.length > 0) {
+        const v = prod.variants.find(
+          variant => variant.size === item.selectedSize && variant.color === item.selectedColor
+        );
+        if (v) {
+          v.stock = Math.max(0, v.stock - item.quantity);
+        }
+      }
+
+      data.inventoryMovements.unshift({
+        id: `mov-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        productId: prod.id,
+        productName: prod.name,
+        sku: prod.sku,
+        variantInfo: `সাইজ: ${item.selectedSize}, কালার: ${item.selectedColor}`,
+        type: 'SALE',
+        quantity: -item.quantity,
+        previousStock: prevStock,
+        newStock: prod.stockCount,
+        unitCost: prod.costPrice,
+        supplierOrInvoice: `অনলাইন অর্ডার #${orderNumber}`,
+        note: `গ্রাহক: ${orderData.customerName} (${orderData.phone})`,
+        createdAt: new Date().toISOString()
+      });
+    }
+  }
 
   data.orders.unshift(newOrder);
   await saveStoreData(data);

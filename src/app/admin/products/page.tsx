@@ -30,16 +30,21 @@ export default function AdminProductsPage() {
 
   // Form State
   const [formData, setFormData] = useState({
+    sku: '',
+    barcode: '',
     name: '',
     category: 'shoes',
     subCategory: 'Sneakers',
     price: '',
+    costPrice: '',
     originalPrice: '',
     description: '',
     sizes: '40, 41, 42, 43, 44',
     colors: 'Black, Brown',
     imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800',
     stockCount: '20',
+    minStockAlert: '5',
+    supplier: '',
     inStock: true,
     isFeatured: false,
   });
@@ -69,16 +74,21 @@ export default function AdminProductsPage() {
   const openAddModal = () => {
     setEditingProduct(null);
     setFormData({
+      sku: `JX-SH-${Math.floor(100 + Math.random() * 900)}`,
+      barcode: `890100${Date.now().toString().slice(-6)}`,
       name: '',
       category: 'shoes',
       subCategory: 'Sneakers',
       price: '',
+      costPrice: '',
       originalPrice: '',
       description: '',
       sizes: '40, 41, 42, 43, 44',
       colors: 'Black, Brown',
       imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800',
       stockCount: '20',
+      minStockAlert: '5',
+      supplier: 'প্রধান সরবরাহকারী',
       inStock: true,
       isFeatured: false,
     });
@@ -88,16 +98,21 @@ export default function AdminProductsPage() {
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
     setFormData({
+      sku: product.sku || `JX-${product.category === 'bags' ? 'BG' : 'SH'}-${Math.floor(100 + Math.random() * 900)}`,
+      barcode: product.barcode || '',
       name: product.name,
       category: product.category,
       subCategory: product.subCategory || '',
       price: product.price.toString(),
+      costPrice: product.costPrice !== undefined ? product.costPrice.toString() : '',
       originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
       description: product.description,
       sizes: product.sizes.join(', '),
       colors: product.colors.map((c) => c.name).join(', '),
       imageUrl: product.images[0] || '',
       stockCount: product.stockCount.toString(),
+      minStockAlert: (product.minStockAlert || 5).toString(),
+      supplier: product.supplier || '',
       inStock: product.inStock,
       isFeatured: Boolean(product.isFeatured),
     });
@@ -154,16 +169,21 @@ export default function AdminProductsPage() {
 
     const payload = {
       id: editingProduct?.id,
+      sku: formData.sku?.trim() || undefined,
+      barcode: formData.barcode?.trim() || undefined,
       name: formData.name,
       category: formData.category,
       subCategory: formData.subCategory,
       price: Number(formData.price),
+      costPrice: formData.costPrice ? Number(formData.costPrice) : undefined,
       originalPrice: formData.originalPrice ? Number(formData.originalPrice) : undefined,
       description: formData.description,
       sizes: sizesArr.length > 0 ? sizesArr : ['Standard'],
       colors: colorsArr.length > 0 ? colorsArr : [{ name: 'Black', hex: '#000000' }],
       images: [formData.imageUrl],
       stockCount: Number(formData.stockCount),
+      minStockAlert: formData.minStockAlert ? Number(formData.minStockAlert) : 5,
+      supplier: formData.supplier?.trim() || undefined,
       inStock: formData.inStock,
       isFeatured: formData.isFeatured,
     };
@@ -313,10 +333,15 @@ export default function AdminProductsPage() {
                         >
                           {p.name}
                         </a>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                           {p.isFeatured && (
                             <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded">
                               হট ডিল
+                            </span>
+                          )}
+                          {p.sku && (
+                            <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-mono">
+                              {p.sku}
                             </span>
                           )}
                           <span className="text-xs text-slate-400">
@@ -462,6 +487,48 @@ export default function AdminProductsPage() {
                 />
               </div>
 
+              {/* SKU & Barcode Inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold text-slate-700 uppercase">
+                      প্রোডাক্ট কোড / SKU *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pfx = formData.category === 'bags' ? 'BG' : 'SH';
+                        setFormData({ ...formData, sku: `JX-${pfx}-${Math.floor(100 + Math.random() * 900)}` });
+                      }}
+                      className="text-[11px] text-orange-600 font-bold hover:underline"
+                    >
+                      অটো জেনারেট
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={formData.sku}
+                    onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
+                    placeholder="যেমন: JX-SH-001"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    বারকোড (Barcode / EAN-13)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.barcode}
+                    onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
+                    placeholder="যেমন: 8901002001"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
@@ -491,7 +558,8 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Price, Cost Price, Original Price */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     বিক্রয় মূল্য (Price ৳) *
@@ -508,13 +576,55 @@ export default function AdminProductsPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                    পূর্বের মূল্য (Original Price ৳ - ছাড় দেখানোর জন্য)
+                    ক্রয়মূল্য (Cost Price ৳)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.costPrice}
+                    onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
+                    placeholder="যেমন: 2200"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    পূর্বের মূল্য (Original ৳)
                   </label>
                   <input
                     type="number"
                     value={formData.originalPrice}
                     onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
                     placeholder="যেমন: 4200"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+              </div>
+
+              {/* Supplier & Min Alert */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    সাপ্লায়ার / প্রস্তুতকারক
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.supplier}
+                    onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                    placeholder="যেমন: হাজারীবাগ লেদার ক্রাফট"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                    লো-স্টক সতর্কতা লেভেল (Min Alert)
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.minStockAlert}
+                    onChange={(e) => setFormData({ ...formData, minStockAlert: e.target.value })}
+                    placeholder="যেমন: 5"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>

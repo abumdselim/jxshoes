@@ -1,9 +1,38 @@
+export interface ProductVariant {
+  id: string;
+  sku: string;         // e.g. "JX-SH-001-42-BLK"
+  size: string;        // e.g. "42"
+  color: string;       // e.g. "Black"
+  stock: number;       // e.g. 8
+  price?: number;      // specific selling price if different
+  costPrice?: number;  // wholesale cost price
+}
+
+export interface InventoryMovement {
+  id: string;
+  productId: string;
+  productName: string;
+  sku: string;
+  variantInfo?: string; // e.g. "Size 42 - Jet Black"
+  type: 'RESTOCK' | 'SALE' | 'DAMAGE' | 'RETURN' | 'ADJUSTMENT';
+  quantity: number; // e.g. +20, -1
+  previousStock: number;
+  newStock: number;
+  unitCost?: number;
+  supplierOrInvoice?: string; // e.g. "চালান #CH-2026-09, ঢাকা লেদার ক্রাফট"
+  note?: string;
+  createdAt: string;
+}
+
 export interface Product {
   id: string;
+  sku: string;          // Product Code / SKU (e.g. JX-SH-001)
+  barcode?: string;     // Barcode number (e.g. 8901001001)
   name: string;
   slug: string;
   description: string;
-  price: number;
+  price: number;        // Retail Selling Price
+  costPrice?: number;   // Wholesale / Purchase Cost Price (ক্রয়মূল্য)
   originalPrice?: number;
   category: string; // 'shoes' | 'bags' | custom
   subCategory?: string; // e.g. "Sneakers", "Leather Loafers", "Formal Shoes", "Backpacks", "Handbags", "Travel Bags"
@@ -12,6 +41,9 @@ export interface Product {
   images: string[];
   inStock: boolean;
   stockCount: number;
+  minStockAlert?: number; // Minimum stock alert threshold (default: 5)
+  supplier?: string;     // Supplier / Factory name
+  variants?: ProductVariant[]; // Variant-level stock breakdown
   isFeatured?: boolean;
   rating?: number;
   createdAt: string;
