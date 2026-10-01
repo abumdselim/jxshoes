@@ -9,7 +9,6 @@ import {
   MapPin,
   Clock,
   Printer,
-  X,
   Search,
   CheckCircle2,
   AlertCircle
@@ -20,9 +19,6 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Invoice Modal State
-  const [selectedInvoice, setSelectedInvoice] = useState<Order | null>(null);
 
   const loadOrders = async () => {
     try {
@@ -146,13 +142,15 @@ export default function AdminOrdersPage() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setSelectedInvoice(order)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-bold text-slate-700 shadow-sm"
+                  <a
+                    href={`/admin/orders/${order.id}/invoice`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 text-xs font-bold text-orange-700 shadow-sm transition-colors"
                   >
-                    <Printer className="w-3.5 h-3.5 text-orange-600" />
+                    <Printer className="w-3.5 h-3.5" />
                     <span>চালান / ইনভয়েস</span>
-                  </button>
+                  </a>
 
                   {/* Status Dropdown */}
                   <select
@@ -269,85 +267,6 @@ export default function AdminOrdersPage() {
           ))
         )}
       </div>
-
-      {/* Invoice Modal */}
-      {selectedInvoice && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl border border-slate-200 space-y-6">
-            <div className="flex items-center justify-between border-b pb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-orange-600 text-white font-black flex items-center justify-center">
-                  JX
-                </div>
-                <span className="font-black text-xl text-slate-900">JxShoes Invoice</span>
-              </div>
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4 text-xs text-slate-600">
-              <div className="flex justify-between">
-                <div>
-                  <div className="font-bold text-slate-900 text-sm">ইনভয়েস নং: {selectedInvoice.orderNumber}</div>
-                  <div>তারিখ: {formatDate(selectedInvoice.createdAt)}</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-slate-900">ডেলিভারি এরিয়া: {selectedInvoice.city}</div>
-                  <div>পেমেন্ট: {selectedInvoice.paymentMethod}</div>
-                </div>
-              </div>
-
-              <div className="p-3 bg-slate-50 rounded-xl space-y-1">
-                <div className="font-bold text-slate-900">প্রাপক: {selectedInvoice.customerName}</div>
-                <div>ফোন: {selectedInvoice.phone}</div>
-                <div>ঠিকানা: {selectedInvoice.address}</div>
-              </div>
-
-              <div className="divide-y border-t border-b py-2 space-y-2">
-                {selectedInvoice.items.map((it, idx) => (
-                  <div key={idx} className="flex justify-between items-center pt-2">
-                    <div>
-                      <div className="font-bold text-slate-900">{it.name}</div>
-                      <div className="text-[11px] text-slate-400">সাইজ: {it.selectedSize} | কালার: {it.selectedColor}</div>
-                    </div>
-                    <div className="font-bold text-slate-900">
-                      {it.quantity} × {formatPrice(it.price)} = {formatPrice(it.price * it.quantity)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-1.5 text-right font-medium">
-                <div>সাবটোটাল: {formatPrice(selectedInvoice.subtotal)}</div>
-                <div>ডেলিভারি চার্জ: {formatPrice(selectedInvoice.deliveryFee)}</div>
-                <div className="text-base font-black text-slate-900 pt-2 border-t">
-                  সর্বমোট: {formatPrice(selectedInvoice.total)}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-4 border-t">
-              <button
-                onClick={() => setSelectedInvoice(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-700"
-              >
-                বন্ধ করুন
-              </button>
-              <button
-                onClick={() => window.print()}
-                className="px-5 py-2 rounded-xl bg-orange-600 text-white text-xs font-bold shadow-md flex items-center gap-2"
-              >
-                <Printer className="w-4 h-4" />
-                <span>প্রিন্ট চালান</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
