@@ -1,5 +1,7 @@
 'use client';
 
+export const runtime = 'edge';
+
 import React, { useEffect, useState, use } from 'react';
 import { Order } from '@/types';
 import { formatPrice } from '@/lib/utils';
