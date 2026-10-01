@@ -51,17 +51,17 @@ export default function Navbar() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 gap-4">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <div className="w-11 h-11 rounded-xl bg-orange-600 flex items-center justify-center text-white font-extrabold text-2xl shadow-md group-hover:scale-105 transition-transform">
+          <a href="/" className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-orange-600 flex items-center justify-center text-white font-extrabold text-xl sm:text-2xl shadow-md group-hover:scale-105 transition-transform">
               JX
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-black tracking-tight text-slate-900 leading-none">
+              <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-none">
                 {settings.storeName || 'JxShoes'}<span className="text-orange-600">.</span>
               </span>
-              <span className="text-[10px] tracking-widest uppercase font-semibold text-slate-500 mt-1">
+              <span className="text-[9px] sm:text-[10px] tracking-widest uppercase font-semibold text-slate-500 mt-0.5 sm:mt-1 truncate max-w-[130px] sm:max-w-none">
                 {settings.tagline || 'Footwear & Bags'}
               </span>
             </div>

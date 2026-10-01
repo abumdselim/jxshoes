@@ -19,10 +19,10 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className="bg-slate-950 text-slate-300 pt-16 pb-12 border-t border-slate-900 mt-20">
+    <footer className="bg-slate-950 text-slate-300 pt-12 sm:pt-16 pb-24 md:pb-12 border-t border-slate-900 mt-12 sm:mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Value Proposition Badges */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pb-12 border-b border-slate-800">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 pb-10 sm:pb-12 border-b border-slate-800">
           <div className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
               <Truck className="w-6 h-6" />

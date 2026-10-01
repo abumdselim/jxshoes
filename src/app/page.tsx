@@ -176,45 +176,45 @@ function HomePageContent() {
                   <span>{heroBanner.badgeText}</span>
                 </div>
 
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15]">
+                <h1 className="text-2xl sm:text-4xl lg:text-6xl font-black tracking-tight leading-[1.2] px-2 sm:px-0">
                   {heroBanner.titlePart1} <br className="hidden sm:inline" />
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500">
                     {heroBanner.titleHighlight}
                   </span>
                 </h1>
 
-                <p className="text-sm sm:text-base text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+                <p className="text-xs sm:text-base text-slate-300 max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal px-2 sm:px-0">
                   {heroBanner.subtitle}
                 </p>
 
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-2">
+                <div className="flex flex-row items-center justify-center lg:justify-start gap-2.5 sm:gap-4 pt-2">
                   <a
                     href="#catalog"
-                    className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm sm:text-base shadow-xl shadow-orange-600/25 transition-all transform hover:-translate-y-0.5"
+                    className="inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs sm:text-base shadow-xl shadow-orange-600/25 transition-all transform hover:-translate-y-0.5"
                   >
                     <span>{heroBanner.ctaText}</span>
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                   </a>
 
                   <a
                     href="/admin"
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-sm sm:text-base border border-white/20 transition-all backdrop-blur-sm"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs sm:text-base border border-white/20 transition-all backdrop-blur-sm"
                   >
                     <span>এডমিন প্যানেল</span>
                   </a>
                 </div>
 
                 {/* Trust Points */}
-                <div className="grid grid-cols-3 gap-2 pt-4 text-xs text-slate-300 border-t border-slate-800/80">
-                  <div className="flex items-center gap-1.5 justify-center lg:justify-start">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-2 pt-4 text-xs text-slate-300 border-t border-slate-800/80">
+                  <div className="flex items-center gap-2 justify-center lg:justify-start">
                     <CheckCircle2 className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span>ক্যাশ অন ডেলিভারি</span>
                   </div>
-                  <div className="flex items-center gap-1.5 justify-center lg:justify-start">
+                  <div className="flex items-center gap-2 justify-center lg:justify-start">
                     <CheckCircle2 className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span>৭ দিনে সাইজ এক্সচেঞ্জ</span>
                   </div>
-                  <div className="flex items-center gap-1.5 justify-center lg:justify-start">
+                  <div className="flex items-center gap-2 justify-center lg:justify-start">
                     <CheckCircle2 className="w-4 h-4 text-orange-400 flex-shrink-0" />
                     <span>১০০% আসল লেদার</span>
                   </div>
@@ -303,29 +303,31 @@ function HomePageContent() {
                   </p>
 
                   {/* Countdown Timer */}
-                  <div className="flex items-center gap-3 pt-2">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2">
                     <span className="text-xs font-bold uppercase tracking-wider text-orange-200">অফারের সময় বাকি:</span>
-                    <div className="flex items-center gap-2 font-mono font-bold text-xs sm:text-sm">
-                      <span className="bg-black/30 px-2.5 py-1.5 rounded-lg">{String(timeLeft.hours).padStart(2, '0')} ঘ</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 font-mono font-bold text-xs sm:text-sm">
+                      <span className="bg-black/30 px-2 sm:px-2.5 py-1 rounded-lg">{String(timeLeft.hours).padStart(2, '0')} ঘ</span>
                       <span>:</span>
-                      <span className="bg-black/30 px-2.5 py-1.5 rounded-lg">{String(timeLeft.minutes).padStart(2, '0')} মি</span>
+                      <span className="bg-black/30 px-2 sm:px-2.5 py-1 rounded-lg">{String(timeLeft.minutes).padStart(2, '0')} মি</span>
                       <span>:</span>
-                      <span className="bg-black/30 px-2.5 py-1.5 rounded-lg text-yellow-300">{String(timeLeft.seconds).padStart(2, '0')} সে</span>
+                      <span className="bg-black/30 px-2 sm:px-2.5 py-1 rounded-lg text-yellow-300">{String(timeLeft.seconds).padStart(2, '0')} সে</span>
                     </div>
                   </div>
 
-                  <div className="pt-2 flex items-center gap-4">
-                    <span className="text-2xl sm:text-3xl font-black text-white">
-                      {formatPrice(dealProduct.price)}
-                    </span>
-                    {dealProduct.originalPrice && (
-                      <span className="text-sm text-orange-200 line-through">
-                        {formatPrice(dealProduct.originalPrice)}
+                  <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl sm:text-3xl font-black text-white">
+                        {formatPrice(dealProduct.price)}
                       </span>
-                    )}
+                      {dealProduct.originalPrice && (
+                        <span className="text-sm text-orange-200 line-through">
+                          {formatPrice(dealProduct.originalPrice)}
+                        </span>
+                      )}
+                    </div>
                     <a
                       href={`/product/${dealProduct.id}`}
-                      className="px-6 py-2.5 rounded-xl bg-white text-orange-700 hover:bg-orange-50 font-bold text-xs sm:text-sm shadow-md transition-all ml-2"
+                      className="w-full sm:w-auto text-center px-6 py-2.5 rounded-xl bg-white text-orange-700 hover:bg-orange-50 font-bold text-xs sm:text-sm shadow-md transition-all"
                     >
                       এখনই অর্ডার করুন
                     </a>
