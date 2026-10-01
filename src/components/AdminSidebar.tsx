@@ -68,7 +68,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 text-white min-h-screen h-full flex flex-col justify-between border-r border-slate-800 flex-shrink-0">
+    <aside className="w-64 bg-slate-900 text-white h-full flex flex-col justify-between border-r border-slate-800 overflow-y-auto">
       <div>
         {/* Brand Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between">

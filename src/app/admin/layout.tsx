@@ -12,9 +12,9 @@ export default function AdminLayout({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col md:flex-row text-slate-900">
-      {/* Desktop Sidebar */}
-      <div className="hidden md:block">
+    <div className="min-h-screen bg-slate-100 text-slate-900">
+      {/* Desktop Sidebar — Fixed */}
+      <div className="hidden md:block fixed inset-y-0 left-0 z-40 w-64">
         <AdminSidebar />
       </div>
 
@@ -31,7 +31,8 @@ export default function AdminLayout({
         </div>
       )}
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      {/* Main Content — offset by sidebar width on desktop */}
+      <div className="md:ml-64 flex flex-col min-h-screen">
         <header className="bg-white border-b border-slate-200 h-16 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-3">
             {/* Mobile Hamburger Toggle */}
