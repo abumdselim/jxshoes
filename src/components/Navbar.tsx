@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, Menu, X, ArrowRight, PhoneCall } from 'lucide-react';
+import { Search, Menu, X, ArrowRight, PhoneCall, Home, Footprints, ShoppingBag, Truck, Sparkles } from 'lucide-react';
 import CartIcon from '@/components/CartIcon';
 import { useCart } from '@/context/CartContext';
 import { StoreSettings } from '@/types';
@@ -12,6 +12,7 @@ export default function Navbar() {
   const router = useRouter();
   const { totalItems, setIsCartOpen } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [settings, setSettings] = useState<StoreSettings>(initialStoreSettings);
 
@@ -80,11 +81,26 @@ export default function Navbar() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5" />
           </form>
 
-          {/* Actions: Mobile Menu Toggle & Cart Button */}
+          {/* Actions: Mobile Search, Menu Toggle & Cart Button */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Quick Search Toggle for Mobile */}
+            <button
+              onClick={() => {
+                setMobileSearchOpen(!mobileSearchOpen);
+                if (mobileMenuOpen) setMobileMenuOpen(false);
+              }}
+              className="lg:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+              aria-label="সার্চ করুন"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
             {/* Mobile menu toggle */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                setMobileMenuOpen(!mobileMenuOpen);
+                if (mobileSearchOpen) setMobileSearchOpen(false);
+              }}
               className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
               aria-label="মেনু খুলুন"
             >
@@ -107,29 +123,97 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile dropdown */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-100 py-4 px-2 space-y-3">
-            <form onSubmit={handleSearch} className="relative mb-3">
+        {/* Mobile quick search bar */}
+        {mobileSearchOpen && (
+          <div className="lg:hidden border-t border-slate-100 py-3 px-3 bg-white">
+            <form onSubmit={handleSearch} className="relative">
               <input
                 type="text"
+                autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="প্রোডাক্ট খুঁজুন..."
-                className="w-full bg-slate-100 text-sm rounded-lg pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
+                placeholder="জুতা বা ব্যাগ খুঁজুন..."
+                className="w-full bg-slate-100 text-sm rounded-xl pl-10 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-1 rounded-full text-slate-400 hover:text-slate-600 absolute right-3 top-2.5"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </form>
-            <div className="flex flex-col space-y-2 font-medium">
-              <a href="/" className="px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">হোম (সব প্রোডাক্ট)</a>
-              <a href="/?category=shoes" className="px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">জুতা (Shoes)</a>
-              <a href="/?category=bags" className="px-3 py-2 rounded-lg hover:bg-slate-50 text-slate-800">ব্যাগ (Bags)</a>
+          </div>
+        )}
+
+        {/* Mobile dropdown with rich functional icons */}
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-slate-100 py-3 px-3 space-y-2 bg-white">
+            <div className="flex flex-col space-y-1 font-medium">
+              <a
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
+                  <Home className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-slate-900">হোম পেইজ</span>
+                  <span className="text-[10px] text-slate-500">সকল নতুন কালেকশন ও অফার</span>
+                </div>
+              </a>
+
+              <a
+                href="/?category=shoes"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+                  <Footprints className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-slate-900">জুতা কালেকশন (Shoes)</span>
+                  <span className="text-[10px] text-slate-500">লেদার লোফার, অক্সফোর্ড ও স্নিকার্স</span>
+                </div>
+              </a>
+
+              <a
+                href="/?category=bags"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-slate-900">ব্যাগ কালেকশন (Bags)</span>
+                  <span className="text-[10px] text-slate-500">লেডিস ব্যাগ, ব্যাকপ্যাক ও ট্রাভেল ব্যাগ</span>
+                </div>
+              </a>
+
+              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs">
+                <Truck className="w-4 h-4 text-orange-600 flex-shrink-0" />
+                <span>সারাদেশে ক্যাশ অন ডেলিভারি ও ফ্রি সাইজ পরিবর্তন</span>
+              </div>
+
               <a
                 href={`tel:${settings.hotline || '01712-345678'}`}
-                className="px-3 py-2.5 rounded-lg bg-orange-50 text-orange-600 font-bold flex items-center justify-between"
+                className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200/80 text-orange-950 transition-all mt-1"
               >
-                <span>হটলাইন: {settings.hotline || '01712-345678'}</span>
-                <PhoneCall className="w-4 h-4" />
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-orange-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
+                    <PhoneCall className="w-4 h-4" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-black">হটলাইনে সরাসরি অর্ডার করুন</span>
+                    <span className="text-[11px] font-mono font-bold text-orange-600">{settings.hotline || '01712-345678'}</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-extrabold bg-orange-600 text-white px-2.5 py-1 rounded-lg shadow-xs">কল করুন</span>
               </a>
             </div>
           </div>
