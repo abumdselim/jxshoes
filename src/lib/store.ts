@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import {
   Product,
   Order,
@@ -19,9 +17,6 @@ import {
   initialCoupons
 } from './initialData';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
-const DATA_FILE = path.join(DATA_DIR, 'store.json');
-
 export interface FullStoreData {
   products: Product[];
   orders: Order[];
@@ -32,75 +27,91 @@ export interface FullStoreData {
   coupons: Coupon[];
 }
 
-function ensureDataFile(): FullStoreData {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-    if (!fs.existsSync(DATA_FILE)) {
-      const defaultData: FullStoreData = {
-        products: initialProducts,
-        orders: initialOrders,
-        categories: initialCategories,
-        storeSettings: initialStoreSettings,
-        heroBanner: initialHeroBanner,
-        flashDeal: initialFlashDeal,
-        coupons: initialCoupons,
-      };
-      fs.writeFileSync(DATA_FILE, JSON.stringify(defaultData, null, 2), 'utf-8');
-      return defaultData;
-    }
-    const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-    const parsed = JSON.parse(raw);
+const CF_KV_NAMESPACE_ID = process.env.CLOUDFLARE_KV_ID || '';
+const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || '';
+const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || '';
+const KV_KEY = 'jx_store_state';
 
-    // Merge defaults if fields are missing
-    return {
-      products: parsed.products || initialProducts,
-      orders: parsed.orders || initialOrders,
-      categories: parsed.categories || initialCategories,
-      storeSettings: parsed.storeSettings || initialStoreSettings,
-      heroBanner: parsed.heroBanner || initialHeroBanner,
-      flashDeal: parsed.flashDeal || initialFlashDeal,
-      coupons: parsed.coupons || initialCoupons,
-    };
-  } catch (error) {
-    console.error('Error reading store data:', error);
-    return {
-      products: initialProducts,
-      orders: initialOrders,
-      categories: initialCategories,
-      storeSettings: initialStoreSettings,
-      heroBanner: initialHeroBanner,
-      flashDeal: initialFlashDeal,
-      coupons: initialCoupons,
-    };
+// In-memory cache
+let cachedData: FullStoreData = {
+  products: initialProducts,
+  orders: initialOrders,
+  categories: initialCategories,
+  storeSettings: initialStoreSettings,
+  heroBanner: initialHeroBanner,
+  flashDeal: initialFlashDeal,
+  coupons: initialCoupons,
+};
+
+let hasFetchedKV = false;
+
+export async function getStoreData(): Promise<FullStoreData> {
+  // If we have Cloudflare KV credentials, sync with Cloudflare KV
+  if (CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID) {
+    try {
+      const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/${KV_KEY}`;
+      const res = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${CF_API_TOKEN}`,
+        },
+        cache: 'no-store',
+      });
+      if (res.ok) {
+        const parsed = await res.json();
+        cachedData = {
+          products: parsed.products || initialProducts,
+          orders: parsed.orders || initialOrders,
+          categories: parsed.categories || initialCategories,
+          storeSettings: parsed.storeSettings || initialStoreSettings,
+          heroBanner: parsed.heroBanner || initialHeroBanner,
+          flashDeal: parsed.flashDeal || initialFlashDeal,
+          coupons: parsed.coupons || initialCoupons,
+        };
+        hasFetchedKV = true;
+        return cachedData;
+      }
+    } catch (err) {
+      console.warn('Cloudflare KV fetch warning:', err);
+    }
   }
+
+  return cachedData;
 }
 
-function saveData(data: FullStoreData) {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+export async function saveStoreData(data: FullStoreData): Promise<void> {
+  cachedData = data;
+
+  // Persist to Cloudflare KV
+  if (CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID) {
+    try {
+      const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/${KV_KEY}`;
+      await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${CF_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+    } catch (err) {
+      console.warn('Cloudflare KV save warning:', err);
     }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
-  } catch (error) {
-    console.error('Error saving store data:', error);
   }
 }
 
 // ================== PRODUCTS ==================
-export function getProducts(): Product[] {
-  const data = ensureDataFile();
+export async function getProducts(): Promise<Product[]> {
+  const data = await getStoreData();
   return data.products;
 }
 
-export function getProductById(id: string): Product | undefined {
-  const products = getProducts();
+export async function getProductById(id: string): Promise<Product | undefined> {
+  const products = await getProducts();
   return products.find(p => p.id === id);
 }
 
-export function saveProduct(product: Partial<Product> & { name: string; price: number }): Product {
-  const data = ensureDataFile();
+export async function saveProduct(product: Partial<Product> & { name: string; price: number }): Promise<Product> {
+  const data = await getStoreData();
   const isNew = !product.id;
   const newId = isNew ? `prod-${Date.now()}` : product.id!;
 
@@ -132,34 +143,34 @@ export function saveProduct(product: Partial<Product> & { name: string; price: n
     data.products.unshift(fullProduct);
   }
 
-  saveData(data);
+  await saveStoreData(data);
   return fullProduct;
 }
 
-export function deleteProduct(id: string): boolean {
-  const data = ensureDataFile();
+export async function deleteProduct(id: string): Promise<boolean> {
+  const data = await getStoreData();
   const initialLength = data.products.length;
   data.products = data.products.filter(p => p.id !== id);
   if (data.products.length !== initialLength) {
-    saveData(data);
+    await saveStoreData(data);
     return true;
   }
   return false;
 }
 
 // ================== ORDERS ==================
-export function getOrders(): Order[] {
-  const data = ensureDataFile();
+export async function getOrders(): Promise<Order[]> {
+  const data = await getStoreData();
   return data.orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 }
 
-export function getOrderById(id: string): Order | undefined {
-  const orders = getOrders();
+export async function getOrderById(id: string): Promise<Order | undefined> {
+  const orders = await getOrders();
   return orders.find(o => o.id === id);
 }
 
-export function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'status'>): Order {
-  const data = ensureDataFile();
+export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'status'>): Promise<Order> {
+  const data = await getStoreData();
   const id = `ord-${Date.now()}`;
   const orderNumber = `JX-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -172,32 +183,32 @@ export function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'creat
   };
 
   data.orders.unshift(newOrder);
-  saveData(data);
+  await saveStoreData(data);
   return newOrder;
 }
 
-export function updateOrderStatus(id: string, status: Order['status'], adminNote?: string): Order | null {
-  const data = ensureDataFile();
+export async function updateOrderStatus(id: string, status: Order['status'], adminNote?: string): Promise<Order | null> {
+  const data = await getStoreData();
   const order = data.orders.find(o => o.id === id);
   if (order) {
     order.status = status;
     if (adminNote !== undefined) {
       order.adminNote = adminNote;
     }
-    saveData(data);
+    await saveStoreData(data);
     return order;
   }
   return null;
 }
 
 // ================== CATEGORIES ==================
-export function getCategories(): CategoryItem[] {
-  const data = ensureDataFile();
+export async function getCategories(): Promise<CategoryItem[]> {
+  const data = await getStoreData();
   return data.categories;
 }
 
-export function saveCategory(category: Partial<CategoryItem> & { name: string; parentType: CategoryItem['parentType'] }): CategoryItem {
-  const data = ensureDataFile();
+export async function saveCategory(category: Partial<CategoryItem> & { name: string; parentType: CategoryItem['parentType'] }): Promise<CategoryItem> {
+  const data = await getStoreData();
   const id = category.id || `cat-${Date.now()}`;
   const newCat: CategoryItem = {
     id,
@@ -215,67 +226,67 @@ export function saveCategory(category: Partial<CategoryItem> & { name: string; p
     data.categories.push(newCat);
   }
 
-  saveData(data);
+  await saveStoreData(data);
   return newCat;
 }
 
-export function deleteCategory(id: string): boolean {
-  const data = ensureDataFile();
+export async function deleteCategory(id: string): Promise<boolean> {
+  const data = await getStoreData();
   const initialLen = data.categories.length;
   data.categories = data.categories.filter(c => c.id !== id);
   if (data.categories.length !== initialLen) {
-    saveData(data);
+    await saveStoreData(data);
     return true;
   }
   return false;
 }
 
 // ================== STORE SETTINGS ==================
-export function getStoreSettings(): StoreSettings {
-  const data = ensureDataFile();
+export async function getStoreSettings(): Promise<StoreSettings> {
+  const data = await getStoreData();
   return data.storeSettings;
 }
 
-export function saveStoreSettings(settings: Partial<StoreSettings>): StoreSettings {
-  const data = ensureDataFile();
+export async function saveStoreSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
+  const data = await getStoreData();
   data.storeSettings = { ...data.storeSettings, ...settings };
-  saveData(data);
+  await saveStoreData(data);
   return data.storeSettings;
 }
 
 // ================== HERO BANNER & FLASH DEAL ==================
-export function getHeroBanner(): HeroBannerSettings {
-  const data = ensureDataFile();
+export async function getHeroBanner(): Promise<HeroBannerSettings> {
+  const data = await getStoreData();
   return data.heroBanner;
 }
 
-export function saveHeroBanner(banner: Partial<HeroBannerSettings>): HeroBannerSettings {
-  const data = ensureDataFile();
+export async function saveHeroBanner(banner: Partial<HeroBannerSettings>): Promise<HeroBannerSettings> {
+  const data = await getStoreData();
   data.heroBanner = { ...data.heroBanner, ...banner };
-  saveData(data);
+  await saveStoreData(data);
   return data.heroBanner;
 }
 
-export function getFlashDeal(): FlashDealSettings {
-  const data = ensureDataFile();
+export async function getFlashDeal(): Promise<FlashDealSettings> {
+  const data = await getStoreData();
   return data.flashDeal;
 }
 
-export function saveFlashDeal(deal: Partial<FlashDealSettings>): FlashDealSettings {
-  const data = ensureDataFile();
+export async function saveFlashDeal(deal: Partial<FlashDealSettings>): Promise<FlashDealSettings> {
+  const data = await getStoreData();
   data.flashDeal = { ...data.flashDeal, ...deal };
-  saveData(data);
+  await saveStoreData(data);
   return data.flashDeal;
 }
 
 // ================== COUPONS ==================
-export function getCoupons(): Coupon[] {
-  const data = ensureDataFile();
+export async function getCoupons(): Promise<Coupon[]> {
+  const data = await getStoreData();
   return data.coupons;
 }
 
-export function saveCoupon(coupon: Partial<Coupon> & { code: string; value: number }): Coupon {
-  const data = ensureDataFile();
+export async function saveCoupon(coupon: Partial<Coupon> & { code: string; value: number }): Promise<Coupon> {
+  const data = await getStoreData();
   const id = coupon.id || `coup-${Date.now()}`;
   const newCoup: Coupon = {
     id,
@@ -293,23 +304,23 @@ export function saveCoupon(coupon: Partial<Coupon> & { code: string; value: numb
     data.coupons.unshift(newCoup);
   }
 
-  saveData(data);
+  await saveStoreData(data);
   return newCoup;
 }
 
-export function deleteCoupon(id: string): boolean {
-  const data = ensureDataFile();
+export async function deleteCoupon(id: string): Promise<boolean> {
+  const data = await getStoreData();
   const initialLen = data.coupons.length;
   data.coupons = data.coupons.filter(c => c.id !== id);
   if (data.coupons.length !== initialLen) {
-    saveData(data);
+    await saveStoreData(data);
     return true;
   }
   return false;
 }
 
-export function validateCoupon(code: string, orderTotal: number): { valid: boolean; discount: number; message: string } {
-  const coupons = getCoupons();
+export async function validateCoupon(code: string, orderTotal: number): Promise<{ valid: boolean; discount: number; message: string }> {
+  const coupons = await getCoupons();
   const match = coupons.find(c => c.code === code.toUpperCase().trim() && c.active);
   if (!match) {
     return { valid: false, discount: 0, message: 'কুপন কোডটি সঠিক নয় বা মেয়াদ উত্তীর্ণ।' };

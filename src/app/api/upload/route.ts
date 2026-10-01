@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs';
+
+export const runtime = 'edge';
+
+const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || '';
+const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || '';
+const R2_BUCKET = process.env.CLOUDFLARE_R2_BUCKET || 'jxshoes-media';
 
 export async function POST(request: Request) {
   try {
@@ -11,24 +15,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // Generate safe clean unique filename
     const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const filename = `${Date.now()}-${cleanName}`;
-    const filePath = path.join(uploadsDir, filename);
+    const bytes = await file.arrayBuffer();
 
-    fs.writeFileSync(filePath, buffer);
+    // 1. If running with Cloudflare R2 configured
+    if (CF_API_TOKEN && CF_ACCOUNT_ID) {
+      try {
+        const r2Url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/r2/buckets/${R2_BUCKET}/objects/${filename}`;
+        const cfRes = await fetch(r2Url, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${CF_API_TOKEN}`,
+            'Content-Type': file.type || 'application/octet-stream',
+          },
+          body: bytes,
+        });
 
-    const publicUrl = `/uploads/${filename}`;
-    return NextResponse.json({ url: publicUrl, filename });
+        if (cfRes.ok) {
+          // Serve through public endpoint or proxy
+          const filePublicUrl = `/api/media/${filename}`;
+          return NextResponse.json({ url: filePublicUrl, filename });
+        }
+      } catch (err) {
+        console.warn('R2 upload failed, fallback to data URI / local:', err);
+      }
+    }
+
+    // 2. Base64 fallback if storage bucket direct put is offline
+    const base64Data = Buffer.from(bytes).toString('base64');
+    const mimeType = file.type || 'image/jpeg';
+    const dataUri = `data:${mimeType};base64,${base64Data}`;
+
+    return NextResponse.json({ url: dataUri, filename });
   } catch (error) {
     console.error('File upload error:', error);
     return NextResponse.json({ error: 'Failed to upload image' }, { status: 500 });
