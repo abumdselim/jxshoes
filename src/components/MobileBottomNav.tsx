@@ -9,10 +9,12 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   const { totalItems, setIsCartOpen } = useCart();
 
-  // If in admin dashboard, we show admin-friendly navigation or hide
+  // If in admin dashboard, product detail (which has its own sticky CTA), or checkout, hide bottom nav
   const isAdmin = pathname.startsWith('/admin');
+  const isProduct = pathname.startsWith('/product');
+  const isCheckout = pathname.startsWith('/checkout');
 
-  if (isAdmin) return null;
+  if (isAdmin || isProduct || isCheckout) return null;
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-slate-200 z-40 py-2 px-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">

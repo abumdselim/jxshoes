@@ -209,7 +209,7 @@ export default function CheckoutPage() {
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                     ডেলিভারি এরিয়া বেছে নিন *
                   </label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setCity('Inside Dhaka')}
