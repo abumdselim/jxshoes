@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, ShieldCheck, Menu, X, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Search, Menu, X, ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
@@ -79,27 +79,17 @@ export default function Navbar() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5" />
           </form>
 
-          {/* Actions: Admin & Cart */}
+          {/* Actions: Cart & Mobile Menu */}
           <div className="flex items-center gap-3">
-            {/* Quick Link to Admin Panel */}
-            <a
-              href="/admin"
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 transition-all shadow-sm"
-              title="এডমিন প্যানেলে যান"
-            >
-              <ShieldCheck className="w-4 h-4 text-orange-600" />
-              <span className="hidden sm:inline">Admin Panel</span>
-            </a>
-
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors"
+              className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 transition-all border border-orange-200/80 shadow-xs group"
               aria-label="View Cart"
             >
-              <ShoppingBag className="w-5 h-5" />
+              <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600 group-hover:scale-110 transition-transform" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-600 text-white text-[11px] font-bold rounded-full flex items-center justify-center shadow-md animate-pulse">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-orange-600 text-white text-[11px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse">
                   {totalItems}
                 </span>
               )}
