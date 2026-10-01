@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, Menu, X, ArrowRight, PhoneCall } from 'lucide-react';
+import { Search, Menu, X, ArrowRight, PhoneCall } from 'lucide-react';
+import CartIcon from '@/components/CartIcon';
 import { useCart } from '@/context/CartContext';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
@@ -94,9 +95,9 @@ export default function Navbar() {
             <button
               onClick={() => setIsCartOpen(true)}
               className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 transition-all border border-orange-200/80 shadow-xs group"
-              aria-label="শপিং ব্যাগ দেখুন"
+              aria-label="কার্ট দেখুন"
             >
-              <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600 group-hover:scale-110 transition-transform" />
+              <CartIcon className="w-5 h-5 text-orange-600 group-hover:scale-110 transition-transform" />
               {totalItems > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-orange-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse">
                   {totalItems}

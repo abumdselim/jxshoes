@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Home, Grid, ShoppingBag, PhoneCall } from 'lucide-react';
+import { Home, Grid, PhoneCall } from 'lucide-react';
+import CartIcon from '@/components/CartIcon';
 import { useCart } from '@/context/CartContext';
 import { usePathname } from 'next/navigation';
 import { initialStoreSettings } from '@/lib/initialData';
@@ -54,17 +55,17 @@ export default function MobileBottomNav() {
         <button
           onClick={() => setIsCartOpen(true)}
           className="relative flex flex-col items-center gap-1 py-1 px-3 text-orange-600 transition-all group"
-          aria-label="শপিং ব্যাগ"
+          aria-label="কার্ট"
         >
           <div className="relative">
-            <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600 group-hover:scale-110 transition-transform" />
+            <CartIcon className="w-5 h-5 text-orange-600 group-hover:scale-110 transition-transform" />
             {totalItems > 0 && (
               <span className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 bg-orange-600 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-bounce shadow-xs">
                 {totalItems}
               </span>
             )}
           </div>
-          <span className="text-[10px] font-bold text-orange-600">ব্যাগ</span>
+          <span className="text-[10px] font-bold text-orange-600">কার্ট</span>
         </button>
 
         {/* Hotline Link */}

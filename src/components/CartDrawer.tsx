@@ -1,7 +1,8 @@
 'use client';
 
 import React from 'react';
-import { X, Trash2, ShoppingBag, ArrowRight, Plus, Minus } from 'lucide-react';
+import { X, Trash2, ArrowRight, Plus, Minus } from 'lucide-react';
+import CartIcon from '@/components/CartIcon';
 import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/utils';
 
@@ -22,10 +23,10 @@ export default function CartDrawer() {
         <div className="w-full sm:max-w-md bg-white shadow-2xl flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600" />
+            <div className="flex items-center gap-2.5">
+              <CartIcon className="w-5 h-5 text-orange-600" />
               <h2 className="text-lg font-bold text-slate-900">
-                শপিং ব্যাগ ({totalItems})
+                আপনার কার্ট ({totalItems})
               </h2>
             </div>
             <button
@@ -41,7 +42,7 @@ export default function CartDrawer() {
             {cart.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center text-slate-500 py-12">
                 <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 mb-4">
-                  <ShoppingBag className="w-10 h-10 fill-orange-500 text-orange-500" />
+                  <CartIcon className="w-10 h-10 text-orange-500" />
                 </div>
                 <p className="text-base font-semibold text-slate-800">আপনার শপিং ব্যাগ খালি!</p>
                 <p className="text-xs text-slate-500 mt-1 max-w-xs">

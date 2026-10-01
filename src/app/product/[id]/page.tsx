@@ -11,6 +11,7 @@ import { initialProducts } from '@/lib/initialData';
 import { formatPrice } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { ShoppingBag, Truck, RotateCcw, ShieldCheck, Star, Check, ArrowLeft, Zap, Heart } from 'lucide-react';
+import CartIcon from '@/components/CartIcon';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -327,7 +328,7 @@ export default function ProductDetailPage() {
               title="ব্যাগে যোগ করুন"
               aria-label="ব্যাগে যোগ করুন"
             >
-              <ShoppingBag className="w-5 h-5 fill-orange-600 text-orange-600" />
+              <CartIcon className="w-5 h-5 text-orange-600" />
             </button>
             <button
               onClick={handleBuyNow}
