@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
-import { Menu, X, ShieldCheck } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -12,9 +12,17 @@ export default function AdminLayout({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
-      {/* Desktop Sidebar — Fixed */}
-      <div className="hidden md:block fixed inset-y-0 left-0 z-40 w-64">
+    /**
+     * fixed inset-0 + flex:
+     * - পুরো admin panel একটা আলাদা "app" হিসেবে পুরো viewport দখল করে
+     * - body-তে overflow-x-hidden থাকলেও position:fixed ভাঙে না
+     * - Sidebar একটি flex child — কখনো scroll হয় না
+     * - Main content শুধু overflow-y-auto দিয়ে নিজেই scroll করে
+     */
+    <div className="fixed inset-0 bg-slate-100 text-slate-900 flex overflow-hidden">
+
+      {/* Desktop Sidebar — always visible, never scrolls */}
+      <div className="hidden md:flex w-64 flex-shrink-0 h-full">
         <AdminSidebar />
       </div>
 
@@ -31,11 +39,12 @@ export default function AdminLayout({
         </div>
       )}
 
-      {/* Main Content — offset by sidebar width on desktop */}
-      <div className="md:ml-64 flex flex-col min-h-screen">
-        <header className="bg-white border-b border-slate-200 h-16 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+      {/* Main Content — flex-1, only this column scrolls */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+        {/* Sticky Header inside the scrollable column */}
+        <header className="bg-white border-b border-slate-200 h-16 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-30 shadow-sm flex-shrink-0">
           <div className="flex items-center gap-3">
-            {/* Mobile Hamburger Toggle */}
+            {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileSidebarOpen(true)}
               className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100"
@@ -52,7 +61,7 @@ export default function AdminLayout({
 
           <div className="flex items-center gap-3 text-xs font-semibold text-slate-600">
             <span className="hidden sm:inline bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200">
-              ক্যাশ অন ডেলিভারি: সক্রিয়
+              ক্যাশ অন ডেলিভারি: সক্রিয়
             </span>
             <a
               href="/"
