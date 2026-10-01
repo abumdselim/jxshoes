@@ -324,11 +324,11 @@ export default function ProductDetailPage() {
           <div className="flex items-center gap-2 flex-1 justify-end">
             <button
               onClick={handleAddToCart}
-              className="p-3 rounded-xl bg-orange-50 text-orange-600 font-bold border border-orange-200 hover:bg-orange-100 transition-colors"
-              title="ব্যাগে যোগ করুন"
-              aria-label="ব্যাগে যোগ করুন"
+              className="p-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold shadow-md shadow-orange-600/30 transition-all active:scale-95 flex items-center justify-center"
+              title="কার্টে যোগ করুন"
+              aria-label="কার্টে যোগ করুন"
             >
-              <CartIcon className="w-5 h-5 text-orange-600" />
+              <CartIcon className="w-5 h-5 text-white" />
             </button>
             <button
               onClick={handleBuyNow}

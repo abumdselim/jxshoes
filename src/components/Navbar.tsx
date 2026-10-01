@@ -94,12 +94,12 @@ export default function Navbar() {
             {/* Cart Button (Always positioned at the far right corner for mobile thumb reach) */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 transition-all border border-orange-200/80 shadow-xs group"
+              className="relative flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-orange-600 hover:bg-orange-700 text-white transition-all shadow-md shadow-orange-600/30 hover:shadow-lg hover:shadow-orange-600/40 hover:scale-105 active:scale-95 group"
               aria-label="কার্ট দেখুন"
             >
-              <CartIcon className="w-5 h-5 text-orange-600 group-hover:scale-110 transition-transform" />
+              <CartIcon className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-orange-600 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md animate-pulse">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1 bg-slate-900 text-white text-[10px] font-black rounded-full flex items-center justify-center shadow-md border-2 border-white animate-pulse">
                   {totalItems}
                 </span>
               )}

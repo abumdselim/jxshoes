@@ -54,13 +54,13 @@ export default function MobileBottomNav() {
         {/* Cart Trigger */}
         <button
           onClick={() => setIsCartOpen(true)}
-          className="relative flex flex-col items-center gap-1 py-1 px-3 text-orange-600 transition-all group"
+          className="relative flex flex-col items-center gap-1 py-0.5 px-3 group"
           aria-label="কার্ট"
         >
-          <div className="relative">
-            <CartIcon className="w-5 h-5 text-orange-600 group-hover:scale-110 transition-transform" />
+          <div className="relative flex items-center justify-center w-9 h-9 rounded-xl bg-orange-600 text-white shadow-md shadow-orange-600/30 group-hover:bg-orange-700 group-hover:scale-105 transition-all">
+            <CartIcon className="w-4 h-4 text-white group-hover:scale-110 transition-transform" />
             {totalItems > 0 && (
-              <span className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 bg-orange-600 text-white text-[10px] font-black rounded-full flex items-center justify-center animate-bounce shadow-xs">
+              <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 bg-slate-900 text-white text-[9px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-xs animate-bounce">
                 {totalItems}
               </span>
             )}
