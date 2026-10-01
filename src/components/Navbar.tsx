@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Search, ShieldCheck, Menu, X, ArrowRight, Zap } from 'lucide-react';
+import { ShoppingBag, Search, ShieldCheck, Menu, X, ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
@@ -43,16 +43,7 @@ export default function Navbar() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm shadow-slate-900/5 transition-all">
-      {/* Top Banner (Admin Controlled) */}
-      <div className="bg-slate-900 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
-        <Zap className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
-        <span>{(settings.announcementText || 'ক্যাশ অন ডেলিভারি সুবিধা | সারা বাংলাদেশে দ্রুত হোম ডেলিভারি!').replace(/^[\u26a1\s]+/, '')}</span>
-        {settings.announcementSecondary && (
-          <span className="hidden md:inline text-orange-400 font-semibold">{settings.announcementSecondary}</span>
-        )}
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
           {/* Logo */}
           <a href="/" className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group">
@@ -152,7 +143,7 @@ export default function Navbar() {
     </header>
 
     {/* Spacer so page content begins neatly below the fixed navbar */}
-    <div className="h-[96px] sm:h-[112px] flex-shrink-0" aria-hidden="true" />
+    <div className="h-16 sm:h-20 flex-shrink-0" aria-hidden="true" />
   </>
   );
 }
