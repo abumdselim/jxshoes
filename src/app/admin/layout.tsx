@@ -61,7 +61,6 @@ export default function AdminLayout({
                 alt="Shopkeeper"
                 className="h-7 w-auto"
               />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             </div>
           </div>
 
