@@ -546,11 +546,9 @@ export default function AdminAiFab() {
         }`}
         aria-label="আপনার এআই সহকারী"
       >
-        <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white" />
-        </span>
-        <AnimatedBotIcon className="w-5 h-5 flex-shrink-0" />
+        <AnimatedBotIcon
+          className={`flex-shrink-0 transition-all ${introExpanded ? 'w-5 h-5' : 'w-7 h-7'}`}
+        />
         <span
           className={`text-sm font-bold whitespace-nowrap overflow-hidden transition-all duration-500 ${
             introExpanded || open ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0'
