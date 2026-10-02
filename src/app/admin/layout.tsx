@@ -55,8 +55,13 @@ export default function AdminLayout({
             </button>
 
             <div className="flex items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/shopkeeper-logo-orange.png"
+                alt="Shopkeeper"
+                className="h-7 w-auto"
+              />
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-slate-800">Shopkeeper Control Panel</span>
             </div>
           </div>
 
