@@ -11,11 +11,13 @@
 import React, { useEffect, useRef } from 'react';
 
 export default function AnimatedBotIcon({ className = '' }: { className?: string }) {
+  const svgRef = useRef<SVGSVGElement>(null);
   const lookRef = useRef<SVGGElement>(null);
   const eyeRefs = useRef<(SVGPathElement | null)[]>([]);
 
   useEffect(() => {
     let raf = 0;
+    let curAngle = 0;
     const start = performance.now();
 
     const tick = (now: number) => {
@@ -27,7 +29,12 @@ export default function AnimatedBotIcon({ className = '' }: { className?: string
       if (lookPhase >= 1.0 && lookPhase < 2.2) dx = -3;
       else if (lookPhase >= 2.6 && lookPhase < 3.6) dx = 3;
       else if (lookPhase >= 4.0 && lookPhase < 4.8) dx = -3;
+
+      // চোখ যেদিকে তাকায়, বডিটাও সেদিকে হালকা ঝোঁকে (মসৃণ ফলো)
+      const targetAngle = dx === -3 ? -6 : dx === 3 ? 6 : 0;
+      curAngle += (targetAngle - curAngle) * 0.08;
       if (lookRef.current) lookRef.current.style.transform = `translateX(${dx}px)`;
+      if (svgRef.current) svgRef.current.style.transform = `rotate(${curAngle.toFixed(2)}deg)`;
 
       // পলক — ২.৮ সেকেন্ড চক্রে টানা দুবার চোখ বন্ধ
       const blinkPhase = t % 2.8;
@@ -47,6 +54,7 @@ export default function AnimatedBotIcon({ className = '' }: { className?: string
 
   return (
     <svg
+      ref={svgRef}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -54,6 +62,7 @@ export default function AnimatedBotIcon({ className = '' }: { className?: string
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={{ transformOrigin: 'center' }}
       aria-hidden="true"
     >
       <path d="M12 8V4H8" />
