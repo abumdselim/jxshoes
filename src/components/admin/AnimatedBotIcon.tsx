@@ -2,15 +2,21 @@
 
 /**
  * AnimatedBotIcon — জীবন্ত lucide "bot" আইকন
- * - চোখ দুটো এদিক-ওদিক তাকায় আর মাঝে মাঝে দ্বিগুণ পলক ফেলে
+ * - চোখ বাঁয়ে-ডানে ছাড়াও উপরে-নিচে তাকায়; মাঝে মাঝে দ্বিগুণ পলক
+ * - চোখ যেদিকে তাকায় বডিটাও সেদিকে হালকা ঝোঁকে (মসৃণ ফলো)
  * - requestAnimationFrame দিয়ে চলে, তাই সিস্টেমের reduced-motion সেটিং
  *   থাকলেও অ্যানিমেশন বন্ধ হয় না (CSS অ্যানিমেশন সেখানে বন্ধ হয়ে যায়)
- * - রঙ currentColor থেকে
+ * - রঙ currentColor থেকে; strokeWidth প্রপে বোল্ডনেস নিয়ন্ত্রণ হয়
  */
 
 import React, { useEffect, useRef } from 'react';
 
-export default function AnimatedBotIcon({ className = '' }: { className?: string }) {
+interface Props {
+  className?: string;
+  strokeWidth?: number;
+}
+
+export default function AnimatedBotIcon({ className = '', strokeWidth = 2 }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const lookRef = useRef<SVGGElement>(null);
   const eyeRefs = useRef<(SVGPathElement | null)[]>([]);
@@ -23,23 +29,25 @@ export default function AnimatedBotIcon({ className = '' }: { className?: string
     const tick = (now: number) => {
       const t = (now - start) / 1000;
 
-      // চঞ্চল তাকানো — ৬ সেকেন্ড চক্রে কেন্দ্র → বাঁয়ে → ডানে → বাঁয়ে → কেন্দ্র
-      const lookPhase = t % 6;
+      // ৭ সেকেন্ড চক্র: কেন্দ্র → বাঁয়ে → কেন্দ্র → উপরে → কেন্দ্র → ডানে → কেন্দ্র → নিচে → কেন্দ্র
+      const p = t % 7;
       let dx = 0;
-      if (lookPhase >= 1.0 && lookPhase < 2.2) dx = -3;
-      else if (lookPhase >= 2.6 && lookPhase < 3.6) dx = 3;
-      else if (lookPhase >= 4.0 && lookPhase < 4.8) dx = -3;
+      let dy = 0;
+      if (p >= 0.8 && p < 1.8) { dx = -3; dy = 0; }
+      else if (p >= 2.4 && p < 3.2) { dx = 0; dy = -2.2; }
+      else if (p >= 3.8 && p < 4.8) { dx = 3; dy = 0; }
+      else if (p >= 5.3 && p < 6.1) { dx = 0; dy = 2.2; }
 
-      // চোখ যেদিকে তাকায়, বডিটাও সেদিকে হালকা ঝোঁকে (মসৃণ ফলো)
+      // বডি অনুসরণ — চোখের দিকে হালকা ঝোঁক (মসৃণ লার্প)
       const targetAngle = dx === -3 ? -6 : dx === 3 ? 6 : 0;
       curAngle += (targetAngle - curAngle) * 0.08;
-      if (lookRef.current) lookRef.current.style.transform = `translateX(${dx}px)`;
+      if (lookRef.current) lookRef.current.style.transform = `translate(${dx}px, ${dy}px)`;
       if (svgRef.current) svgRef.current.style.transform = `rotate(${curAngle.toFixed(2)}deg)`;
 
       // পলক — ২.৮ সেকেন্ড চক্রে টানা দুবার চোখ বন্ধ
-      const blinkPhase = t % 2.8;
+      const bp = t % 2.8;
       const closed =
-        (blinkPhase >= 1.3 && blinkPhase < 1.42) || (blinkPhase >= 1.55 && blinkPhase < 1.67);
+        (bp >= 1.3 && bp < 1.42) || (bp >= 1.55 && bp < 1.67);
       const sy = closed ? 0.08 : 1;
       for (const eye of eyeRefs.current) {
         if (eye) eye.style.transform = `scaleY(${sy})`;
@@ -58,7 +66,7 @@ export default function AnimatedBotIcon({ className = '' }: { className?: string
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}

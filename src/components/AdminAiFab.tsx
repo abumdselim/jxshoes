@@ -100,11 +100,17 @@ export default function AdminAiFab() {
   const [submitting, setSubmitting] = useState(false);
   const [recording, setRecording] = useState(false);
   const [voiceBusy, setVoiceBusy] = useState(false);
-  // ঢুকার সাথে সাথে কিছুক্ষণ ফুল রূপে (আইকন + লেখা) দেখায়, তারপর শুধু আইকনে বসে যায়
-  const [introExpanded, setIntroExpanded] = useState(true);
+  // ইন্ট্রো রিভিল — প্রতি সেশনে একবারই ফুল রূপে দেখায়; বাকি সময় শুধু আইকন
+  const [introExpanded, setIntroExpanded] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setIntroExpanded(false), 3500);
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem('ai_fab_intro_seen')) return;
+    setIntroExpanded(true);
+    const t = setTimeout(() => {
+      setIntroExpanded(false);
+      sessionStorage.setItem('ai_fab_intro_seen', '1');
+    }, 3500);
     return () => clearTimeout(t);
   }, []);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -547,7 +553,8 @@ export default function AdminAiFab() {
         aria-label="আপনার এআই সহকারী"
       >
         <AnimatedBotIcon
-          className={`flex-shrink-0 transition-all ${introExpanded ? 'w-5 h-5' : 'w-7 h-7'}`}
+          strokeWidth={2.4}
+          className={`flex-shrink-0 transition-all ${introExpanded ? 'w-6 h-6' : 'w-8 h-8'}`}
         />
         <span
           className={`text-sm font-bold whitespace-nowrap overflow-hidden transition-all duration-500 ${

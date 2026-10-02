@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminAiFab from '@/components/AdminAiFab';
 import { Menu } from 'lucide-react';
@@ -11,6 +11,19 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // ড্রয়ার খোলা থাকলে পেছনের পেজ স্ক্রল বন্ধ + Escape-এ বন্ধ
+  useEffect(() => {
+    document.body.style.overflow = mobileSidebarOpen ? 'hidden' : '';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileSidebarOpen(false);
+    };
+    if (mobileSidebarOpen) window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [mobileSidebarOpen]);
 
   return (
     /**
@@ -27,14 +40,14 @@ export default function AdminLayout({
         <AdminSidebar />
       </div>
 
-      {/* Mobile Sidebar Drawer */}
+      {/* Mobile Sidebar Drawer — দৃঢ়ভাবে অ্যাংকর করা, স্লাইড-ইন, টান-টানি নেই */}
       {mobileSidebarOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex">
+        <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
             onClick={() => setMobileSidebarOpen(false)}
           />
-          <div className="relative z-10 w-72 max-w-full">
+          <div className="absolute left-0 top-0 bottom-0 w-72 max-w-[85%] shadow-2xl overflow-hidden animate-in slide-in-from-left duration-300 ease-out">
             <AdminSidebar onCloseMobile={() => setMobileSidebarOpen(false)} />
           </div>
         </div>
@@ -58,11 +71,11 @@ export default function AdminLayout({
           {/* লোগো — হেডারের একদম মাঝখানে */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/shopkeeper-logo-orange.png"
-              alt="Shopkeeper"
-              className="h-7 w-auto"
-            />
+              <img
+                src="/shopkeeper-logo-orange.png"
+                alt="Shopkeeper"
+                className="h-8 w-auto"
+              />
           </div>
 
           <a
