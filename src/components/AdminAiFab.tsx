@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * AI FAB — সব অ্যাডমিন পেজে ভাসমান "AI কে বলুন" বাটন
+ * AI FAB — সব অ্যাডমিন পেজে ভাসমান "আপনার এআই সহকারী" বাটন
  * ------------------------------------------------
  * দুই কাজ এক বাটনে:
  * ১. দ্রুত সেল এন্ট্রি — প্রোডাক্ট কোড (SKU/বারকোড) পাঠালে AI প্রোডাক্ট + ভ্যারিয়েন্ট
@@ -378,14 +378,14 @@ export default function AdminAiFab() {
             ? 'bg-slate-900 text-white px-5 py-3.5'
             : 'bg-orange-600 text-white px-5 py-3.5'
         }`}
-        aria-label="AI কে বলুন"
+        aria-label="আপনার এআই সহকারী"
       >
         <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white" />
         </span>
         <Bot className="w-5 h-5" />
-        <span className="text-sm font-bold">AI কে বলুন</span>
+        <span className="text-sm font-bold">আপনার এআই সহকারী</span>
       </button>
 
       {/* কুইক শিট */}
