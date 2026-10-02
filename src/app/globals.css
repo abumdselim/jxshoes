@@ -139,3 +139,35 @@ img {
     animation: none !important;
   }
 }
+
+/* ── AnimatedBotIcon — চোখ তাকায় আর পলক ফেলে ── */
+@keyframes bot-look {
+  0%, 18% { transform: translateX(0); }
+  30% { transform: translateX(-1.6px); }
+  44%, 56% { transform: translateX(-1.6px); }
+  68% { transform: translateX(1.6px); }
+  82% { transform: translateX(1.6px); }
+  100% { transform: translateX(0); }
+}
+@keyframes bot-blink {
+  0%, 40% { transform: scaleY(1); }
+  45%, 51% { transform: scaleY(0.12); }
+  56%, 100% { transform: scaleY(1); }
+}
+.bot-look {
+  animation: bot-look 7s ease-in-out infinite;
+  transform-box: fill-box;
+}
+.bot-eye {
+  animation: bot-blink 4.2s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.bot-eye:nth-of-type(2) {
+  animation-delay: 0.06s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bot-look, .bot-eye {
+    animation: none !important;
+  }
+}

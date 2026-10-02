@@ -10,6 +10,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import AnimatedBotIcon from '@/components/admin/AnimatedBotIcon';
 import { Product } from '@/types';
 import { ChatMsg, streamChat } from '@/lib/chatClient';
 import { usePathname } from 'next/navigation';
@@ -99,6 +100,13 @@ export default function AdminAiFab() {
   const [submitting, setSubmitting] = useState(false);
   const [recording, setRecording] = useState(false);
   const [voiceBusy, setVoiceBusy] = useState(false);
+  // ঢুকার সাথে সাথে কিছুক্ষণ ফুল রূপে (আইকন + লেখা) দেখায়, তারপর শুধু আইকনে বসে যায়
+  const [introExpanded, setIntroExpanded] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setIntroExpanded(false), 3500);
+    return () => clearTimeout(t);
+  }, []);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const voiceChunksRef = useRef<Blob[]>([]);
   const messagesRef = useRef<ChatMsg[]>([]);
@@ -526,13 +534,15 @@ export default function AdminAiFab() {
 
   return (
     <>
-      {/* ভাসমান AI বাটন */}
+      {/* ভাসমান AI বাটন — ঢুকার সময় ফুল রূপে দেখিয়ে পরে শুধু আইকন */}
       <button
         onClick={() => setOpen(o => !o)}
-        className={`fixed bottom-6 right-5 sm:right-8 z-40 group flex items-center gap-2 rounded-md transition-all ${
+        className={`fixed bottom-6 right-5 sm:right-8 z-40 group flex items-center rounded-md transition-all duration-500 ${
           open
-            ? 'bg-slate-900 text-white px-5 py-3.5'
-            : 'bg-orange-600 text-white px-5 py-3.5'
+            ? 'bg-slate-900 text-white px-5 py-3.5 gap-2'
+            : introExpanded
+            ? 'bg-orange-600 text-white px-5 py-3.5 gap-2'
+            : 'bg-orange-600 text-white p-4 gap-0'
         }`}
         aria-label="আপনার এআই সহকারী"
       >
@@ -540,8 +550,14 @@ export default function AdminAiFab() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white" />
         </span>
-        <Bot className="w-5 h-5" />
-        <span className="text-sm font-bold">আপনার এআই সহকারী</span>
+        <AnimatedBotIcon className="w-5 h-5 flex-shrink-0" />
+        <span
+          className={`text-sm font-bold whitespace-nowrap overflow-hidden transition-all duration-500 ${
+            introExpanded || open ? 'max-w-[200px] opacity-100' : 'max-w-0 opacity-0'
+          }`}
+        >
+          আপনার এআই সহকারী
+        </span>
       </button>
 
       {/* কুইক শিট */}
