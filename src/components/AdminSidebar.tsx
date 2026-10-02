@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -16,7 +16,8 @@ import {
   Receipt,
   Calculator,
   FileText,
-  Images
+  Images,
+  Bell
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -26,7 +27,37 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
   const pathname = usePathname();
 
-  const navItems = [
+  // অপঠিত নোটিফিকেশন সংখ্যা — নেভিগেশনে এবং প্রতি ৪৫ সেকেন্ডে রিফ্রেশ
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/notifications?unreadCount=1');
+        if (res.ok) {
+          const d = await res.json();
+          if (alive) setUnreadNotifications(d.count || 0);
+        }
+      } catch {
+        /* নীরব */
+      }
+    };
+    load();
+    const iv = setInterval(load, 45000);
+    return () => {
+      alive = false;
+      clearInterval(iv);
+    };
+  }, [pathname]);
+
+  const navItems: {
+    label: string;
+    href: string;
+    icon: React.ElementType;
+    active: boolean;
+    highlight?: boolean;
+    badge?: number;
+  }[] = [
     {
       label: 'ওভারভিউ ড্যাশবোর্ড',
       href: '/admin',
@@ -63,6 +94,13 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       href: '/admin/orders',
       icon: ShoppingCart,
       active: pathname.startsWith('/admin/orders'),
+    },
+    {
+      label: 'নোটিফিকেশন',
+      href: '/admin/notifications',
+      icon: Bell,
+      active: pathname.startsWith('/admin/notifications'),
+      badge: unreadNotifications,
     },
     {
       label: 'কাস্টমার ও বাকির খাতা',
@@ -145,6 +183,11 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                 <span className="truncate">{item.label}</span>
+                {item.badge ? (
+                  <span className="ml-auto bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {item.badge > 99 ? '99+' : item.badge}
+                  </span>
+                ) : null}
               </a>
             );
           })}

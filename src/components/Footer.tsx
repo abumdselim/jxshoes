@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Truck, RotateCcw, ShieldCheck, PhoneCall, Heart } from 'lucide-react';
+import { Truck, RotateCcw, ShieldCheck, PhoneCall, Heart, MessageSquareHeart } from 'lucide-react';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
+import FeedbackForm from '@/components/FeedbackForm';
 
 export default function Footer() {
   const [settings, setSettings] = useState<StoreSettings>(initialStoreSettings);
@@ -97,6 +98,23 @@ export default function Footer() {
               <li>ঠিকানা: {settings.address}</li>
               <li>সকাল ১০টা - রাত ১০টা</li>
             </ul>
+          </div>
+        </div>
+
+        {/* মতামত ও অভিযোগ — সরাসরি অ্যাডমিন নোটিফিকেশনে পৌঁছায় */}
+        <div className="py-10 border-t border-slate-900">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <div>
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <MessageSquareHeart className="w-5 h-5 text-orange-500" />
+                মতামত ও অভিযোগ
+              </h3>
+              <p className="text-sm text-slate-400 mt-2 leading-relaxed max-w-md">
+                শপ, পণ্য বা ডেলিভারি নিয়ে আপনার পরামর্শ কিংবা অভিযোগ জানান —
+                এটা সরাসরি ম্যানেজমেন্টের নোটিফিকেশনে পৌঁছে যাবে, আমরা দ্রুত ব্যবস্থা নেব।
+              </p>
+            </div>
+            <FeedbackForm />
           </div>
         </div>
 

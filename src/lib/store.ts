@@ -15,7 +15,8 @@ import {
   DuePayment,
   FinanceSummary,
   StoredReport,
-  FastMoverEntry
+  FastMoverEntry,
+  NotificationItem
 } from '@/types';
 import {
   initialProducts,
@@ -501,6 +502,18 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
 
   data.orders.unshift(newOrder);
   await saveStoreData(data);
+
+  // অ্যাডমিন নোটিফিকেশন — প্রতিটি নতুন অর্ডার/বিক্রিতে (অনলাইন ও POS)
+  try {
+    await addNotification({
+      type: 'order',
+      title: `নতুন অর্ডার: ${orderNumber}`,
+      message: `${newOrder.customerName} • ${newOrder.items.length}টি আইটেম • ৳${newOrder.total.toLocaleString('en-BD')} • ${newOrder.paymentMethod}${newOrder.source === 'in-store' ? ' (দোকানে বিক্রি)' : ''}`,
+    });
+  } catch (err) {
+    console.warn('Order notification warning:', err);
+  }
+
   return newOrder;
 }
 
@@ -783,6 +796,18 @@ export async function createPosSale(
 
   data.orders.unshift(newOrder);
   await saveStoreData(data);
+
+  // অ্যাডমিন নোটিফিকেশন — প্রতিটি নতুন অর্ডার/বিক্রিতে (অনলাইন ও POS)
+  try {
+    await addNotification({
+      type: 'order',
+      title: `নতুন অর্ডার: ${newOrder.orderNumber}`,
+      message: `${newOrder.customerName} • ${newOrder.items.length}টি আইটেম • ৳${newOrder.total.toLocaleString('en-BD')} • ${newOrder.paymentMethod}${newOrder.source === 'in-store' ? ' (দোকানে বিক্রি)' : ''}`,
+    });
+  } catch (err) {
+    console.warn('Order notification warning:', err);
+  }
+
   return newOrder;
 }
 
@@ -1172,4 +1197,58 @@ export async function saveMediaLibrary(urls: string[]): Promise<void> {
   } catch (err) {
     console.warn('Media library save warning:', err);
   }
+}
+
+/* ── নোটিফিকেশন — নতুন অর্ডার, কাস্টমারের অভিযোগ ও পরামর্শ ── */
+let notificationsCache: NotificationItem[] | null = null;
+const NOTIFICATIONS_CAP = 200;
+
+export async function getNotifications(): Promise<NotificationItem[]> {
+  if (notificationsCache) return notificationsCache;
+  const kv = kvApi('jx_notifications');
+  if (!kv.ok) return [];
+  try {
+    const res = await fetch(kv.url, {
+      headers: { Authorization: `Bearer ${kv.token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const parsed = await res.json();
+    notificationsCache = Array.isArray(parsed) ? parsed : [];
+    return notificationsCache;
+  } catch (err) {
+    console.warn('Notifications fetch warning:', err);
+    return [];
+  }
+}
+
+export async function saveNotifications(list: NotificationItem[]): Promise<void> {
+  notificationsCache = list.slice(0, NOTIFICATIONS_CAP);
+  const kv = kvApi('jx_notifications');
+  if (!kv.ok) return;
+  try {
+    await fetch(kv.url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${kv.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(notificationsCache),
+    });
+  } catch (err) {
+    console.warn('Notifications save warning:', err);
+  }
+}
+
+export async function addNotification(
+  n: Omit<NotificationItem, 'id' | 'read' | 'createdAt'>
+): Promise<void> {
+  const current = await getNotifications();
+  const item: NotificationItem = {
+    ...n,
+    id: `ntf-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    read: false,
+    createdAt: new Date().toISOString(),
+  };
+  await saveNotifications([item, ...current]);
 }

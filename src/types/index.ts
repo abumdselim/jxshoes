@@ -116,6 +116,15 @@ export interface DuePayment {
   createdAt: string;
 }
 
+export interface NotificationItem {
+  id: string;
+  type: 'order' | 'complaint' | 'feedback';
+  title: string;
+  message: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface FinanceSummary {
   revenue: number; // মোট বিক্রি (বাতিল বাদে)
   cogs: number; // বিক্রীত পণ্যের ক্রয়মূল্য (cost of goods sold)
