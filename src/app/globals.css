@@ -142,24 +142,26 @@ img {
 
 /* ── AnimatedBotIcon — চোখ তাকায় আর পলক ফেলে ── */
 @keyframes bot-look {
-  0%, 18% { transform: translateX(0); }
-  30% { transform: translateX(-1.6px); }
-  44%, 56% { transform: translateX(-1.6px); }
-  68% { transform: translateX(1.6px); }
-  82% { transform: translateX(1.6px); }
+  0%, 15% { transform: translateX(0); }
+  28% { transform: translateX(-3px); }
+  42%, 54% { transform: translateX(-3px); }
+  66% { transform: translateX(3px); }
+  78%, 88% { transform: translateX(3px); }
   100% { transform: translateX(0); }
 }
 @keyframes bot-blink {
-  0%, 40% { transform: scaleY(1); }
-  45%, 51% { transform: scaleY(0.12); }
-  56%, 100% { transform: scaleY(1); }
+  0%, 38% { transform: scaleY(1); }
+  44% { transform: scaleY(0.05); }
+  50% { transform: scaleY(1); }
+  56% { transform: scaleY(0.05); }
+  62%, 100% { transform: scaleY(1); }
 }
 .bot-look {
-  animation: bot-look 7s ease-in-out infinite;
+  animation: bot-look 6s ease-in-out infinite;
   transform-box: fill-box;
 }
 .bot-eye {
-  animation: bot-blink 4.2s ease-in-out infinite;
+  animation: bot-blink 3.5s ease-in-out infinite;
   transform-box: fill-box;
   transform-origin: center;
 }
