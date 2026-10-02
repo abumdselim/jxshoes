@@ -2,7 +2,8 @@
 
 export const runtime = 'edge';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { Order } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { Printer, MapPin, Phone, Globe, AlertCircle, Sparkles } from 'lucide-react';
@@ -30,12 +31,9 @@ function statusBn(status: string) {
 
 /* ─────────────────────────────────────── */
 
-export default function InvoicePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function InvoicePage() {
+  const params = useParams();
+  const id = params.id;
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);

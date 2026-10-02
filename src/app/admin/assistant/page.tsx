@@ -5,16 +5,16 @@
  * ------------------------------------------------
  * - আসল স্টোর ডেটা (প্রোডাক্ট/অর্ডার/স্টক) সার্ভার-সাইডে প্রম্পটে ইনজেক্ট হয়,
  *   তাই AI আসল সংখ্যা দিয়ে উত্তর দেয়
- * - স্ট্রিমিং উত্তর (Workers AI SSE)
+ * - স্ট্রিমিং উত্তর (সার্ভার SSE)
  * - কুইক চিপ: প্রশ্ন লিখতে না হয়ে এক ক্লিকে প্রশ্ন
  */
 
 import React, { useEffect, useRef, useState } from 'react';
 import { ChatMsg, streamChat } from '@/lib/chatClient';
+import AnimatedAiIcon from '@/components/admin/AnimatedAiIcon';
 import {
   Bot,
   Send,
-  Sparkles,
   TrendingUp,
   Package,
   AlertTriangle,
@@ -452,7 +452,7 @@ export default function AdminAssistantPage() {
           {messages.length === 0 && (
             <div className="text-center space-y-5 py-12">
               <div className="w-16 h-16 mx-auto rounded-md bg-orange-600 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-white" />
+                <AnimatedAiIcon className="w-9 h-9 text-white" />
               </div>
               <div>
                 <h2 className="text-lg font-bold text-slate-900">আপনাকে স্বাগতম!</h2>

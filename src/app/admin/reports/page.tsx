@@ -4,7 +4,7 @@
  * AI বিজনেস রিপোর্ট
  * ------------------
  * - সাপ্তাহিক/মাসিক রিপোর্ট AI দিয়ে তৈরি (আসল ডেটা → নিখুঁত স্কোরকার্ড + AI বিশ্লেষণ)
- * - হিস্ট্রি KV-তে থাকে, যেকোনো সময় দেখা/প্রিন্ট/ইমেইল করা যায়
+ * - হিস্ট্রি সার্ভারে থাকে, যেকোনো সময় দেখা/প্রিন্ট/ইমেইল করা যায়
  * - Cron Worker সেট আপ করলে রিপোর্ট অটো তৈরি হয়ে ইমেইলে যাবে (docs/ROADMAP.md)
  */
 
@@ -165,7 +165,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-20">
       {/* হেডার — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-200/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-200 rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">AI বিজনেস রিপোর্ট</h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -382,7 +382,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
               </p>
               <div className="mt-4 inline-flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                রিপোর্ট ইমেইল করতে Cloudflare Email Service সেটআপ লাগবে
+                রিপোর্ট ইমেইল করতে সার্ভারে ইমেইল সেন্ডিং সেটআপ লাগবে
               </div>
             </div>
           )}

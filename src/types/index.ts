@@ -184,7 +184,7 @@ export interface Coupon {
   active: boolean;
 }
 
-// ================== AI (Cloudflare Workers AI) ==================
+// ================== AI (সার্ভার-সাইড) ==================
 export interface AIDailyBrief {
   date: string; // YYYY-MM-DD (DST) — দিনে ১ বার জেনারেট হয়
   greeting: string; // AI-এর ব্যক্তিগত স্বাগতম

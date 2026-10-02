@@ -47,3 +47,95 @@ img {
   max-width: 100%;
   height: auto;
 }
+
+/* ── হালকা এন্ট্রি মোশন (ড্যাশবোর্ড প্যানেল ও চার্ট) ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* SVG লাইন ড্র-ইন — pathLength={1} সেট করা পাথে dashoffset 1→0 */
+@keyframes chart-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+.animate-fade-up {
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fade-in {
+  animation: fade-in 0.7s ease-out both;
+}
+.chart-draw {
+  animation: chart-draw 1.3s ease-out 0.15s both;
+}
+.chart-points {
+  animation: fade-in 0.5s ease-out 1s both;
+}
+/* .stagger কন্টেইনারের সরাসরি সন্তানরা পরপর উঠে আসে; --stagger-base দিয়ে শুরুর দেরি ঠিক করা যায় */
+.stagger > * {
+  animation: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--stagger-base, 0s) + 0.05s);
+}
+.stagger > *:nth-child(2) { animation-delay: calc(var(--stagger-base, 0s) + 0.12s); }
+.stagger > *:nth-child(3) { animation-delay: calc(var(--stagger-base, 0s) + 0.19s); }
+.stagger > *:nth-child(4) { animation-delay: calc(var(--stagger-base, 0s) + 0.26s); }
+.stagger > *:nth-child(5) { animation-delay: calc(var(--stagger-base, 0s) + 0.33s); }
+.stagger > *:nth-child(6) { animation-delay: calc(var(--stagger-base, 0s) + 0.4s); }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .chart-draw,
+  .chart-points,
+  .stagger > * {
+    animation: none !important;
+  }
+  .donut-seg,
+  .bar-fill {
+    transition: none !important;
+  }
+}
+
+/* ── AnimatedAiIcon — জীবন্ত AI আইকন ── */
+@keyframes ai-look {
+  0%, 12% { transform: rotate(0deg); }
+  26% { transform: rotate(-9deg); }
+  40%, 52% { transform: rotate(-9deg); }
+  66% { transform: rotate(9deg); }
+  80%, 90% { transform: rotate(9deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes ai-twinkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(0.65); }
+}
+@keyframes ai-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.ai-look {
+  animation: ai-look 6s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ai-twinkle-1 {
+  animation: ai-twinkle 1.8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ai-twinkle-2 {
+  animation: ai-twinkle 2.4s ease-in-out 0.9s infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.ai-float {
+  animation: ai-float 4.5s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-look, .ai-twinkle-1, .ai-twinkle-2, .ai-float {
+    animation: none !important;
+  }
+}

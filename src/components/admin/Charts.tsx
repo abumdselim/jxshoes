@@ -7,7 +7,7 @@
  * - BarList: হরাইজন্টাল বার র‍্যাংকিং
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export interface TrendPoint {
   label: string; // তারিখ (টুলটিপ/অক্ষ)
@@ -52,13 +52,23 @@ export function TrendChart({ data, color = '#ea580c', height = 200 }: { data: Tr
         </g>
       ))}
 
-      {/* এরিয়া + লাইন (ফ্ল্যাট সলিড, লো-অপাসিটি ফিল) */}
-      <path d={area} fill={color} fillOpacity="0.08" />
-      <path d={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      {/* এরিয়া + লাইন (ফ্ল্যাট সলিড, লো-অপাসিটি ফিল) — লাইনটা আঁকা হয় ধীরে */}
+      <path d={area} fill={color} fillOpacity="0.08" className="animate-fade-in" style={{ animationDelay: '0.35s' }} />
+      <path
+        d={line}
+        fill="none"
+        stroke={color}
+        strokeWidth="2.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        pathLength={1}
+        strokeDasharray={1}
+        className="chart-draw"
+      />
 
       {/* পয়েন্ট + নেটিভ টুলটিপ */}
       {data.map((d, i) => (
-        <circle key={i} cx={x(i)} cy={y(d.value)} r={i === data.length - 1 ? 4 : 2.5} fill={color}>
+        <circle key={i} cx={x(i)} cy={y(d.value)} r={i === data.length - 1 ? 4 : 2.5} fill={color} className="chart-points">
           <title>{`${d.label}: ৳${d.value.toLocaleString('en-BD')}`}</title>
         </circle>
       ))}
@@ -82,6 +92,13 @@ export interface DonutSegment {
 }
 
 export function DonutChart({ segments, centerLabel, centerValue }: { segments: DonutSegment[]; centerLabel: string; centerValue: string }) {
+  // মাউন্টের পর সেগমেন্টগুলো ০ থেকে সাইজে সুইপ করে ভরে ওঠে
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setOn(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   const total = segments.reduce((s, x) => s + x.value, 0);
   const R = 60;
   const C = 2 * Math.PI * R;
@@ -89,7 +106,7 @@ export function DonutChart({ segments, centerLabel, centerValue }: { segments: D
 
   return (
     <div className="flex items-center gap-5">
-      <svg viewBox="0 0 160 160" className="w-36 h-36 flex-shrink-0 -rotate-90">
+      <svg viewBox="0 0 160 160" className="w-36 h-36 flex-shrink-0 -rotate-90 animate-fade-in">
         <circle cx="80" cy="80" r={R} fill="none" stroke="#e2e8f0" strokeWidth="24" />
         {total > 0 &&
           segments.map((s, i) => {
@@ -104,8 +121,13 @@ export function DonutChart({ segments, centerLabel, centerValue }: { segments: D
                 fill="none"
                 stroke={s.color}
                 strokeWidth="24"
-                strokeDasharray={`${dash} ${C - dash}`}
+                strokeDasharray={on ? `${dash} ${C - dash}` : `0 ${C}`}
                 strokeDashoffset={-offset}
+                className="donut-seg"
+                style={{
+                  transition: 'stroke-dasharray 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
+                  transitionDelay: `${i * 100}ms`,
+                }}
               >
                 <title>{`${s.label}: ${s.value.toLocaleString('en-BD')} (${Math.round(frac * 100)}%)`}</title>
               </circle>
@@ -140,6 +162,13 @@ export interface BarItem {
 }
 
 export function BarList({ items, color = '#ea580c', muted = '#94a3b8' }: { items: BarItem[]; color?: string; muted?: string }) {
+  // মাউন্টের পর বারগুলো ০ থেকে ভরে ওঠে
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setOn(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   const max = Math.max(...items.map(i => i.value), 1);
   return (
     <div className="space-y-3">
@@ -151,8 +180,13 @@ export function BarList({ items, color = '#ea580c', muted = '#94a3b8' }: { items
           </div>
           <div className="h-2 bg-slate-100 rounded-sm overflow-hidden">
             <div
-              className="h-full rounded-sm transition-all"
-              style={{ width: `${Math.max((it.value / max) * 100, 2)}%`, backgroundColor: i === 0 ? color : muted }}
+              className="bar-fill h-full rounded-sm"
+              style={{
+                width: on ? `${Math.max((it.value / max) * 100, 2)}%` : '0%',
+                backgroundColor: i === 0 ? color : muted,
+                transition: 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)',
+                transitionDelay: `${i * 80}ms`,
+              }}
             />
           </div>
         </div>

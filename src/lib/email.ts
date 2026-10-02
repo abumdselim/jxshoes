@@ -21,7 +21,7 @@ export function isEmailConfigured(): boolean {
 }
 
 export const EMAIL_NOT_CONFIGURED_MSG =
-  'ইমেইল এখনো সেটআপ হয়নি। যা করতে হবে: (১) নিজের ডোমেইন দিয়ে `npx wrangler email sending enable yourdomain.com` চালান, (২) টোকেনে Email Sending পারমিশন দিন, (৩) EMAIL_FROM_ADDRESS env বসান। বিস্তারিত docs/ROADMAP.md-তে।';
+  'ইমেইল এখনো সেটআপ হয়নি। যা করতে হবে: (১) সার্ভারে ইমেইল সেন্ডিং চালু করুন, (২) টোকেনে Email Sending পারমিশন দিন, (৩) EMAIL_FROM_ADDRESS env বসান। বিস্তারিত docs/ROADMAP.md-তে।';
 
 export interface SendEmailResult {
   ok: boolean;
@@ -60,10 +60,12 @@ export async function sendEmail(opts: {
 
     const json = await res.json().catch(() => null);
     if (!res.ok || !json?.success) {
-      const msg = Array.isArray(json?.errors) && json.errors.length > 0
+      // API-র raw এরর টেক্সট সার্ভার লগে, ক্লায়েন্টে জেনেরিক মেসেজ
+      const detail = Array.isArray(json?.errors) && json.errors.length > 0
         ? json.errors.map((e: { message?: string }) => e.message).join('; ')
         : `HTTP ${res.status}`;
-      return { ok: false, error: `ইমেইল পাঠানো যায়নি: ${msg}` };
+      console.warn('Email send failed:', detail);
+      return { ok: false, error: `ইমেইল পাঠানো যায়নি (কোড ${res.status})` };
     }
 
     return {

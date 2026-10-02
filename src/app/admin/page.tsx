@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
                 <span>আপনার AI ম্যানেজার</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold mt-2 tracking-tight">
-                {getGreeting()}{ownerName ? `, ${ownerName}` : ''}! 👋
+                {getGreeting()}{ownerName ? `, ${ownerName}` : ''}!
               </h1>
               <p className="text-xs text-slate-300 mt-1">
                 {new Date().toLocaleDateString('bn-BD', {
@@ -267,8 +267,8 @@ export default function AdminDashboardPage() {
 
           {briefState === 'unconfigured' && (
             <div className="mt-5 rounded-md bg-white/5 border border-white/10 p-4 text-xs text-slate-300 leading-relaxed">
-              💡 দিনের শুরুতে AI ব্রিফিং পেতে Cloudflare API টোকেনে{' '}
-              <span className="font-bold text-orange-300">&quot;Workers AI → Write&quot;</span>{' '}
+              💡 দিনের শুরুতে AI ব্রিফিং পেতে সার্ভারের AI API টোকেনে{' '}
+              <span className="font-bold text-orange-300">&quot;AI → Write&quot;</span>{' '}
               পারমিশন যোগ করুন। বিস্তারিত <code className="font-mono">docs/AI_SYSTEM.md</code> ফাইলে।
             </div>
           )}
@@ -286,14 +286,14 @@ export default function AdminDashboardPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {brief.advice.length > 0 && (
-                  <div className="rounded-md bg-white/5 border border-white/10 p-4">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-300 uppercase tracking-wider mb-2">
+                  <div className="rounded-md bg-white border border-slate-200 p-4">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 uppercase tracking-wider mb-2">
                       <Lightbulb className="w-3.5 h-3.5" /> আজকের পরামর্শ
                     </div>
                     <ul className="space-y-1.5">
                       {brief.advice.map((a, i) => (
-                        <li key={i} className="text-xs text-slate-200 flex gap-2">
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <li key={i} className="text-xs text-slate-700 flex gap-2">
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
                           <span>{a}</span>
                         </li>
                       ))}
@@ -302,21 +302,21 @@ export default function AdminDashboardPage() {
                 )}
 
                 {brief.alerts.length > 0 ? (
-                  <div className="rounded-md bg-amber-500/10 border border-amber-400/30 p-4">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-2">
+                  <div className="rounded-md bg-white border border-amber-300 p-4">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-600 uppercase tracking-wider mb-2">
                       <AlertTriangle className="w-3.5 h-3.5" /> জরুরি সতর্কতা
                     </div>
                     <ul className="space-y-1.5">
                       {brief.alerts.map((a, i) => (
-                        <li key={i} className="text-xs text-amber-100 flex gap-2">
-                          <span className="w-1.5 h-1.5 bg-amber-400 rounded-full flex-shrink-0 mt-1.5" />
+                        <li key={i} className="text-xs text-slate-700 flex gap-2">
+                          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0 mt-1.5" />
                           <span>{a}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 ) : (
-                  <div className="rounded-md bg-emerald-500/10 border border-emerald-400/30 p-4 flex items-center gap-2 text-xs text-emerald-200">
+                  <div className="rounded-md bg-white border border-emerald-200 p-4 flex items-center gap-2 text-xs text-emerald-700">
                     <CheckCircle className="w-4 h-4" /> কোনো জরুরি সমস্যা নেই — সব ঠিক আছে!
                   </div>
                 )}
@@ -327,7 +327,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Title & Actions — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-200/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="animate-fade-up sticky top-14 md:top-0 z-20 bg-slate-200 rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             অ্যাডমিন ওভারভিউ ড্যাশবোর্ড
@@ -356,7 +356,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Metrics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <div className="stagger grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5" style={{ '--stagger-base': '0.05s' } as React.CSSProperties}>
         <div className="bg-white p-5 sm:p-6 rounded-md border border-slate-200/80 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">মোট বিক্রয় (Revenue)</span>
@@ -413,7 +413,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 📊 অ্যানালিটিক্স চার্ট */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="stagger grid grid-cols-1 lg:grid-cols-3 gap-6" style={{ '--stagger-base': '0.3s' } as React.CSSProperties}>
         {/* রেভিনিউ ট্রেন্ড */}
         <div className="lg:col-span-2 bg-white rounded-md border border-slate-200/80 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -443,7 +443,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="stagger grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ '--stagger-base': '0.45s' } as React.CSSProperties}>
         {/* টপ প্রোডাক্ট */}
         <div className="bg-white rounded-md border border-slate-200/80 p-6">
           <h2 className="text-sm font-bold text-slate-900 mb-4">সর্বোচ্চ আয়ের প্রোডাক্ট (টপ ৫)</h2>
@@ -466,7 +466,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 🔥 দ্রুততম বিক্রিত পণ্য (Fast Movers) */}
-      <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden">
+      <div className="animate-fade-up bg-white rounded-md border border-slate-200/80 overflow-hidden" style={{ animationDelay: '0.55s' }}>
         <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-md bg-red-500 flex items-center justify-center">
@@ -551,7 +551,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* AI বিজনেস ইনসাইট */}
-      <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden">
+      <div className="animate-fade-up bg-white rounded-md border border-slate-200/80 overflow-hidden" style={{ animationDelay: '0.62s' }}>
         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-md bg-orange-600 flex items-center justify-center">

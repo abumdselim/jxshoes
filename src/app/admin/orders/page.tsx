@@ -70,7 +70,7 @@ export default function AdminOrdersPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-200/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-200 rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             অর্ডার ম্যানেজমেন্ট
@@ -215,7 +215,7 @@ export default function AdminOrdersPage() {
                         href={`tel:${order.phone}`}
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-[11px] font-bold text-white transition-colors"
                       >
-                        <Phone className="w-3.5 h-3.5 text-orange-600" />
+                        <Phone className="w-3.5 h-3.5" />
                         কল করুন
                       </a>
                       <a

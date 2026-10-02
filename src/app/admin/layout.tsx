@@ -43,7 +43,7 @@ export default function AdminLayout({
       {/* Main Content — flex-1, only this column scrolls */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* মোবাইল-অনলি স্লিম বার — ডেস্কটপে প্রতিটা পেজের নিজের স্টিকি হেডলাইনই হেডার */}
-        <header className="md:hidden sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 h-14 px-4 flex items-center justify-between flex-shrink-0">
+        <header className="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 h-14 px-4 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             {/* Mobile Hamburger */}
             <button

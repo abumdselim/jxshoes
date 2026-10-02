@@ -40,7 +40,7 @@ export function isAIConfigured(): boolean {
 }
 
 export const AI_NOT_CONFIGURED_MSG =
-  'AI এখনো কনফিগার করা হয়নি। Cloudflare Pages প্রজেক্টে CLOUDFLARE_ACCOUNT_ID ও CLOUDFLARE_API_TOKEN (Workers AI → Write পারমিশনসহ) env হিসেবে বসালেই চালু হয়ে যাবে।';
+  'AI এখনো কনফিগার করা হয়নি। সার্ভারে AI API টোকেন ও অ্যাকাউন্ট আইডি (AI → Write পারমিশনসহ) env হিসেবে বসালেই চালু হয়ে যাবে (বিস্তারিত docs/AI_SYSTEM.md)।';
 
 function aiRun(model: string): { url: string; token: string; primary: string; fallback: string } {
   const env = getCfEnv();
@@ -105,13 +105,15 @@ async function callModel(model: string, messages: AIMessage[], opts: RunAIOption
 
   const json = await res!.json().catch(() => null);
   if (!res!.ok || !json || json.success !== true) {
-    const errText = Array.isArray(json?.errors) ? json.errors.join('; ') : `HTTP ${lastStatus}`;
-    throw new Error(`Workers AI (${model}): ${errText}`);
+    // টেকনিক্যাল ডিটেইল (API এরর টেক্সট, মডেল নাম) শুধু সার্ভার লগে — ক্লায়েন্টে ব্র্যান্ড-মুক্ত জেনেরিক মেসেজ যায়
+    console.error(`AI API call failed (${model}): HTTP ${lastStatus}`, json?.errors);
+    throw new Error(`AI এই মুহূর্তে উত্তর দিতে পারছে না (কোড ${lastStatus})`);
   }
 
   const text = extractResponseText(json.result);
   if (!text.trim()) {
-    throw new Error(`Workers AI (${model}): খালি উত্তর`);
+    console.error(`AI API returned empty response (${model})`);
+    throw new Error('AI খালি উত্তর দিয়েছে — একটু পরে আবার চেষ্টা করুন');
   }
   return text;
 }
@@ -148,7 +150,8 @@ export async function runAIStream(
     });
     if (!res.ok || !res.body) {
       const errText = await res.text().catch(() => `HTTP ${res.status}`);
-      throw new Error(`Workers AI (${model}): ${errText.slice(0, 300)}`);
+      console.error(`AI stream failed (${model}): HTTP ${res.status}`, errText.slice(0, 300));
+      throw new Error(`AI সংযোগে সমস্যা হয়েছে (কোড ${res.status})`);
     }
     return res.body;
   };

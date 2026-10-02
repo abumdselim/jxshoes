@@ -1,6 +1,6 @@
 /**
  * ক্লায়েন্ট-সাইড AI চ্যাট স্ট্রিমিং হেল্পার
- * Workers AI-এর SSE ফরম্যাট পার্স করে (data: {"response":"..."} ... data: [DONE])
+ * সার্ভারের AI SSE ফরম্যাট পার্স করে (data: {"response":"..."} ... data: [DONE])
  * শুধু /api/ai রাউটের সাথে কথা বলে — সার্ভার টোকেন ব্রাউজারে যায় না।
  */
 
@@ -43,7 +43,7 @@ export async function streamChat(
       if (!payload || payload === '[DONE]') continue;
       try {
         const json = JSON.parse(payload);
-        // Workers AI স্ট্রিমিং: OpenAI-স্টাইল delta.content (llama + gemma দুটোই);
+        // সার্ভার AI স্ট্রিমিং: OpenAI-স্টাইল delta.content (llama + gemma দুটোই);
         // legacy "response" ফিল্ডও ফলব্যাক হিসেবে রাখা। Gemma-র reasoning_content
         // চাংকগুলো delta.content খালি রাখে — অটোমেটিক স্কিপ হয়ে যায়।
         let delta: string | null = null;

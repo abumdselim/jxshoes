@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Product } from '@/types';
 import { formatPrice } from '@/lib/utils';
+import ImageEditor from '@/components/admin/ImageEditor';
 import {
   Plus,
   Edit2,
@@ -14,7 +15,9 @@ import {
   Tag,
   Eye,
   Sparkles,
-  Upload
+  Upload,
+  Pencil,
+  Star
 } from 'lucide-react';
 
 export default function AdminProductsPage() {
@@ -23,6 +26,8 @@ export default function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [editorIndex, setEditorIndex] = useState<number | null>(null);
+  const [pendingUrl, setPendingUrl] = useState('');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,7 +46,7 @@ export default function AdminProductsPage() {
     description: '',
     sizes: '40, 41, 42, 43, 44',
     colors: 'Black, Brown',
-    imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800',
+    imageUrls: [] as string[],
     stockCount: '20',
     minStockAlert: '5',
     supplier: '',
@@ -121,7 +126,7 @@ export default function AdminProductsPage() {
       description: '',
       sizes: '40, 41, 42, 43, 44',
       colors: 'Black, Brown',
-      imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800',
+      imageUrls: [],
       stockCount: '20',
       minStockAlert: '5',
       supplier: 'প্রধান সরবরাহকারী',
@@ -145,7 +150,7 @@ export default function AdminProductsPage() {
       description: product.description,
       sizes: product.sizes.join(', '),
       colors: product.colors.map((c) => c.name).join(', '),
-      imageUrl: product.images[0] || '',
+      imageUrls: (product.images || []).filter(Boolean),
       stockCount: product.stockCount.toString(),
       minStockAlert: (product.minStockAlert || 5).toString(),
       supplier: product.supplier || '',
@@ -156,26 +161,29 @@ export default function AdminProductsPage() {
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    e.target.value = ''; // একই ফাইল আবার বাছলেও কাজ করে
 
     setUploadingImage(true);
     try {
-      const uploadData = new FormData();
-      uploadData.append('file', file);
+      for (const file of files) {
+        const uploadData = new FormData();
+        uploadData.append('file', file);
 
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: uploadData,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setFormData((prev) => ({ ...prev, imageUrl: data.url }));
-      } else {
-        alert('ছবি আপলোড করতে সমস্যা হয়েছে');
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadData,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setFormData((prev) => ({ ...prev, imageUrls: [...prev.imageUrls, data.url] }));
+        } else {
+          alert('ছবি আপলোড করতে সমস্যা হয়েছে');
+        }
       }
     } catch (err) {
-      alert('ছবি আপলোড ব্যর্থ হয়েছে');
+      alert('ছবি আপলোড ব্যর্থ হয়েছে');
     } finally {
       setUploadingImage(false);
     }
@@ -183,6 +191,12 @@ export default function AdminProductsPage() {
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const gallery = formData.imageUrls.map((u) => u.trim()).filter(Boolean);
+    if (gallery.length === 0) {
+      alert('অন্তত একটি ছবি যোগ করুন — আপলোড করে বা লিংক দিয়ে।');
+      return;
+    }
 
     const sizesArr = formData.sizes
       .split(',')
@@ -216,7 +230,7 @@ export default function AdminProductsPage() {
       description: formData.description,
       sizes: sizesArr.length > 0 ? sizesArr : ['Standard'],
       colors: colorsArr.length > 0 ? colorsArr : [{ name: 'Black', hex: '#000000' }],
-      images: [formData.imageUrl],
+      images: gallery,
       stockCount: Number(formData.stockCount),
       minStockAlert: formData.minStockAlert ? Number(formData.minStockAlert) : 5,
       supplier: formData.supplier?.trim() || undefined,
@@ -290,7 +304,7 @@ export default function AdminProductsPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-200/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-200 rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             প্রোডাক্ট ম্যানেজমেন্ট
@@ -309,17 +323,17 @@ export default function AdminProductsPage() {
         </button>
       </div>
 
-      {/* Filters & Search */}
-      <div className="bg-white p-4 rounded-md border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* Filters & Search — কন্টেইনার বার ছাড়া স্বাধীন এলিমেন্ট */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative w-full sm:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="প্রোডাক্টের নাম দিয়ে খুঁজুন..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-md pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+            placeholder="প্রোডাক্টের নাম দিয়ে খুঁজুন..."
+            className="w-full bg-white border border-slate-200 rounded-md pl-10 pr-4 py-3 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
           />
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -327,7 +341,7 @@ export default function AdminProductsPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+            className="w-full sm:w-auto bg-white border border-slate-200 rounded-md px-4 py-3 text-xs font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
           >
             <option value="all">সকল পণ্য ({products.length})</option>
             <option value="shoes">জুতা (Shoes)</option>
@@ -491,24 +505,25 @@ export default function AdminProductsPage() {
         </div>
       </div>
 
-      {/* Add / Edit Product Modal */}
+      {/* Add / Edit Product Modal — হেডার/ফুটার স্টিকি, শুধু বডি স্ক্রল হয়; মোবাইলে বটম-শিট */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-md max-w-2xl w-full p-6 sm:p-8 border border-slate-200 my-8">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
-              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <Tag className="w-5 h-5 text-orange-600" />
-                <span>{editingProduct ? 'প্রোডাক্ট এডিট করুন' : 'নতুন প্রোডাক্ট আপলোড'}</span>
-              </h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
+          <div className="min-h-full flex items-end sm:items-center justify-center sm:p-6">
+            <div className="bg-white w-full max-w-2xl rounded-t-md sm:rounded-md border border-slate-200 shadow-xl flex flex-col max-h-[92vh] sm:max-h-[88vh] overflow-hidden">
+              <div className="flex items-center justify-between border-b border-slate-100 px-5 sm:px-8 py-4 flex-shrink-0 bg-white rounded-t-md">
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
+                  <Tag className="w-5 h-5 text-orange-600" />
+                  <span>{editingProduct ? 'প্রোডাক্ট এডিট করুন' : 'নতুন প্রোডাক্ট আপলোড'}</span>
+                </h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-            <form onSubmit={handleSaveProduct} className="space-y-5">
+              <form id="product-form" onSubmit={handleSaveProduct} className="space-y-5 overflow-y-auto px-5 sm:px-8 py-5 flex-1 min-h-0">
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                   প্রোডাক্টের নাম *
@@ -595,7 +610,7 @@ export default function AdminProductsPage() {
               </div>
 
               {/* Price, Cost Price, Original Price */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     বিক্রয় মূল্য (Price ৳) *
@@ -696,15 +711,16 @@ export default function AdminProductsPage() {
 
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase">
-                  প্রোডাক্টের ছবি (Image Upload) *
+                  প্রোডাক্টের ছবি (গ্যালারি) *
                 </label>
 
-                {/* Direct File Picker */}
+                {/* ডাইরেক্ট ফাইল পিকার (একাধিক ছবি) */}
                 <div className="p-4 border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-md bg-slate-50/70 text-center transition-colors">
                   <input
                     type="file"
                     id="fileUploadInput"
                     accept="image/*"
+                    multiple
                     onChange={handleFileUpload}
                     className="hidden"
                   />
@@ -716,46 +732,121 @@ export default function AdminProductsPage() {
                       <Upload className="w-5 h-5" />
                     </div>
                     <span className="text-xs font-bold text-slate-800">
-                      {uploadingImage ? 'ছবি আপলোড হচ্ছে...' : 'কম্পিউটার বা মোবাইল থেকে ছবি সিলেক্ট করুন'}
+                      {uploadingImage ? 'ছবি আপলোড হচ্ছে...' : 'কম্পিউটার বা মোবাইল থেকে ছবি সিলেক্ট করুন (একাধিকও চলবে)'}
                     </span>
                     <span className="text-[11px] text-slate-400">
-                      JPG, PNG বা WebP ফরম্যাট (সর্বোচ্চ 5MB)
+                      JPG, PNG বা WebP (সর্বোচ্চ 5MB) — প্রথম ছবিটি কভার হিসেবে দেখাবে
                     </span>
                   </label>
                 </div>
 
-                {/* Direct URL Input fallback */}
-                <div className="pt-2">
-                  <span className="text-[11px] text-slate-500 font-semibold block mb-1">
-                    অথবা সরাসরি ছবির লিংক/URL দিন:
-                  </span>
+                {/* লিংক দিয়ে ছবি যোগ */}
+                <div className="flex gap-2 pt-2">
                   <input
                     type="text"
-                    required
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    placeholder="https://... অথবা /uploads/..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
+                    value={pendingUrl}
+                    onChange={(e) => setPendingUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const u = pendingUrl.trim();
+                        if (u) {
+                          setFormData((p) => ({ ...p, imageUrls: [...p.imageUrls, u] }));
+                          setPendingUrl('');
+                        }
+                      }
+                    }}
+                    placeholder="https://... ছবির লিংক লিখে যোগ করুন"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const u = pendingUrl.trim();
+                      if (!u) return;
+                      setFormData((p) => ({ ...p, imageUrls: [...p.imageUrls, u] }));
+                      setPendingUrl('');
+                    }}
+                    className="px-4 py-2 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors"
+                  >
+                    যোগ করুন
+                  </button>
                 </div>
 
-                {/* Image Preview */}
-                {formData.imageUrl && (
-                  <div className="mt-2 flex items-center gap-3 p-2 bg-slate-100 rounded-md border border-slate-200">
-                    <img
-                      src={formData.imageUrl}
-                      alt="Preview"
-                      className="w-14 h-14 rounded-md object-cover border bg-white"
-                    />
-                    <div>
-                      <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5" /> ছবি সফলভাবে সিলেক্ট হয়েছে
-                      </span>
-                      <span className="text-[11px] text-slate-500 truncate block max-w-xs font-mono">
-                        {formData.imageUrl}
-                      </span>
-                    </div>
+                {/* ছবির গ্যালারি */}
+                {formData.imageUrls.length > 0 ? (
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pt-1">
+                    {formData.imageUrls.map((u, idx) => (
+                      <div
+                        key={idx}
+                        className="relative aspect-square rounded-md overflow-hidden border border-slate-200 group bg-slate-50"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={u} alt={`ছবি ${idx + 1}`} className="w-full h-full object-cover" />
+                        {idx === 0 && (
+                          <span className="absolute top-1.5 left-1.5 bg-orange-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">
+                            কভার
+                          </span>
+                        )}
+                        <div className="absolute inset-0 bg-slate-900/55 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                          <button
+                            type="button"
+                            title="এডিট করুন — ক্রপ, রোটেট, কালার"
+                            onClick={() => setEditorIndex(idx)}
+                            className="p-2 bg-white/95 rounded-md text-slate-700 hover:bg-white"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          {idx !== 0 && (
+                            <button
+                              type="button"
+                              title="কভার বানান"
+                              onClick={() =>
+                                setFormData((p) => ({
+                                  ...p,
+                                  imageUrls: [p.imageUrls[idx], ...p.imageUrls.filter((_, i) => i !== idx)],
+                                }))
+                              }
+                              className="p-2 bg-white/95 rounded-md text-amber-600 hover:bg-white"
+                            >
+                              <Star className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            title="মুছে ফেলুন"
+                            onClick={() => {
+                              setFormData((p) => ({ ...p, imageUrls: p.imageUrls.filter((_, i) => i !== idx) }));
+                              if (editorIndex === idx) setEditorIndex(null);
+                            }}
+                            className="p-2 bg-white/95 rounded-md text-red-600 hover:bg-white"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                ) : (
+                  <p className="text-[11px] text-slate-400 pt-1 flex items-start gap-1.5 leading-relaxed">
+                    <ImageIcon className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                    এখনো কোনো ছবি যোগ হয়নি — আপলোড করুন বা লিংক দিন। প্রতিটি ছবিতে এডিট করা যাবে: ফ্রি ক্রপ, যেকোনো ডিগ্রিতে রোটেট, ফ্লিপ ও কালার ব্যালেন্স।
+                  </p>
+                )}
+
+                {/* ছবি এডিটর */}
+                {editorIndex !== null && formData.imageUrls[editorIndex] && (
+                  <ImageEditor
+                    src={formData.imageUrls[editorIndex]}
+                    onClose={() => setEditorIndex(null)}
+                    onSave={(dataUrl) => {
+                      setFormData((p) => ({
+                        ...p,
+                        imageUrls: p.imageUrls.map((x, i) => (i === editorIndex ? dataUrl : x)),
+                      }));
+                      setEditorIndex(null);
+                    }}
+                  />
                 )}
               </div>
 
@@ -787,7 +878,7 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                     স্টক সংখ্যা
@@ -800,7 +891,7 @@ export default function AdminProductsPage() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 pt-6">
+                <div className="flex items-center gap-2 sm:pt-6">
                   <input
                     type="checkbox"
                     id="inStockCheck"
@@ -813,7 +904,7 @@ export default function AdminProductsPage() {
                   </label>
                 </div>
 
-                <div className="flex items-center gap-2 pt-6">
+                <div className="flex items-center gap-2 sm:pt-6">
                   <input
                     type="checkbox"
                     id="featuredCheck"
@@ -827,7 +918,9 @@ export default function AdminProductsPage() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              </form>
+
+              <div className="flex-shrink-0 bg-white border-t border-slate-100 px-5 sm:px-8 py-4 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
@@ -837,12 +930,13 @@ export default function AdminProductsPage() {
                 </button>
                 <button
                   type="submit"
+                  form="product-form"
                   className="px-6 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold"
                 >
                   {editingProduct ? 'আপডেট সংরক্ষণ করুন' : 'প্রোডাক্ট সেভ করুন'}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
