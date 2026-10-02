@@ -14,6 +14,7 @@ import { usePathname } from 'next/navigation';
 import { Product } from '@/types';
 import { ChatMsg, streamChat } from '@/lib/chatClient';
 import {
+  Bot,
   Sparkles,
   Send,
   X,
@@ -383,7 +384,7 @@ export default function AdminAiFab() {
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
           <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white" />
         </span>
-        <Sparkles className="w-5 h-5" />
+        <Bot className="w-5 h-5" />
         <span className="text-sm font-black">AI কে বলুন</span>
       </button>
 
@@ -394,7 +395,7 @@ export default function AdminAiFab() {
           <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center">
-                <Sparkles className="w-4 h-4" />
+                <Bot className="w-4 h-4" />
               </div>
               <div>
                 <div className="text-sm font-black leading-none">AI অ্যাসিস্ট্যান্ট</div>
