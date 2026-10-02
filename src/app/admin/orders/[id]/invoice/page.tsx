@@ -142,14 +142,14 @@ export default function InvoicePage() {
                     JX
                   </div>
                   <div>
-                    <div className="font-bold text-xl tracking-tight">JxShoes &amp; Bags</div>
+                    <div className="font-bold text-xl tracking-tight">Shopkeeper</div>
                     <div className="text-orange-100 text-xs">প্রিমিয়াম কোয়ালিটি ফুটওয়্যার ও ব্যাগ</div>
                   </div>
                 </div>
                 <div className="mt-3 text-[11px] text-orange-100 space-y-1">
                   <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>ঢাকা, বাংলাদেশ</span></div>
                   <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>01XXXXXXXXX</span></div>
-                  <div className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>jxbd.pages.dev</span></div>
+                  <div className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>shopkeeperbd.pages.dev</span></div>
                 </div>
               </div>
 

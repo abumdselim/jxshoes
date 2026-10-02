@@ -65,7 +65,7 @@ export const initialCategories: CategoryItem[] = [
 ];
 
 export const initialStoreSettings: StoreSettings = {
-  storeName: "JxShoes & Bags",
+  storeName: "Shopkeeper",
   tagline: "প্রিমিয়াম কোয়ালিটি জুতা ও ব্যাগের বিশ্বস্ত স্টোর",
   hotline: "01712-345678",
   email: "support@jxshoes.com",

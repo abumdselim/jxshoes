@@ -9,7 +9,7 @@
     ]
   },
   "vars": {
-    "SITE_URL": "https://jxbd.pages.dev",
+    "SITE_URL": "https://shopkeeperbd.pages.dev",
     "NOTE": "SITE_URL আপনার Pages ডোমেইন (কাস্টম ডোমেইন থাকলে সেটা)। CRON_SECRET সিক্রেট হিসেবে বসাতে হবে।"
   }
 }

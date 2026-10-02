@@ -129,7 +129,7 @@ async function handleChat(body: { messages?: { role: string; content: string }[]
   const context = await buildStoreContext(25);
   const system: AIMessage = {
     role: 'system',
-    content: `তুমি "JxShoes" দোকানের নিজস্ব AI অ্যাসিস্ট্যান্ট — দোকানের মালিকের বিশ্বস্ত ব্যবসায়িক সহকারী। সব উত্তর অবশ্যই সহজ কিন্তু ভদ্র ও পেশাদার বাংলায়।
+    content: `তুমি "Shopkeeper" দোকানের নিজস্ব AI অ্যাসিস্ট্যান্ট — দোকানের মালিকের বিশ্বস্ত ব্যবসায়িক সহকারী। সব উত্তর অবশ্যই সহজ কিন্তু ভদ্র ও পেশাদার বাংলায়।
 
 নিয়ম:
 - ভাষা মার্জিত ও কর্পোরেট মানের রাখবে; 'মালিক সাহেব', 'সাহেব', 'ভাই' জাতীয় কোনো সম্বোধন করবে না — শুধু 'আপনি' ব্যবহার করবে।
@@ -229,7 +229,7 @@ async function generateBannerCopy(payload: { storeName?: string; tagline?: strin
     },
     {
       role: 'user',
-      content: `দোকানের নাম: ${payload.storeName || 'JxShoes & Bags'} | ট্যাগলাইন: ${payload.tagline || 'স্টাইলিশ জুতা ও ব্যাগ'}। চলতি সময়ের জন্য নতুন হিরো ব্যানার কপি দাও।`,
+      content: `দোকানের নাম: ${payload.storeName || 'Shopkeeper'} | ট্যাগলাইন: ${payload.tagline || 'স্টাইলিশ জুতা ও ব্যাগ'}। চলতি সময়ের জন্য নতুন হিরো ব্যানার কপি দাও।`,
     },
   ];
 

@@ -114,7 +114,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
             </div>
             <div>
               <div className="font-extrabold text-sm tracking-tight flex items-center gap-1.5">
-                <span>Master Admin</span>
+                <span>Shopkeeper</span>
                 <ShieldCheck className="w-4 h-4 text-orange-400" />
               </div>
               <div className="text-[10px] text-white">Full Control CMS</div>

@@ -50,7 +50,7 @@ export async function sendEmail(opts: {
         },
         body: JSON.stringify({
           to: opts.to,
-          from: { address: cf.emailFromAddress, name: opts.fromName || cf.emailFromName || 'JxShoes AI' },
+          from: { address: cf.emailFromAddress, name: opts.fromName || cf.emailFromName || 'Shopkeeper AI' },
           subject: opts.subject,
           html: opts.html,
           text: opts.text,

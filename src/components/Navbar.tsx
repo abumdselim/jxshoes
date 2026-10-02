@@ -53,7 +53,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 leading-none">
-                {settings.storeName || 'JxShoes'}<span className="text-orange-600">.</span>
+                {settings.storeName || 'Shopkeeper'}<span className="text-orange-600">.</span>
               </span>
               <span className="text-[9px] sm:text-[10px] tracking-widest uppercase font-semibold text-slate-500 mt-0.5 sm:mt-1 truncate max-w-[130px] sm:max-w-none">
                 {settings.tagline || 'Footwear & Bags'}

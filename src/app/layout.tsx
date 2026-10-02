@@ -21,7 +21,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'JxShoes & Bags | সেরা জুতা ও ব্যাগের অনলাইন শপ',
+  title: 'Shopkeeper | সেরা জুতা ও ব্যাগের অনলাইন শপ',
   description: 'প্রিমিয়াম কোয়ালিটি লেদার জুতা, স্নিকার্স ও আকর্ষণীয় ব্যাগের বিশ্বস্ত অনলাইন স্টোর। ক্যাশ অন ডেলিভারি সুবিধা।',
 };
 

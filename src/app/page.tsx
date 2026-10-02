@@ -805,7 +805,7 @@ function HomePageContent() {
                     আমাদের বিশেষত্ব
                   </span>
                   <h2 className="text-2xl sm:text-4xl font-black text-white mt-1">
-                    কেন JxShoes এর জুতা ও ব্যাগ আলাদা?
+                    কেন Shopkeeper এর জুতা ও ব্যাগ আলাদা?
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
                     আমরা শুধুমাত্র ট্রেন্ড নয়, স্থায়িত্ব ও পায়ের সর্বোচ্চ আরাম নিশ্চিত করতে প্রতি জোড়া জুতা ও ব্যাগে ব্যবহার করি বিশ্বমানের উপাদান।

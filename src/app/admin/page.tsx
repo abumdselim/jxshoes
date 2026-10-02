@@ -333,7 +333,7 @@ export default function AdminDashboardPage() {
             অ্যাডমিন ওভারভিউ ড্যাশবোর্ড
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            JxShoes & Bags শপের লাইভ সেলস ও ক্যাটালগ পরিসংখ্যান।
+            Shopkeeper শপের লাইভ সেলস ও ক্যাটালগ পরিসংখ্যান।
           </p>
         </div>
 

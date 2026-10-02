@@ -56,7 +56,7 @@ export default function AdminLayout({
 
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-bold text-slate-800">JxShoes Control Panel</span>
+              <span className="text-xs font-bold text-slate-800">Shopkeeper Control Panel</span>
             </div>
           </div>
 
