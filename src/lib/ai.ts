@@ -19,6 +19,7 @@
  */
 
 import { getOrders, getProducts, getStoreSettings } from './store';
+import { getCfEnv } from './cfEnv';
 
 export interface AIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -30,23 +31,25 @@ interface RunAIOptions {
   temperature?: number;
 }
 
-const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || '';
-const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || '';
-
-export const AI_PRIMARY_MODEL =
-  process.env.AI_TEXT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
-export const AI_FALLBACK_MODEL =
-  process.env.AI_FALLBACK_MODEL || '@cf/google/gemma-4-26b-a4b-it';
+export const AI_PRIMARY_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+export const AI_FALLBACK_MODEL = '@cf/google/gemma-4-26b-a4b-it';
 
 export function isAIConfigured(): boolean {
-  return Boolean(CF_ACCOUNT_ID && CF_API_TOKEN);
+  const env = getCfEnv();
+  return Boolean(env.accountId && env.apiToken);
 }
 
 export const AI_NOT_CONFIGURED_MSG =
-  'AI এখনো কনফিগার করা হয়নি। Cloudflare ড্যাশবোর্ডে API টোকেনে "Workers AI → Write" পারমিশন যোগ করুন (GitHub Secrets-এর CLOUDFLARE_API_TOKEN একই টোকেন)। সেটআপের পর ডিপ্লয় করলেই AI চালু হয়ে যাবে।';
+  'AI এখনো কনফিগার করা হয়নি। Cloudflare Pages প্রজেক্টে CLOUDFLARE_ACCOUNT_ID ও CLOUDFLARE_API_TOKEN (Workers AI → Write পারমিশনসহ) env হিসেবে বসালেই চালু হয়ে যাবে।';
 
-function aiRunUrl(model: string): string {
-  return `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/ai/run/${model}`;
+function aiRun(model: string): { url: string; token: string; primary: string; fallback: string } {
+  const env = getCfEnv();
+  return {
+    url: `https://api.cloudflare.com/client/v4/accounts/${env.accountId}/ai/run/${model}`,
+    token: env.apiToken,
+    primary: env.aiTextModel || AI_PRIMARY_MODEL,
+    fallback: env.aiFallbackModel || AI_FALLBACK_MODEL,
+  };
 }
 
 function buildRequestBody(messages: AIMessage[], opts: RunAIOptions, stream: boolean): string {
@@ -80,10 +83,11 @@ function extractResponseText(result: unknown): string {
 }
 
 async function callModel(model: string, messages: AIMessage[], opts: RunAIOptions): Promise<string> {
-  const res = await fetch(aiRunUrl(model), {
+  const target = aiRun(model);
+  const res = await fetch(target.url, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${CF_API_TOKEN}`,
+      Authorization: `Bearer ${target.token}`,
       'Content-Type': 'application/json',
     },
     body: buildRequestBody(messages, opts, false),
@@ -105,11 +109,12 @@ async function callModel(model: string, messages: AIMessage[], opts: RunAIOption
 /** প্রাইমারি মডেলে চেষ্টা করে, ব্যর্থ হলে ফেলব্যাক মডেলে যায় */
 export async function runAI(messages: AIMessage[], opts: RunAIOptions = {}): Promise<string> {
   if (!isAIConfigured()) throw new Error(AI_NOT_CONFIGURED_MSG);
+  const models = aiRun(AI_PRIMARY_MODEL);
   try {
-    return await callModel(AI_PRIMARY_MODEL, messages, opts);
+    return await callModel(models.primary, messages, opts);
   } catch (primaryErr) {
     console.warn('AI primary model failed, trying fallback:', primaryErr);
-    return await callModel(AI_FALLBACK_MODEL, messages, opts);
+    return await callModel(models.fallback, messages, opts);
   }
 }
 
@@ -120,11 +125,13 @@ export async function runAIStream(
 ): Promise<ReadableStream<Uint8Array>> {
   if (!isAIConfigured()) throw new Error(AI_NOT_CONFIGURED_MSG);
 
+  const models = aiRun(AI_PRIMARY_MODEL);
   const attempt = async (model: string): Promise<ReadableStream<Uint8Array>> => {
-    const res = await fetch(aiRunUrl(model), {
+    const target = aiRun(model);
+    const res = await fetch(target.url, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${CF_API_TOKEN}`,
+        Authorization: `Bearer ${target.token}`,
         'Content-Type': 'application/json',
       },
       body: buildRequestBody(messages, opts, true),
@@ -137,10 +144,10 @@ export async function runAIStream(
   };
 
   try {
-    return await attempt(AI_PRIMARY_MODEL);
+    return await attempt(models.primary);
   } catch (primaryErr) {
     console.warn('AI primary stream failed, trying fallback:', primaryErr);
-    return await attempt(AI_FALLBACK_MODEL);
+    return await attempt(models.fallback);
   }
 }
 

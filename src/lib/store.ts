@@ -29,6 +29,7 @@ import {
   initialExpenses,
   initialDuePayments
 } from './initialData';
+import { getCfEnv } from './cfEnv';
 
 export interface FullStoreData {
   products: Product[];
@@ -44,10 +45,17 @@ export interface FullStoreData {
   duePayments: DuePayment[];
 }
 
-const CF_KV_NAMESPACE_ID = process.env.CLOUDFLARE_KV_ID || '';
-const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || '';
-const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || '';
 const KV_KEY = 'jx_store_state';
+
+/** রিকোয়েস্ট টাইমে env থেকে Cloudflare KV REST এন্ডপয়েন্ট বানায় */
+function kvApi(key: string): { ok: boolean; url: string; token: string } {
+  const env = getCfEnv();
+  return {
+    ok: Boolean(env.accountId && env.apiToken && env.kvId),
+    url: `https://api.cloudflare.com/client/v4/accounts/${env.accountId}/storage/kv/namespaces/${env.kvId}/values/${key}`,
+    token: env.apiToken,
+  };
+}
 
 // In-memory cache
 let cachedData: FullStoreData = {
@@ -94,12 +102,12 @@ function migrateStoreData(data: FullStoreData): boolean {
 
 export async function getStoreData(): Promise<FullStoreData> {
   // If we have Cloudflare KV credentials, sync with Cloudflare KV
-  if (CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID) {
+  const kv = kvApi(KV_KEY);
+  if (kv.ok) {
     try {
-      const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/${KV_KEY}`;
-      const res = await fetch(url, {
+      const res = await fetch(kv.url, {
         headers: {
-          Authorization: `Bearer ${CF_API_TOKEN}`,
+          Authorization: `Bearer ${kv.token}`,
         },
         cache: 'no-store',
       });
@@ -137,13 +145,13 @@ export async function saveStoreData(data: FullStoreData): Promise<void> {
   cachedData = data;
 
   // Persist to Cloudflare KV
-  if (CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID) {
+  const kv = kvApi(KV_KEY);
+  if (kv.ok) {
     try {
-      const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/${KV_KEY}`;
-      await fetch(url, {
+      await fetch(kv.url, {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${CF_API_TOKEN}`,
+          Authorization: `Bearer ${kv.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(data),
@@ -1000,11 +1008,11 @@ let reportsCache: StoredReport[] | null = null;
 
 export async function getReports(): Promise<StoredReport[]> {
   if (reportsCache) return reportsCache;
-  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return [];
+  const kv = kvApi('jx_ai_reports');
+  if (!kv.ok) return [];
   try {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_reports`;
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${CF_API_TOKEN}` },
+    const res = await fetch(kv.url, {
+      headers: { Authorization: `Bearer ${kv.token}` },
       cache: 'no-store',
     });
     if (!res.ok) return [];
@@ -1020,13 +1028,13 @@ export async function getReports(): Promise<StoredReport[]> {
 export async function saveReport(report: StoredReport): Promise<void> {
   const list = (await getReports()).filter(r => r.id !== report.id);
   reportsCache = [report, ...list].slice(0, 24); // সর্বশেষ ২৪টা রিপোর্ট
-  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return;
+  const kv = kvApi('jx_ai_reports');
+  if (!kv.ok) return;
   try {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_reports`;
-    await fetch(url, {
+    await fetch(kv.url, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${CF_API_TOKEN}`,
+        Authorization: `Bearer ${kv.token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(reportsCache),
@@ -1042,11 +1050,11 @@ let dailyBriefCache: AIDailyBrief | null = null;
 export async function getDailyBrief(): Promise<AIDailyBrief | null> {
   const today = new Date().toISOString().slice(0, 10);
   if (dailyBriefCache && dailyBriefCache.date === today) return dailyBriefCache;
-  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return null;
+  const kv = kvApi('jx_ai_daily_brief');
+  if (!kv.ok) return null;
   try {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_daily_brief`;
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${CF_API_TOKEN}` },
+    const res = await fetch(kv.url, {
+      headers: { Authorization: `Bearer ${kv.token}` },
       cache: 'no-store',
     });
     if (!res.ok) return null;
@@ -1064,13 +1072,13 @@ export async function getDailyBrief(): Promise<AIDailyBrief | null> {
 
 export async function saveDailyBrief(brief: AIDailyBrief): Promise<void> {
   dailyBriefCache = brief;
-  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return;
+  const kv = kvApi('jx_ai_daily_brief');
+  if (!kv.ok) return;
   try {
-    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_daily_brief`;
-    await fetch(url, {
+    await fetch(kv.url, {
       method: 'PUT',
       headers: {
-        Authorization: `Bearer ${CF_API_TOKEN}`,
+        Authorization: `Bearer ${kv.token}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(brief),

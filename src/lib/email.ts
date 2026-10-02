@@ -13,13 +13,11 @@
  * - রেসপন্স result: { delivered, permanent_bounces, queued }
  */
 
-const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || '';
-const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || '';
-
-const FROM_ADDRESS = process.env.EMAIL_FROM_ADDRESS || '';
+import { getCfEnv } from './cfEnv';
 
 export function isEmailConfigured(): boolean {
-  return Boolean(CF_ACCOUNT_ID && CF_API_TOKEN && FROM_ADDRESS);
+  const env = getCfEnv();
+  return Boolean(env.accountId && env.apiToken && env.emailFromAddress);
 }
 
 export const EMAIL_NOT_CONFIGURED_MSG =
@@ -38,20 +36,21 @@ export async function sendEmail(opts: {
   text: string;
   fromName?: string;
 }): Promise<SendEmailResult> {
+  const cf = getCfEnv();
   if (!isEmailConfigured()) return { ok: false, error: EMAIL_NOT_CONFIGURED_MSG };
 
   try {
     const res = await fetch(
-      `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/email/sending/send`,
+      `https://api.cloudflare.com/client/v4/accounts/${cf.accountId}/email/sending/send`,
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${CF_API_TOKEN}`,
+          Authorization: `Bearer ${cf.apiToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           to: opts.to,
-          from: { address: FROM_ADDRESS, name: opts.fromName || 'JxShoes AI' },
+          from: { address: cf.emailFromAddress, name: opts.fromName || cf.emailFromName || 'JxShoes AI' },
           subject: opts.subject,
           html: opts.html,
           text: opts.text,

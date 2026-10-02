@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
+import { getCfEnv } from '@/lib/cfEnv';
 
 export const runtime = 'edge';
 
-const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || '';
-const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || '';
-const R2_BUCKET = process.env.CLOUDFLARE_R2_BUCKET || 'jxshoes-media';
-
 export async function POST(request: Request) {
+  const cf = getCfEnv();
   try {
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
@@ -20,13 +18,13 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
 
     // 1. If running with Cloudflare R2 configured
-    if (CF_API_TOKEN && CF_ACCOUNT_ID) {
+    if (cf.apiToken && cf.accountId) {
       try {
-        const r2Url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/r2/buckets/${R2_BUCKET}/objects/${filename}`;
+        const r2Url = `https://api.cloudflare.com/client/v4/accounts/${cf.accountId}/r2/buckets/${cf.r2Bucket}/objects/${filename}`;
         const cfRes = await fetch(r2Url, {
           method: 'PUT',
           headers: {
-            Authorization: `Bearer ${CF_API_TOKEN}`,
+            Authorization: `Bearer ${cf.apiToken}`,
             'Content-Type': file.type || 'application/octet-stream',
           },
           body: bytes,

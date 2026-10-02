@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { getCfEnv } from '@/lib/cfEnv';
 import { generateReport } from '@/lib/report';
 import { getReports, getStoreSettings, saveReport } from '@/lib/store';
 import { isEmailConfigured, sendEmail } from '@/lib/email';
@@ -17,7 +18,7 @@ export const runtime = 'edge';
  * একটা ছোট Worker (workers/report-cron) শিডিউল করে এই URL-এ হিট করে।
  */
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET || '';
+  const secret = getCfEnv().cronSecret;
   if (!secret) {
     return NextResponse.json({ error: 'CRON_SECRET সেট করা হয়নি (Pages env)' }, { status: 503 });
   }
