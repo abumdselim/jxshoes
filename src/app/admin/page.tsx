@@ -284,7 +284,8 @@ export default function AdminDashboardPage() {
               <p className="text-sm text-orange-200 font-bold">{brief.greeting}</p>
               <p className="text-sm text-slate-200 leading-relaxed">{brief.summary}</p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* পরামর্শ ও সতর্কতা — মোবাইলে লুকানো, কার্ড কমপ্যাক্ট রাখতে */}
+              <div className="hidden sm:grid grid-cols-1 md:grid-cols-2 gap-4">
                 {brief.advice.length > 0 && (
                   <div className="rounded-md bg-white border border-slate-200 p-4">
                     <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 uppercase tracking-wider mb-2">
