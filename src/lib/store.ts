@@ -14,7 +14,8 @@ import {
   Expense,
   DuePayment,
   FinanceSummary,
-  StoredReport
+  StoredReport,
+  FastMoverEntry
 } from '@/types';
 import {
   initialProducts,
@@ -1042,6 +1043,51 @@ export async function saveReport(report: StoredReport): Promise<void> {
   } catch (err) {
     console.warn('Reports KV save warning:', err);
   }
+}
+
+// ================== FAST MOVERS (দ্রুততম বিক্রিত পণ্য) ==================
+/**
+ * কোন পণ্য ক্রেতারা সবচেয়ে বেশি পছন্দ করেছে —
+ * স্টক যুক্ত হওয়ার দিন (createdAt) থেকে গড়ে দিনে কতটা বিক্রি হয়েছে (velocity)
+ * তার ভিত্তিতে র‍্যাংকিং। দ্রুত বিক্রি হয়ে স্টক শেষ হওয়াগুলোও চিহ্নিত হয়।
+ */
+export async function getFastMovers(limit = 6): Promise<FastMoverEntry[]> {
+  const data = await getStoreData();
+  const soldBy = new Map<string, { qty: number; revenue: number }>();
+  for (const o of data.orders) {
+    if (o.status === 'Cancelled') continue;
+    for (const it of o.items) {
+      const cur = soldBy.get(it.productId) || { qty: 0, revenue: 0 };
+      cur.qty += it.quantity;
+      cur.revenue += it.price * it.quantity;
+      soldBy.set(it.productId, cur);
+    }
+  }
+
+  const now = Date.now();
+  const movers: FastMoverEntry[] = [];
+  for (const p of data.products) {
+    const s = soldBy.get(p.id);
+    if (!s || s.qty <= 0) continue;
+    const created = new Date(p.createdAt).getTime();
+    const daysInStock = Math.max(1, Math.ceil((now - created) / 86400000));
+    movers.push({
+      productId: p.id,
+      name: p.name,
+      sku: p.sku || '-',
+      image: p.images[0] || '',
+      totalSold: s.qty,
+      revenue: Math.round(s.revenue),
+      daysInStock,
+      velocity: Math.round((s.qty / daysInStock) * 100) / 100,
+      stockLeft: p.stockCount,
+      soldOut: p.stockCount === 0,
+    });
+  }
+
+  return movers
+    .sort((a, b) => b.velocity - a.velocity || b.totalSold - a.totalSold)
+    .slice(0, limit);
 }
 
 // ================== AI DAILY BRIEF CACHE (আলাদা KV কি, দিনে ১ বার জেনারেট) ==================

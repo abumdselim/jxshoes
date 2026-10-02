@@ -205,6 +205,19 @@ export interface AIInsights {
   generatedAt: string;
 }
 
+export interface FastMoverEntry {
+  productId: string;
+  name: string;
+  sku: string;
+  image: string;
+  totalSold: number; // স্টক হওয়ার পর থেকে মোট বিক্রি (টি)
+  revenue: number;
+  daysInStock: number; // স্টক যুক্ত হয়ে কত দিন
+  velocity: number; // গড়ে দিনে কতটা বিক্রি (units/day)
+  stockLeft: number;
+  soldOut: boolean; // দ্রুত বিক্রি হয়ে স্টক শেষ
+}
+
 export interface AISaleMatch {
   matched: boolean;
   productId?: string;

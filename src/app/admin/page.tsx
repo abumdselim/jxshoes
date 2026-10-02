@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Product, Order, AIDailyBrief, AIInsights } from '@/types';
+import { Product, Order, AIDailyBrief, AIInsights, FastMoverEntry } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import {
   TrendingUp,
@@ -17,7 +17,8 @@ import {
   Bot,
   Sparkles,
   RefreshCw,
-  Lightbulb
+  Lightbulb,
+  Flame
 } from 'lucide-react';
 
 function getGreeting(): string {
@@ -39,6 +40,7 @@ export default function AdminDashboardPage() {
   const [insights, setInsights] = useState<AIInsights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
   const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [fastMovers, setFastMovers] = useState<FastMoverEntry[]>([]);
 
   const loadBrief = async (refresh = false) => {
     if (refresh) setBriefRefreshing(true);
@@ -65,10 +67,11 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [prodRes, ordRes, setRes] = await Promise.all([
+        const [prodRes, ordRes, setRes, fmRes] = await Promise.all([
           fetch('/api/products'),
           fetch('/api/orders'),
           fetch('/api/settings'),
+          fetch('/api/analytics/fast-movers'),
         ]);
         if (prodRes.ok) setProducts(await prodRes.json());
         if (ordRes.ok) setOrders(await ordRes.json());
@@ -76,6 +79,7 @@ export default function AdminDashboardPage() {
           const s = await setRes.json();
           setOwnerName(s?.ownerName || '');
         }
+        if (fmRes.ok) setFastMovers(await fmRes.json());
       } catch (err) {
         console.error(err);
       } finally {
@@ -331,6 +335,91 @@ export default function AdminDashboardPage() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* 🔥 দ্রুততম বিক্রিত পণ্য (Fast Movers) */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg shadow-red-500/25">
+              <Flame className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="text-base font-black text-slate-900">দ্রুততম বিক্রিত পণ্য (Fast Movers)</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                স্টক যুক্ত হওয়ার দিন থেকে গড়ে দিনে যতটা বিক্রি — ক্রেতাদের সবচেয়ে পছন্দের তালিকা
+              </p>
+            </div>
+          </div>
+          <a
+            href="/admin/inventory"
+            className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-orange-600 hover:text-orange-700"
+          >
+            ইনভেন্টরি <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+
+        {fastMovers.length === 0 ? (
+          <div className="p-8 text-center text-sm text-slate-400">
+            এখনো কোনো বিক্রি হয়নি — বিক্রি শুরু হলে এখানে দ্রুততম বিক্রিত পণ্যগুলো দেখা যাবে।
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {fastMovers.map((m, i) => {
+              const rankStyles = [
+                'bg-gradient-to-br from-yellow-400 to-amber-600 shadow-amber-500/40',
+                'bg-gradient-to-br from-slate-300 to-slate-500 shadow-slate-400/40',
+                'bg-gradient-to-br from-orange-400 to-red-600 shadow-orange-500/40',
+              ];
+              return (
+                <div key={m.productId} className="flex items-center gap-3.5 px-5 sm:px-6 py-3.5 hover:bg-slate-50/60 transition-colors">
+                  {/* র‍্যাংক */}
+                  <div
+                    className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${
+                      i < 3 ? rankStyles[i] : 'bg-slate-200 text-slate-600'
+                    }`}
+                  >
+                    {i + 1}
+                  </div>
+
+                  {m.image ? (
+                    <img src={m.image} alt="" className="w-11 h-11 rounded-xl object-cover border border-slate-200 flex-shrink-0" />
+                  ) : (
+                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex-shrink-0" />
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">{m.name}</span>
+                      {m.soldOut && (
+                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 border border-red-200 whitespace-nowrap">
+                          স্টক শেষ!
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">
+                      মোট বিক্রি <span className="font-black text-slate-700">{m.totalSold}টি</span>
+                      {' • '}গড়ে দিনে <span className="font-black text-orange-600">~{m.velocity}টি</span>
+                      {' • '}{m.daysInStock} দিনে • আয় {formatPrice(m.revenue)}
+                    </div>
+                  </div>
+
+                  <div className="text-right flex-shrink-0 hidden sm:block">
+                    {m.soldOut ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-700 font-black text-[11px] border border-red-200">
+                        <AlertTriangle className="w-3 h-3" /> দ্রুত রিস্টক
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-bold text-slate-500">
+                        স্টক বাকি: <span className={m.stockLeft <= 5 ? 'text-amber-600 font-black' : 'text-emerald-600 font-black'}>{m.stockLeft} টি</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* AI বিজনেস ইনসাইট */}
