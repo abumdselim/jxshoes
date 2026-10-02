@@ -96,7 +96,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       active: pathname.startsWith('/admin/gallery'),
     },
     {
-      label: 'শপ সেটিংস ও ডেলিভারি ফি',
+      label: 'সেটিংস এবং অন্যান্য',
       href: '/admin/settings',
       icon: Settings,
       active: pathname.startsWith('/admin/settings'),
