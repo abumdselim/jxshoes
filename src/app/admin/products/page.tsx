@@ -110,6 +110,9 @@ export default function AdminProductsPage() {
 
   useEffect(() => {
     loadProducts();
+    // মোবাইল হেডারের সার্চ থেকে ?q= প্যারামিটার এলে সেটা দিয়েই শুরু
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) setSearchQuery(q);
   }, []);
 
   const openAddModal = () => {

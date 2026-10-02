@@ -103,11 +103,11 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 text-white h-full flex flex-col justify-between border-r border-slate-800 overflow-y-auto">
-      <div>
-        {/* Brand Header */}
-        <div className="p-5 border-b border-slate-800">
-          <div className="flex items-start justify-between gap-2">
+    <aside className="w-64 bg-slate-900 text-white h-full flex flex-col border-r border-slate-800 overflow-hidden">
+      <div className="flex-1 min-h-0 flex flex-col">
+        {/* Brand Header — সবসময় উপরে ফিক্সড */}
+        <div className="p-5 pb-4 border-b border-slate-800 flex-shrink-0">
+          <div className="flex items-center justify-between gap-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/shopkeeper-logo.png"
@@ -118,7 +118,8 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
             {onCloseMobile && (
               <button
                 onClick={onCloseMobile}
-                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 md:hidden flex-shrink-0"
+                className="p-2 -mr-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 md:hidden flex-shrink-0"
+                aria-label="মেনু বন্ধ করুন"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -127,8 +128,8 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           <div className="text-[10px] text-slate-400 mt-1.5">Full Control CMS</div>
         </div>
 
-        {/* Nav Items */}
-        <nav className="p-3 space-y-1">
+        {/* Nav Items — তালিকা বাড়লে শুধু এই অংশই স্ক্রল হয় */}
+        <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
@@ -150,8 +151,8 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         </nav>
       </div>
 
-      {/* Bottom Storefront return */}
-      <div className="p-4 border-t border-slate-800">
+      {/* Bottom Storefront return — সবসময় নিচে ফিক্সড */}
+      <div className="p-4 border-t border-slate-800 flex-shrink-0">
         <a
           href="/"
           target="_blank"

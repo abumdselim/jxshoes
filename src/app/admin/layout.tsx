@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminAiFab from '@/components/AdminAiFab';
-import { Menu } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -11,6 +12,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [headerQuery, setHeaderQuery] = useState('');
+  const router = useRouter();
 
   // ড্রয়ার খোলা থাকলে পেছনের পেজ স্ক্রল বন্ধ + Escape-এ বন্ধ
   useEffect(() => {
@@ -24,6 +28,12 @@ export default function AdminLayout({
       window.removeEventListener('keydown', onKey);
     };
   }, [mobileSidebarOpen]);
+
+  const goToSearch = () => {
+    const q = headerQuery.trim();
+    setSearchOpen(false);
+    router.push(q ? `/admin/products?q=${encodeURIComponent(q)}` : '/admin/products');
+  };
 
   return (
     /**
@@ -78,15 +88,37 @@ export default function AdminLayout({
               />
           </div>
 
-          <a
-            href="/"
-            target="_blank"
-            rel="noreferrer"
-            className="px-3 py-1.5 rounded-md bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold border border-orange-200 transition-colors text-xs"
-          >
-            স্টোর ভিউ ↗
-          </a>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setSearchOpen(v => !v)}
+              className="p-2 rounded-md text-slate-600 hover:bg-slate-200"
+              aria-label="সার্চ করুন"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+          </div>
         </header>
+
+        {/* মোবাইল সার্চ বার */}
+        {searchOpen && (
+          <div className="md:hidden sticky top-14 z-30 bg-white border-b border-slate-200 px-4 py-2.5 flex gap-2">
+            <input
+              autoFocus
+              type="text"
+              value={headerQuery}
+              onChange={(e) => setHeaderQuery(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') goToSearch(); }}
+              placeholder="প্রোডাক্ট খুঁজুন..."
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <button
+              onClick={goToSearch}
+              className="px-4 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold"
+            >
+              খুঁজুন
+            </button>
+          </div>
+        )}
 
         <main className="p-4 sm:p-8 flex-1">
           {children}
