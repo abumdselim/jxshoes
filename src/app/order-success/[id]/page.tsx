@@ -125,12 +125,6 @@ export default function OrderSuccessPage() {
             >
               আরো শপিং করুন
             </a>
-            <a
-              href="/admin/orders"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-sm transition-all"
-            >
-              অ্যাডমিন প্যানেলে দেখুন
-            </a>
           </div>
         </div>
       </main>

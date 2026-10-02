@@ -86,7 +86,6 @@ export default function Footer() {
               <li><a href="/?category=shoes" className="hover:text-orange-400 transition-colors">লেদার জুতা ও স্নিকার্স</a></li>
               <li><a href="/?category=bags" className="hover:text-orange-400 transition-colors">অফিসিয়াল ও ট্রাভেল ব্যাগ</a></li>
               <li><a href="/" className="hover:text-orange-400 transition-colors">নতুন আগমন (New Arrivals)</a></li>
-              <li><a href="/admin" className="text-orange-400 hover:text-orange-300 transition-colors font-medium">এডমিন ড্যাশবোর্ড</a></li>
             </ul>
           </div>
 
