@@ -461,7 +461,7 @@ export default function AdminInventoryPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none"
+                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="all">সকল ক্যাটাগরি</option>
                 <option value="shoes">জুতা (Shoes)</option>
@@ -471,7 +471,7 @@ export default function AdminInventoryPage() {
               <select
                 value={stockStatusFilter}
                 onChange={(e) => setStockStatusFilter(e.target.value as any)}
-                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none"
+                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="all">সকল স্টক অবস্থা</option>
                 <option value="instock">পর্যাপ্ত স্টক (&gt;5)</option>
@@ -1014,7 +1014,7 @@ export default function AdminInventoryPage() {
                   value={restockNote}
                   onChange={(e) => setRestockNote(e.target.value)}
                   placeholder="যেমন: শীতকালীন নতুন সাইজের লট"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -1110,7 +1110,7 @@ export default function AdminInventoryPage() {
                 <select
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 >
                   <option value="ADJUSTMENT">ফিজিক্যাল স্টক অডিট (গণনায় কম/বেশি পাওয়া গেছে)</option>
                   <option value="DAMAGE">ড্যামেজ / নষ্ট পণ্য (স্টক থেকে বাদ)</option>
@@ -1128,7 +1128,7 @@ export default function AdminInventoryPage() {
                   value={adjustNote}
                   onChange={(e) => setAdjustNote(e.target.value)}
                   placeholder="যেমন: স্যাম্পল ডিসপ্লেতে ১ পিস রাখা হয়েছে"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none font-sans"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-sans"
                 />
               </div>
 

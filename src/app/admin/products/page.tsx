@@ -327,7 +327,7 @@ export default function AdminProductsPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none"
+            className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
           >
             <option value="all">সকল পণ্য ({products.length})</option>
             <option value="shoes">জুতা (Shoes)</option>
@@ -413,7 +413,7 @@ export default function AdminProductsPage() {
                           type="number"
                           value={inlinePrice}
                           onChange={(e) => setInlinePrice(e.target.value)}
-                          className="w-24 px-2 py-1 text-xs border border-orange-500 rounded-md focus:outline-none"
+                          className="w-24 px-2 py-1 text-xs border border-orange-500 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                           autoFocus
                         />
                         <button
@@ -796,7 +796,7 @@ export default function AdminProductsPage() {
                     type="number"
                     value={formData.stockCount}
                     onChange={(e) => setFormData({ ...formData, stockCount: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   />
                 </div>
 

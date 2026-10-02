@@ -419,7 +419,7 @@ export default function AdminCustomersPage() {
                   value={payNote}
                   onChange={e => setPayNote(e.target.value)}
                   placeholder="যেমন: আংশিক পরিশোধ"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -557,7 +557,7 @@ export default function AdminCustomersPage() {
                 <input
                   value={addForm.address}
                   onChange={e => setAddForm({ ...addForm, address: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
               <div>
@@ -569,7 +569,7 @@ export default function AdminCustomersPage() {
                   value={addForm.dueAmount}
                   onChange={e => setAddForm({ ...addForm, dueAmount: e.target.value })}
                   placeholder="0"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
               <div>
@@ -577,7 +577,7 @@ export default function AdminCustomersPage() {
                 <input
                   value={addForm.note}
                   onChange={e => setAddForm({ ...addForm, note: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
               <button

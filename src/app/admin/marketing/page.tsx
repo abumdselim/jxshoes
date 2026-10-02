@@ -286,7 +286,7 @@ export default function AdminMarketingPage() {
                 type="text"
                 value={flashDeal.badgeText}
                 onChange={(e) => setFlashDeal({ ...flashDeal, badgeText: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -297,7 +297,7 @@ export default function AdminMarketingPage() {
               <select
                 value={flashDeal.targetProductId}
                 onChange={(e) => setFlashDeal({ ...flashDeal, targetProductId: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs sm:text-sm focus:outline-none font-medium"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-medium"
               >
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -315,7 +315,7 @@ export default function AdminMarketingPage() {
                 type="number"
                 value={flashDeal.countdownHours}
                 onChange={(e) => setFlashDeal({ ...flashDeal, countdownHours: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none font-mono"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-mono"
               />
             </div>
           </div>
@@ -348,7 +348,7 @@ export default function AdminMarketingPage() {
               <select
                 value={newCoupon.discountType}
                 onChange={(e) => setNewCoupon({ ...newCoupon, discountType: e.target.value as any })}
-                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-semibold focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="fixed">ফিক্সড টাকা ছাড় (Fixed ৳)</option>
                 <option value="percentage">শতকরা ছাড় (Percentage %)</option>
@@ -362,7 +362,7 @@ export default function AdminMarketingPage() {
                 placeholder="ছাড়ের পরিমাণ (যেমন: 150 বা 10%)"
                 value={newCoupon.value}
                 onChange={(e) => setNewCoupon({ ...newCoupon, value: e.target.value })}
-                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-bold focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -372,7 +372,7 @@ export default function AdminMarketingPage() {
                 placeholder="ন্যূনতম অর্ডার (৳)"
                 value={newCoupon.minOrder}
                 onChange={(e) => setNewCoupon({ ...newCoupon, minOrder: e.target.value })}
-                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>

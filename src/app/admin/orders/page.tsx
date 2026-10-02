@@ -162,7 +162,7 @@ export default function AdminOrdersPage() {
                   <select
                     value={order.status}
                     onChange={(e) => handleStatusChange(order.id, e.target.value as any)}
-                    className={`text-xs font-bold rounded-md px-3 py-1.5 border focus:outline-none transition-colors ${
+                    className={`text-xs font-bold rounded-md px-3 py-1.5 border focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
                       order.status === 'Pending'
                         ? 'bg-amber-50 text-amber-800 border-amber-300'
                         : order.status === 'Processing'

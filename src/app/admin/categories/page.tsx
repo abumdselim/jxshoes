@@ -230,7 +230,7 @@ export default function AdminCategoriesPage() {
                 <select
                   value={formData.parentType}
                   onChange={(e) => setFormData({ ...formData, parentType: e.target.value as any })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs sm:text-sm focus:outline-none font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-bold"
                 >
                   <option value="shoes">জুতা (Shoes)</option>
                   <option value="bags">ব্যাগ (Bags)</option>
@@ -247,7 +247,7 @@ export default function AdminCategoriesPage() {
                   value={formData.itemCountLabel}
                   onChange={(e) => setFormData({ ...formData, itemCountLabel: e.target.value })}
                   placeholder="যেমন: ৫+ কালার, নতুন কালেকশন"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -260,7 +260,7 @@ export default function AdminCategoriesPage() {
                   value={formData.image}
                   onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                   placeholder="https://... (খালি রাখলে ডিফল্ট ছবি বসবে)"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs font-mono focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
                 {formData.image.trim() && (
                   <div className="mt-2 flex items-center gap-2">
