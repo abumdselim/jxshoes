@@ -1,13 +1,15 @@
 import {
   Product,
   Order,
+  OrderItem,
   CategoryItem,
   StoreSettings,
   HeroBannerSettings,
   FlashDealSettings,
   Coupon,
   InventoryMovement,
-  ProductVariant
+  ProductVariant,
+  AIDailyBrief
 } from '@/types';
 import {
   initialProducts,
@@ -526,10 +528,10 @@ export async function validateCoupon(code: string, orderTotal: number): Promise<
   const coupons = await getCoupons();
   const match = coupons.find(c => c.code === code.toUpperCase().trim() && c.active);
   if (!match) {
-    return { valid: false, discount: 0, message: 'কুপন কোডটি সঠিক নয় বা মেয়াদ উত্তীর্ণ।' };
+    return { valid: false, discount: 0, message: 'কুপন কোডটি সঠিক নয় বা মেয়াদ উত্তীর্ণ।' };
   }
   if (orderTotal < match.minOrder) {
-    return { valid: false, discount: 0, message: `এই কুপন ব্যবহারের জন্য ন্যূনতম ৳${match.minOrder} টাকার অর্ডার প্রয়োজন।` };
+    return { valid: false, discount: 0, message: `এই কুপন ব্যবহারের জন্য ন্যূনতম ৳${match.minOrder} টাকার অর্ডার প্রয়োজন।` };
   }
   let discount = 0;
   if (match.discountType === 'percentage') {
@@ -537,5 +539,152 @@ export async function validateCoupon(code: string, orderTotal: number): Promise<
   } else {
     discount = match.value;
   }
-  return { valid: true, discount, message: `অভিনন্দন! ৳${discount} টাকা ছাড় প্রযোজ্য হয়েছে।` };
+  return { valid: true, discount, message: `অভিনন্দন! ৳${discount} টাকা ছাড় প্রযোজ্য হয়েছে।` };
+}
+
+// ================== POS / IN-STORE QUICK SALE ==================
+export interface PosSaleItemInput {
+  productId: string;
+  variantId?: string;
+  quantity: number;
+  size?: string;
+  color?: string;
+}
+
+export async function createPosSale(
+  items: PosSaleItemInput[],
+  options?: { customerName?: string; note?: string }
+): Promise<Order | null> {
+  const data = await getStoreData();
+  if (!items || items.length === 0) return null;
+
+  const orderItems: OrderItem[] = [];
+  let subtotal = 0;
+  if (!data.inventoryMovements) data.inventoryMovements = [];
+
+  for (const item of items) {
+    const prod = data.products.find(p => p.id === item.productId);
+    if (!prod) continue;
+
+    const qty = Math.max(1, Number(item.quantity) || 1);
+
+    let variant: ProductVariant | undefined;
+    if (item.variantId && prod.variants) {
+      variant = prod.variants.find(v => v.id === item.variantId);
+    }
+    if (!variant && prod.variants && prod.variants.length > 0) {
+      variant =
+        prod.variants.find(v =>
+          (!item.size || v.size === item.size) &&
+          (!item.color || v.color === item.color) &&
+          (v.stock || 0) > 0
+        ) ||
+        prod.variants.find(v => (v.stock || 0) > 0) ||
+        prod.variants[0];
+    }
+
+    const size = item.size || variant?.size || prod.sizes[0] || 'Standard';
+    const color = item.color || variant?.color || prod.colors[0]?.name || 'Default';
+    const unitPrice = variant?.price ?? prod.price;
+
+    const prevStock = prod.stockCount;
+    prod.stockCount = Math.max(0, prod.stockCount - qty);
+    prod.inStock = prod.stockCount > 0;
+    if (variant) variant.stock = Math.max(0, (variant.stock || 0) - qty);
+
+    orderItems.push({
+      productId: prod.id,
+      name: prod.name,
+      price: unitPrice,
+      quantity: qty,
+      selectedSize: size,
+      selectedColor: color,
+      image: prod.images[0] || '',
+    });
+    subtotal += unitPrice * qty;
+
+    data.inventoryMovements.unshift({
+      id: `mov-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      productId: prod.id,
+      productName: prod.name,
+      sku: prod.sku,
+      variantInfo: `সাইজ: ${size}, কালার: ${color}`,
+      type: 'SALE',
+      quantity: -qty,
+      previousStock: prevStock,
+      newStock: prod.stockCount,
+      unitCost: prod.costPrice,
+      supplierOrInvoice: 'ইন-স্টোর POS বিক্রি',
+      note: options?.note || 'দোকানে দ্রুত বিক্রি (AI কুইক সেল)',
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  if (orderItems.length === 0) return null;
+
+  const newOrder: Order = {
+    id: `ord-${Date.now()}`,
+    orderNumber: `JX-${Math.floor(1000 + Math.random() * 9000)}`,
+    source: 'in-store',
+    customerName: options?.customerName?.trim() || 'দোকানে সরাসরি বিক্রি',
+    phone: '',
+    address: '',
+    city: 'Inside Dhaka',
+    paymentMethod: 'Cash on Delivery',
+    items: orderItems,
+    subtotal,
+    deliveryFee: 0,
+    total: subtotal,
+    status: 'Delivered',
+    note: options?.note,
+    createdAt: new Date().toISOString(),
+  };
+
+  data.orders.unshift(newOrder);
+  await saveStoreData(data);
+  return newOrder;
+}
+
+// ================== AI DAILY BRIEF CACHE (আলাদা KV কি, দিনে ১ বার জেনারেট) ==================
+let dailyBriefCache: AIDailyBrief | null = null;
+
+export async function getDailyBrief(): Promise<AIDailyBrief | null> {
+  const today = new Date().toISOString().slice(0, 10);
+  if (dailyBriefCache && dailyBriefCache.date === today) return dailyBriefCache;
+  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return null;
+  try {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_daily_brief`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${CF_API_TOKEN}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const parsed = await res.json();
+    if (parsed && parsed.date === today) {
+      dailyBriefCache = parsed;
+      return parsed;
+    }
+    return null;
+  } catch (err) {
+    console.warn('Daily brief KV fetch warning:', err);
+    return null;
+  }
+}
+
+export async function saveDailyBrief(brief: AIDailyBrief): Promise<void> {
+  dailyBriefCache = brief;
+  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return;
+  try {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_daily_brief`;
+    await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${CF_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(brief),
+    });
+  } catch (err) {
+    console.warn('Daily brief KV save warning:', err);
+  }
 }

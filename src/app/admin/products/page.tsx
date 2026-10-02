@@ -53,6 +53,42 @@ export default function AdminProductsPage() {
   const [editingPriceId, setEditingPriceId] = useState<string | null>(null);
   const [inlinePrice, setInlinePrice] = useState<string>('');
 
+  // AI Description Generator State
+  const [aiDescLoading, setAiDescLoading] = useState(false);
+
+  const generateDescription = async () => {
+    if (!formData.name.trim()) {
+      alert('AI দিয়ে বিবরণ লেখানোর আগে প্রোডাক্টের নাম দিন।');
+      return;
+    }
+    setAiDescLoading(true);
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'product-content',
+          name: formData.name,
+          category: formData.category,
+          subCategory: formData.subCategory,
+          colors: formData.colors,
+          sizes: formData.sizes,
+          price: Number(formData.price) || undefined,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.description) {
+        setFormData(prev => ({ ...prev, description: data.description }));
+      } else {
+        alert('⚠️ ' + (data?.error || 'বিবরণ তৈরি করা যায়নি'));
+      }
+    } catch {
+      alert('⚠️ সার্ভারে সংযোগ করা যায়নি');
+    } finally {
+      setAiDescLoading(false);
+    }
+  };
+
   const loadProducts = async () => {
     try {
       const res = await fetch('/api/products');
@@ -724,14 +760,29 @@ export default function AdminProductsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  বিবরণ (Description)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700 uppercase">
+                    বিবরণ (Description)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={generateDescription}
+                    disabled={aiDescLoading}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 text-white text-[10px] font-black shadow-md shadow-orange-600/25 hover:opacity-90 disabled:opacity-60 transition-all"
+                  >
+                    {aiDescLoading ? (
+                      <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3 h-3" />
+                    )}
+                    {aiDescLoading ? 'AI লিখছে…' : 'AI দিয়ে লিখুন'}
+                  </button>
+                </div>
                 <textarea
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="পণ্যের বৈশিষ্ট্য, ম্যাটেরিয়াল ইত্যাদি লিখুন..."
+                  placeholder="পণ্যের বৈশিষ্ট্য, ম্যাটেরিয়াল ইত্যাদি লিখুন... অথবা AI বাটন চেপে নিজে থেকেই লিখে নিন"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>

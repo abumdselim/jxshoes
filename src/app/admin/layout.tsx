@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
+import AdminAiFab from '@/components/AdminAiFab';
 import { Menu } from 'lucide-react';
 
 export default function AdminLayout({
@@ -78,6 +79,9 @@ export default function AdminLayout({
           {children}
         </main>
       </div>
+
+      {/* AI কুইক অ্যাক্সেস — সব অ্যাডমিন পেজে ভাসমান বাটন */}
+      <AdminAiFab />
     </div>
   );
 }

@@ -20,12 +20,49 @@ export default function AdminMarketingPage() {
     minOrder: '1000',
   });
 
+  // AI Banner Copy State
+  const [storeInfo, setStoreInfo] = useState<{ storeName?: string; tagline?: string }>({});
+  const [aiBannerLoading, setAiBannerLoading] = useState(false);
+
+  const generateBannerCopy = async () => {
+    setAiBannerLoading(true);
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'banner-copy',
+          storeName: storeInfo.storeName,
+          tagline: storeInfo.tagline,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.titlePart1 !== undefined && heroBanner) {
+        setHeroBanner({
+          ...heroBanner,
+          badgeText: data.badgeText || heroBanner.badgeText,
+          titlePart1: data.titlePart1 || heroBanner.titlePart1,
+          titleHighlight: data.titleHighlight || heroBanner.titleHighlight,
+          subtitle: data.subtitle || heroBanner.subtitle,
+          ctaText: data.ctaText || heroBanner.ctaText,
+        });
+      } else {
+        alert('⚠️ ' + (data?.error || 'AI ব্যানার কপি তৈরি করা যায়নি'));
+      }
+    } catch {
+      alert('⚠️ সার্ভারে সংযোগ করা যায়নি');
+    } finally {
+      setAiBannerLoading(false);
+    }
+  };
+
   const loadData = async () => {
     try {
-      const [mRes, cRes, pRes] = await Promise.all([
+      const [mRes, cRes, pRes, sRes] = await Promise.all([
         fetch('/api/marketing'),
         fetch('/api/coupons'),
         fetch('/api/products'),
+        fetch('/api/settings'),
       ]);
       if (mRes.ok) {
         const mData = await mRes.json();
@@ -34,6 +71,10 @@ export default function AdminMarketingPage() {
       }
       if (cRes.ok) setCoupons(await cRes.json());
       if (pRes.ok) setProducts(await pRes.json());
+      if (sRes.ok) {
+        const s = await sRes.json();
+        setStoreInfo({ storeName: s?.storeName, tagline: s?.tagline });
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -128,13 +169,28 @@ export default function AdminMarketingPage() {
               <Sparkles className="w-5 h-5 text-orange-600" />
               <span>১. হোমপেজ হিরো ব্যানার (Hero Section)</span>
             </h2>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md transition-all"
-            >
-              <Save className="w-4 h-4" />
-              <span>পরিবর্তন সেভ করুন</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={generateBannerCopy}
+                disabled={aiBannerLoading}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 hover:opacity-90 text-white text-xs font-bold shadow-md transition-all disabled:opacity-60"
+              >
+                {aiBannerLoading ? (
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                )}
+                {aiBannerLoading ? 'AI লিখছে…' : 'AI দিয়ে ব্যানার লিখুন'}
+              </button>
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md transition-all"
+              >
+                <Save className="w-4 h-4" />
+                <span>পরিবর্তন সেভ করুন</span>
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

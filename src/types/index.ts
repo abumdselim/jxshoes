@@ -62,6 +62,7 @@ export interface OrderItem {
 export interface Order {
   id: string;
   orderNumber: string;
+  source?: 'online' | 'in-store'; // in-store = POS quick sale from admin
   customerName: string;
   phone: string;
   address: string;
@@ -91,6 +92,7 @@ export interface CategoryItem {
 
 export interface StoreSettings {
   storeName: string;
+  ownerName?: string; // দোকানের মালিকের নাম — AI গ্রিটিং ও ব্যক্তিগতকরণের জন্য
   tagline: string;
   hotline: string;
   email: string;
@@ -128,4 +130,38 @@ export interface Coupon {
   value: number;
   minOrder: number;
   active: boolean;
+}
+
+// ================== AI (Cloudflare Workers AI) ==================
+export interface AIDailyBrief {
+  date: string; // YYYY-MM-DD (DST) — দিনে ১ বার জেনারেট হয়
+  greeting: string; // AI-এর ব্যক্তিগত স্বাগতম
+  summary: string; // আজকের শপের অবস্থা নিয়ে সারসংক্ষেপ
+  advice: string[]; // আজকের করণীয় পরামর্শ
+  alerts: string[]; // জরুরি সতর্কতা (স্টক শেষ, পেন্ডিং অর্ডার ইত্যাদি)
+  generatedAt: string;
+}
+
+export interface AIInsights {
+  headline: string;
+  overview: string;
+  bestSellers: { name: string; reason: string }[];
+  slowMovers: { name: string; reason: string }[];
+  restockNeeds: { name: string; suggestion: string }[];
+  pricingAdvice: { name: string; suggestion: string }[];
+  recommendations: string[];
+  generatedAt: string;
+}
+
+export interface AISaleMatch {
+  matched: boolean;
+  productId?: string;
+  productName?: string;
+  variantId?: string;
+  size?: string;
+  color?: string;
+  quantity?: number;
+  confidence: 'high' | 'medium' | 'low';
+  clarification?: string; // AI যদি নিশ্চিত না হয়, দোকানদারকে কী জিজ্ঞেস করা হবে
+  alternatives?: { productId: string; productName: string; size?: string; color?: string }[];
 }

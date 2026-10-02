@@ -12,7 +12,8 @@ import {
   Settings,
   ExternalLink,
   ShieldCheck,
-  X
+  X,
+  Bot
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -28,6 +29,13 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       href: '/admin',
       icon: LayoutDashboard,
       active: pathname === '/admin',
+    },
+    {
+      label: 'AI অ্যাসিস্ট্যান্ট',
+      href: '/admin/assistant',
+      icon: Bot,
+      active: pathname.startsWith('/admin/assistant'),
+      highlight: true,
     },
     {
       label: 'ইনভেন্টরি ও স্টক (ERP)',

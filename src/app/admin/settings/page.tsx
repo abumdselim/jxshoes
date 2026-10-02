@@ -109,6 +109,22 @@ export default function AdminSettingsPage() {
 
             <div>
               <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                মালিকের নাম (AI গ্রিটিংয়ের জন্য)
+              </label>
+              <input
+                type="text"
+                value={settings.ownerName || ''}
+                onChange={(e) => setSettings({ ...settings, ownerName: e.target.value })}
+                placeholder="যেমন: রফিক ভাই"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+              />
+              <p className="text-[10px] text-slate-400 mt-1">
+                AI অ্যাসিস্ট্যান্ট প্রতিদিন দিনের শুরুতে এই নাম ধরে স্বাগতম জানাবে।
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
                 হটলাইন ফোন নম্বর *
               </label>
               <input

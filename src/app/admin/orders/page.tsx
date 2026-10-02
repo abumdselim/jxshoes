@@ -136,6 +136,11 @@ export default function AdminOrdersPage() {
                   <span className="font-mono font-black text-base text-orange-600 bg-orange-50 px-3 py-1 rounded-xl">
                     {order.orderNumber}
                   </span>
+                  {order.source === 'in-store' && (
+                    <span className="text-[10px] font-black px-2 py-1 rounded-lg bg-purple-100 text-purple-700 border border-purple-200 uppercase tracking-wide">
+                      দোকানে বিক্রি (POS)
+                    </span>
+                  )}
                   <div className="text-xs text-slate-400">
                     তারিখ: <strong className="text-slate-700">{formatDate(order.createdAt)}</strong>
                   </div>
