@@ -11,7 +11,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Product } from '@/types';
 import ImageEditor from '@/components/admin/ImageEditor';
-import { Images, Search, Pencil, Package, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Images, Search, Pencil, Package, Loader2, AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
 
 interface EditingTarget {
   productId: string;
@@ -26,6 +26,9 @@ export default function AdminGalleryPage() {
   const [editing, setEditing] = useState<EditingTarget | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
+  const [uploadTargetId, setUploadTargetId] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [pendingUrl, setPendingUrl] = useState('');
 
   useEffect(() => {
     (async () => {
@@ -80,6 +83,74 @@ export default function AdminGalleryPage() {
     }
   };
 
+  /* ── সরাসরি আপলোড — ছবিগুলো নির্বাচিত প্রোডাক্টের গ্যালারিতে যুক্ত হয় ── */
+  const addImagesToProduct = async (productId: string, urls: string[]): Promise<boolean> => {
+    if (urls.length === 0) return false;
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+      alert('প্রোডাক্ট পাওয়া যায়নি — পেজটা রিফ্রেশ করে আবার চেষ্টা করুন।');
+      return false;
+    }
+    setSaving(true);
+    try {
+      const updatedImages = [...(product.images || []), ...urls];
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...product, images: updatedImages }),
+      });
+      if (!res.ok) throw new Error('save failed');
+      setProducts(prev => prev.map(p => (p.id === product.id ? { ...p, images: updatedImages } : p)));
+      setSavedFlash(`${product.name}-এ ${urls.length}টি ছবি যোগ হয়েছে`);
+      setTimeout(() => setSavedFlash(null), 3000);
+      return true;
+    } catch {
+      alert('ছবি সংরক্ষণ করা যায়নি — ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।');
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+    if (!uploadTargetId) {
+      alert('আগে প্রোডাক্ট নির্বাচন করুন — আপলোড করা ছবিগুলো সেই প্রোডাক্টের গ্যালারিতে যুক্ত হবে।');
+      return;
+    }
+    setUploading(true);
+    try {
+      const newUrls: string[] = [];
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.url) newUrls.push(data.url);
+        } else {
+          alert('একটি ছবি আপলোড করতে সমস্যা হয়েছে');
+        }
+      }
+      await addImagesToProduct(uploadTargetId, newUrls);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleAddByUrl = async () => {
+    const u = pendingUrl.trim();
+    if (!u) return;
+    if (!uploadTargetId) {
+      alert('আগে প্রোডাক্ট নির্বাচন করুন — ছবিটা সেই প্রোডাক্টের গ্যালারিতে যুক্ত হবে।');
+      return;
+    }
+    const ok = await addImagesToProduct(uploadTargetId, [u]);
+    if (ok) setPendingUrl('');
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
@@ -118,6 +189,78 @@ export default function AdminGalleryPage() {
             <Package className="w-3.5 h-3.5 text-orange-600" /> {products.length}টি প্রোডাক্ট
           </span>
         </div>
+      </div>
+
+      {/* সরাসরি আপলোড */}
+      <div className="bg-white p-4 rounded-md border border-slate-200/80 space-y-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1.5">
+              ধাপ ১ — ছবি কোন প্রোডাক্টে যুক্ত হবে?
+            </label>
+            <select
+              value={uploadTargetId}
+              onChange={(e) => setUploadTargetId(e.target.value)}
+              className="w-full bg-white border border-slate-200 rounded-md px-3 py-3 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+            >
+              <option value="">— প্রোডাক্ট নির্বাচন করুন —</option>
+              {products.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name}{p.sku ? ` (${p.sku})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1.5">
+              ধাপ ২ — ছবি আপলোড করুন (একাধিক চলবে)
+            </label>
+            <input
+              type="file"
+              id="galleryUploadInput"
+              accept="image/*"
+              multiple
+              onChange={handleGalleryUpload}
+              className="hidden"
+              disabled={uploading}
+            />
+            <label
+              htmlFor="galleryUploadInput"
+              className="cursor-pointer flex items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 bg-slate-50/70 transition-colors"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-orange-600" /> আপলোড হচ্ছে…
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4 text-orange-600" />
+                  কম্পিউটার/মোবাইল থেকে ছবি বাছুন (JPG, PNG, WebP — সর্বোচ্চ 5MB)
+                </>
+              )}
+            </label>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <input
+            type="text"
+            value={pendingUrl}
+            onChange={(e) => setPendingUrl(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddByUrl(); } }}
+            placeholder="অথবা ছবির লিংক দিয়ে যোগ করুন (https://...)"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
+          />
+          <button
+            type="button"
+            onClick={handleAddByUrl}
+            className="px-4 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors"
+          >
+            লিংক যোগ করুন
+          </button>
+        </div>
+        <p className="text-[10px] text-slate-400 leading-relaxed">
+          আপলোড করা ছবি সরাসরি নির্বাচিত প্রোডাক্টের গ্যালারিতে চলে যাবে — পরে যেকোনো ছবিতে এডিট (ক্রপ/রোটেট/কালার) করতে পারবেন।
+        </p>
       </div>
 
       {/* সেভ হওয়ার নোটিশ */}
