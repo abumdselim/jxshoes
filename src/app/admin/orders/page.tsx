@@ -213,7 +213,7 @@ export default function AdminOrdersPage() {
                     <div className="flex items-center gap-2 pt-1">
                       <a
                         href={`tel:${order.phone}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 hover:border-orange-300 text-[11px] font-bold text-slate-700 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-[11px] font-bold text-white transition-colors"
                       >
                         <Phone className="w-3.5 h-3.5 text-orange-600" />
                         কল করুন
@@ -222,7 +222,7 @@ export default function AdminOrdersPage() {
                         href={`https://wa.me/${order.phone.replace(/\D/g, '').replace(/^0+/, '880').replace(/^88(?=880)/, '')}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-[11px] font-bold text-emerald-700 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-[11px] font-bold text-white transition-colors"
                         title="WhatsApp-এ মেসেজ করুন"
                       >
                         <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
