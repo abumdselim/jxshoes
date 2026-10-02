@@ -66,6 +66,7 @@ Workers AI REST API (src/lib/ai.ts)
 | `product-content` | `{ name, category, subCategory, colors, sizes, price }` | `{ description }` | প্রোডাক্ট ফর্ম |
 | `banner-copy` | `{ storeName, tagline }` | `{ badgeText, titlePart1, titleHighlight, subtitle, ctaText }` | মার্কেটিং পেজ |
 | `parse-sale` | `{ message }` | `{ match: AISaleMatch, product: Product \| null }` | AI FAB কুইক সেল |
+| `parse-intent` | `{ message }` | `{ intent: 'sale'\|'restock'\|'new-product'\|'other', … }` | AI FAB — মেসেজ থেকে রিস্টক/নতুন পণ্য |
 | `generate-report` | `{ reportType: 'weekly'\|'monthly' }` | `{ report: StoredReport }` | রিপোর্ট পেজ |
 | `email-report` | `{ reportId, to? }` | `{ success, to }` | রিপোর্ট পেজ ইমেইল বাটন |
 | `restock-plan` | — | `{ summary, plan: [{ productId, productName, recommendedQuantity, reason }] }` | ইনভেন্টরি লো-স্টক ট্যাব |
@@ -127,6 +128,20 @@ Authorization: Bearer <API_TOKEN>
 2. **AI ফাজি ম্যাচ:** না পেলে পুরো ক্যাটালগ কমপ্যাক্ট তালিকা দিয়ে AI-কে JSON ম্যাচ করতে বলা হয় — বাংলা সংখ্যা (২=2) ও বাংলা কালার (কালো=Black) সামলায়।
 
 কনফার্মেশন পপআপে দোকানদার সবকিছু ঠিক করতে পারে (সাইজ/কালার ড্রপডাউন, পরিমাণ স্টেপার, স্টক ভ্যালিডেশন) — তাই AI-এর ভুল থাকলেও সেল সঠিক হয়।
+
+### `parse-intent` — মেসেজ থেকে রিস্টক ও নতুন পণ্য (FAB)
+
+দোকানদার FAB-এ যা লিখবে AI ইচ্ছা বুঝে কাজ ভাগ করে:
+
+| মেসেজ উদাহরণ | intent | ফলাফল |
+|---|---|---|
+| `JX-SH-001 42 2টি` | `sale` | সেল কনফার্মেশন পপআপ |
+| `JX-BG-006 এ ৫ পিস স্টক এসেছে, কস্ট 1550` | `restock` | রিস্টক পপআপ → নিশ্চিত করলেই স্টক+চালান এন্ট্রি |
+| `হাইকিং বুটের ১০ পিস রিস্টক করো` | `restock` | নাম দিয়ে ফাজি ম্যাচ (AI) |
+| `নতুন প্রোডাক্ট যোগ: Bata Formal Shoe, দাম ৪২০০` | `new-product` | প্রি-ফিল করা প্রোডাক্ট ফর্ম → নিশ্চিত করলেই ইনভেন্টরিতে |
+| অন্য প্রশ্ন | `other` | AI চ্যাটে উত্তর |
+
+দুই স্তরের পার্সিং: **ডিটারমিনিস্টিক** (SKU + রিস্টক-শব্দ: স্টক/চালান/রিস্টক/পিস → AI খরচ শূন্য) → না মিললে **AI ক্লাসিফায়ার** (বাংলা সংখ্যা/কালার অনুবাদ, নাম-ম্যাচ, নতুন পণ্যের ফিল্ড এক্সট্রাকশন; নাম+দাম থাকলেই new-product, বাকি ডিফল্ট সিস্টেম বসায়)।
 
 ## ৫. স্টোর কনটেক্সট (`buildStoreContext`)
 
