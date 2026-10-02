@@ -53,7 +53,7 @@ export default function AdminFinancePage() {
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-20">
-      <div>
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 ">
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">হিসাব ও লাভ-ক্ষতি</h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">
           দোকানের পুরো আর্থিক চিত্র — প্রতিটা সেলের ক্রয়মূল্য স্ন্যাপশট থেকে নিখুঁত হিসাব।
