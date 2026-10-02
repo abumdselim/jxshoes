@@ -1,8 +1,58 @@
 'use client';
 
+/**
+ * ক্যাটাগরি ম্যানেজমেন্ট — আইকন-নির্ভর মডার্ন কার্ড
+ * -------------------------------------------------
+ * অ্যাডমিনে ছবির বদলে প্রতিটা ক্যাটাগরির ধরন অনুযায়ী প্রফেশনাল আইকন টাইল
+ * (গ্রেডিয়েন্ট ব্যাকগ্রাউন্ড + সফট শ্যাডো)। ক্যাটাগরির `image` ফিল্ড হোমপেজের
+ * ফটো-কার্ডের জন্য অপরিবর্তিত থাকে — খালি রাখলে স্টোর-লেয়ার ডিফল্ট বসায়।
+ */
+
 import React, { useState, useEffect } from 'react';
 import { CategoryItem } from '@/types';
-import { Plus, Trash2, Layers, X, Tag } from 'lucide-react';
+import {
+  Plus,
+  Trash2,
+  Layers,
+  X,
+  Footprints,
+  Zap,
+  Crown,
+  Briefcase,
+  Luggage,
+  Backpack,
+  ShoppingBag,
+  Watch,
+  Mountain,
+  Sun,
+  SlidersHorizontal,
+} from 'lucide-react';
+
+type IconComponent = React.ComponentType<{ className?: string }>;
+
+interface CatVisual {
+  Icon: IconComponent;
+  gradient: string;
+  shadow: string;
+}
+
+/** ক্যাটাগরির নাম/প্যারেন্ট টাইপ থেকে আইকন + গ্রেডিয়েন্ট (ক্রম গুরুত্বপূর্ণ — আগের ম্যাচ জেতে) */
+function getCategoryVisual(cat: CategoryItem): CatVisual {
+  const n = cat.name;
+  if (/loafer|লোফার|moccasin/i.test(n)) return { Icon: Footprints, gradient: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/30' };
+  if (/sneaker|স্নিকার্স|sports|স্পোর্টস/i.test(n)) return { Icon: Zap, gradient: 'from-orange-500 to-red-600', shadow: 'shadow-orange-500/30' };
+  if (/formal|ফর্মাল|oxford/i.test(n)) return { Icon: Crown, gradient: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/30' };
+  if (/boot|বুট|hiking|হাইকিং/i.test(n)) return { Icon: Mountain, gradient: 'from-emerald-600 to-teal-700', shadow: 'shadow-emerald-500/30' };
+  if (/sandal|স্যাান্ডেল|স্যান্ডেল|চটি|slipper/i.test(n)) return { Icon: Sun, gradient: 'from-yellow-500 to-amber-600', shadow: 'shadow-yellow-500/30' };
+  if (/laptop|office|ল্যাপটপ|অফিস/i.test(n)) return { Icon: Briefcase, gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/30' };
+  if (/travel|gym|ট্রাভেল|জিম|ডাফেল/i.test(n)) return { Icon: Luggage, gradient: 'from-teal-500 to-cyan-600', shadow: 'shadow-teal-500/30' };
+  if (/backpack|ব্যাকপ্যাক/i.test(n)) return { Icon: Backpack, gradient: 'from-rose-500 to-pink-600', shadow: 'shadow-rose-500/30' };
+
+  // নামে না মিললে প্যারেন্ট টাইপ দিয়ে ডিফল্ট
+  if (cat.parentType === 'bags') return { Icon: ShoppingBag, gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/30' };
+  if (cat.parentType === 'accessories') return { Icon: Watch, gradient: 'from-violet-500 to-fuchsia-600', shadow: 'shadow-violet-500/30' };
+  return { Icon: Footprints, gradient: 'from-orange-500 to-amber-600', shadow: 'shadow-orange-500/30' };
+}
 
 export default function AdminCategoriesPage() {
   const [categories, setCategories] = useState<CategoryItem[]>([]);
@@ -12,7 +62,7 @@ export default function AdminCategoriesPage() {
   const [formData, setFormData] = useState({
     name: '',
     parentType: 'shoes' as 'shoes' | 'bags' | 'accessories',
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400',
+    image: '',
     itemCountLabel: 'নতুন মডেল',
   });
 
@@ -39,14 +89,14 @@ export default function AdminCategoriesPage() {
       const res = await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, image: formData.image.trim() }),
       });
       if (res.ok) {
         setIsModalOpen(false);
         setFormData({
           name: '',
           parentType: 'shoes',
-          image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=400',
+          image: '',
           itemCountLabel: 'নতুন মডেল',
         });
         loadCategories();
@@ -77,7 +127,7 @@ export default function AdminCategoriesPage() {
             ক্যাটাগরি ম্যানেজমেন্ট
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            নতুন জুতা ও ব্যাগের সাব-ক্যাটাগরি যুক্ত করুন বা পরিবর্তন করুন। হোমপেজের ভিজুয়াল কার্ডে এগুলো সরাসরি দেখাবে।
+            নতুন জুতা ও ব্যাগের সাব-ক্যাটাগরি যুক্ত করুন বা পরিবর্তন করুন। হোমপেজের ভিজুয়াল কার্ডে এগুলো সরাসরি দেখাবে।
           </p>
         </div>
 
@@ -99,38 +149,42 @@ export default function AdminCategoriesPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {categories.map((cat) => (
-            <div
-              key={cat.id}
-              className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 flex flex-col justify-between hover:shadow-md transition-shadow relative group"
-            >
-              <div className="flex items-center gap-3.5">
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-16 h-16 rounded-xl object-cover border border-slate-200 bg-slate-100 flex-shrink-0"
-                />
-                <div className="min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">
-                    {cat.parentType === 'shoes' ? 'জুতা' : cat.parentType === 'bags' ? 'ব্যাগ' : 'এক্সেসরিজ'}
-                  </span>
-                  <h3 className="font-bold text-sm text-slate-900 mt-1 truncate">{cat.name}</h3>
-                  <span className="text-xs text-slate-400">{cat.itemCountLabel || 'ক্যাটালগ'}</span>
+          {categories.map((cat) => {
+            const { Icon, gradient, shadow } = getCategoryVisual(cat);
+            return (
+              <div
+                key={cat.id}
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-4 flex flex-col justify-between hover:shadow-md hover:border-orange-300/60 transition-all relative group"
+              >
+                <div className="flex items-center gap-3.5">
+                  {/* মডার্ন আইকন টাইল — ছবির বদলে */}
+                  <div
+                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg ${shadow} flex-shrink-0`}
+                  >
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-50 text-orange-700">
+                      {cat.parentType === 'shoes' ? 'জুতা' : cat.parentType === 'bags' ? 'ব্যাগ' : 'এক্সেসরিজ'}
+                    </span>
+                    <h3 className="font-bold text-sm text-slate-900 mt-1 truncate">{cat.name}</h3>
+                    <span className="text-xs text-slate-400">{cat.itemCountLabel || 'ক্যাটালগ'}</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-mono text-[11px]">ID: {cat.id}</span>
+                  <button
+                    onClick={() => handleDelete(cat.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="মুছে ফেলুন"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-
-              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-mono text-[11px]">ID: {cat.id}</span>
-                <button
-                  onClick={() => handleDelete(cat.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  title="মুছে ফেলুন"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -164,6 +218,10 @@ export default function AdminCategoriesPage() {
                   placeholder="যেমন: স্যান্ডেল ও চটি (Sandals)"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold"
                 />
+                <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
+                  <SlidersHorizontal className="w-3 h-3" />
+                  নাম অনুযায়ী অ্যাডমিনে অটোমেটিক আইকন ও রঙ বসে যাবে।
+                </p>
               </div>
 
               <div>
@@ -196,17 +254,16 @@ export default function AdminCategoriesPage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-                  ছবির URL (Photo URL) *
+                  ছবির URL — ঐচ্ছিক (হোমপেজ কার্ডের জন্য)
                 </label>
                 <input
                   type="text"
-                  required
                   value={formData.image}
                   onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="https://..."
+                  placeholder="https://... (খালি রাখলে ডিফল্ট ছবি বসবে)"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none"
                 />
-                {formData.image && (
+                {formData.image.trim() && (
                   <div className="mt-2 flex items-center gap-2">
                     <img src={formData.image} alt="" className="w-10 h-10 rounded-lg object-cover border" />
                     <span className="text-[11px] text-slate-400">প্রিভিউ</span>
