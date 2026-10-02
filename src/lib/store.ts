@@ -1133,3 +1133,43 @@ export async function saveDailyBrief(brief: AIDailyBrief): Promise<void> {
     console.warn('Daily brief KV save warning:', err);
   }
 }
+
+/* ── মিডিয়া লাইব্রেরি — আপলোড করা কিন্তু এখনো কোনো প্রোডাক্টে যুক্ত না হওয়া ছবি ── */
+let mediaLibraryCache: string[] | null = null;
+
+export async function getMediaLibrary(): Promise<string[]> {
+  if (mediaLibraryCache) return mediaLibraryCache;
+  const kv = kvApi('jx_media_library');
+  if (!kv.ok) return [];
+  try {
+    const res = await fetch(kv.url, {
+      headers: { Authorization: `Bearer ${kv.token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const parsed = await res.json();
+    mediaLibraryCache = Array.isArray(parsed) ? parsed : [];
+    return mediaLibraryCache;
+  } catch (err) {
+    console.warn('Media library fetch warning:', err);
+    return [];
+  }
+}
+
+export async function saveMediaLibrary(urls: string[]): Promise<void> {
+  mediaLibraryCache = urls;
+  const kv = kvApi('jx_media_library');
+  if (!kv.ok) return;
+  try {
+    await fetch(kv.url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${kv.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(urls),
+    });
+  } catch (err) {
+    console.warn('Media library save warning:', err);
+  }
+}

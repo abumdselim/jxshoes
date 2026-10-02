@@ -11,30 +11,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Product } from '@/types';
 import ImageEditor from '@/components/admin/ImageEditor';
-import { Images, Search, Pencil, Package, Loader2, AlertTriangle, CheckCircle2, Upload } from 'lucide-react';
-
-interface EditingTarget {
-  productId: string;
-  productName: string;
-  imageIndex: number;
-}
+import { Images, Search, Pencil, Package, Loader2, AlertTriangle, CheckCircle2, Upload, Trash2 } from 'lucide-react';
 
 export default function AdminGalleryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [editing, setEditing] = useState<EditingTarget | null>(null);
+  const [editing, setEditing] = useState<
+    | { kind: 'library'; url: string }
+    | { kind: 'product'; productId: string; imageIndex: number }
+    | null
+  >(null);
   const [saving, setSaving] = useState(false);
   const [savedFlash, setSavedFlash] = useState<string | null>(null);
   const [uploadTargetId, setUploadTargetId] = useState('');
   const [uploading, setUploading] = useState(false);
   const [pendingUrl, setPendingUrl] = useState('');
+  const [library, setLibrary] = useState<string[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await fetch('/api/products');
         if (res.ok) setProducts(await res.json());
+        const libRes = await fetch('/api/media-library');
+        if (libRes.ok) setLibrary(await libRes.json());
       } finally {
         setLoading(false);
       }
@@ -61,6 +62,30 @@ export default function AdminGalleryPage() {
 
   const handleSave = async (dataUrl: string) => {
     if (!editing) return;
+    if (editing.kind === 'library') {
+      // লাইব্রেরির ছবি এডিট — পুরনো URL-এর বদলে নতুনটা সেভ হয়
+      setSaving(true);
+      try {
+        const addRes = await fetch('/api/media-library', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls: [dataUrl] }),
+        });
+        if (!addRes.ok) throw new Error('save failed');
+        await fetch('/api/media-library', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls: [editing.url] }),
+        });
+        setLibrary(prev => prev.map(u => (u === editing.url ? dataUrl : u)));
+        setEditing(null);
+      } catch {
+        alert('ছবি সংরক্ষণ করা যায়নি — ইন্টারনেট সংযোগ দেখে আবার চেষ্টা করুন।');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     const product = products.find(p => p.id === editing.productId);
     if (!product) return;
     setSaving(true);
@@ -116,10 +141,6 @@ export default function AdminGalleryPage() {
     const files = Array.from(e.target.files || []);
     e.target.value = '';
     if (files.length === 0) return;
-    if (!uploadTargetId) {
-      alert('আগে প্রোডাক্ট নির্বাচন করুন — আপলোড করা ছবিগুলো সেই প্রোডাক্টের গ্যালারিতে যুক্ত হবে।');
-      return;
-    }
     setUploading(true);
     try {
       const newUrls: string[] = [];
@@ -134,7 +155,25 @@ export default function AdminGalleryPage() {
           alert('একটি ছবি আপলোড করতে সমস্যা হয়েছে');
         }
       }
-      await addImagesToProduct(uploadTargetId, newUrls);
+      if (newUrls.length === 0) return;
+      if (uploadTargetId) {
+        // আপলোডের সময়ই প্রোডাক্ট বেছে নিলে সরাসরি সেখানে যুক্ত হয়
+        await addImagesToProduct(uploadTargetId, newUrls);
+      } else {
+        // ডিফল্ট: নতুন ছবি লাইব্রেরিতে জমা হয় — পরে যেকোনো প্রোডাক্টে যুক্ত করা যায়
+        const res = await fetch('/api/media-library', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ urls: newUrls }),
+        });
+        if (!res.ok) {
+          alert('লাইব্রেরিতে যোগ করা যায়নি — আবার চেষ্টা করুন।');
+          return;
+        }
+        setLibrary(prev => [...prev, ...newUrls]);
+        setSavedFlash(`${newUrls.length}টি ছবি লাইব্রেরিতে যোগ হয়েছে`);
+        setTimeout(() => setSavedFlash(null), 3000);
+      }
     } finally {
       setUploading(false);
     }
@@ -143,12 +182,44 @@ export default function AdminGalleryPage() {
   const handleAddByUrl = async () => {
     const u = pendingUrl.trim();
     if (!u) return;
-    if (!uploadTargetId) {
-      alert('আগে প্রোডাক্ট নির্বাচন করুন — ছবিটা সেই প্রোডাক্টের গ্যালারিতে যুক্ত হবে।');
-      return;
+    if (uploadTargetId) {
+      const ok = await addImagesToProduct(uploadTargetId, [u]);
+      if (ok) setPendingUrl('');
+    } else {
+      const res = await fetch('/api/media-library', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ urls: [u] }),
+      });
+      if (!res.ok) {
+        alert('লাইব্রেরিতে যোগ করা যায়নি — আবার চেষ্টা করুন।');
+        return;
+      }
+      setLibrary(prev => [...prev, u]);
+      setSavedFlash('ছবিটা লাইব্রেরিতে যোগ হয়েছে');
+      setTimeout(() => setSavedFlash(null), 3000);
+      setPendingUrl('');
     }
-    const ok = await addImagesToProduct(uploadTargetId, [u]);
-    if (ok) setPendingUrl('');
+  };
+
+  const attachLibraryImage = async (url: string, productId: string) => {
+    const ok = await addImagesToProduct(productId, [url]);
+    if (!ok) return;
+    await fetch('/api/media-library', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: [url] }),
+    });
+    setLibrary(prev => prev.filter(u => u !== url));
+  };
+
+  const deleteLibraryImage = async (url: string) => {
+    const res = await fetch('/api/media-library', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ urls: [url] }),
+    });
+    if (res.ok) setLibrary(prev => prev.filter(u => u !== url));
   };
 
   if (loading) {
@@ -195,15 +266,15 @@ export default function AdminGalleryPage() {
       <div className="bg-white p-4 rounded-md border border-slate-200/80 space-y-3">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
           <div>
-            <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1.5">
-              ধাপ ১ — ছবি কোন প্রোডাক্টে যুক্ত হবে?
-            </label>
-            <select
-              value={uploadTargetId}
-              onChange={(e) => setUploadTargetId(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-md px-3 py-3 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
-            >
-              <option value="">— প্রোডাক্ট নির্বাচন করুন —</option>
+          <label className="block text-[11px] font-bold uppercase text-slate-500 mb-1.5">
+            ছবি কোথায় যুক্ত হবে?
+          </label>
+          <select
+            value={uploadTargetId}
+            onChange={(e) => setUploadTargetId(e.target.value)}
+            className="w-full bg-white border border-slate-200 rounded-md px-3 py-3 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+          >
+            <option value="">🖼️ নতুন ছবি — লাইব্রেরিতে জমা হবে (ডিফল্ট)</option>
               {products.map(p => (
                 <option key={p.id} value={p.id}>
                   {p.name}{p.sku ? ` (${p.sku})` : ''}
@@ -259,7 +330,7 @@ export default function AdminGalleryPage() {
           </button>
         </div>
         <p className="text-[10px] text-slate-400 leading-relaxed">
-          আপলোড করা ছবি সরাসরি নির্বাচিত প্রোডাক্টের গ্যালারিতে চলে যাবে — পরে যেকোনো ছবিতে এডিট (ক্রপ/রোটেট/কালার) করতে পারবেন।
+          ডিফল্টে নতুন ছবি লাইব্রেরিতে জমা হয় — নিচের "নতুন ছবি" সেকশন থেকে যেকোনো সময় এক ক্লিকে প্রোডাক্টে যুক্ত করুন। আপলোডের সময়ই প্রোডাক্ট বেছে নিলে সরাসরি সেখানে চলে যাবে। পরে যেকোনো ছবিতে এডিট (ক্রপ/রোটেট/কালার) করতে পারবেন।
         </p>
       </div>
 
@@ -272,6 +343,61 @@ export default function AdminGalleryPage() {
       {saving && (
         <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-amber-50 border border-amber-200 text-xs font-bold text-amber-700">
           <Loader2 className="w-4 h-4 animate-spin" /> সংরক্ষণ হচ্ছে…
+        </div>
+      )}
+
+      {/* নতুন আপলোড — প্রোডাক্টে অযুক্ত ছবি */}
+      {library.length > 0 && (
+        <div className="bg-white rounded-md border border-amber-200 p-4 sm:p-5">
+          <h2 className="font-bold text-sm text-slate-900 flex items-center gap-2 mb-4">
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            নতুন ছবি — এখনো কোনো প্রোডাক্টে যুক্ত হয়নি ({library.length}টি)
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {library.map((url, i) => (
+              <div key={url} className="bg-white rounded-md border border-amber-200 overflow-hidden group">
+                <div className="relative aspect-square bg-slate-50">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`নতুন ছবি ${i + 1}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-slate-900/55 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                    <button
+                      type="button"
+                      title="এডিট করুন — ক্রপ, রোটেট, কালার"
+                      onClick={() => setEditing({ kind: 'library', url })}
+                      className="p-2 bg-white/95 rounded-md text-slate-700 hover:bg-white"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      title="লাইব্রেরি থেকে মুছুন"
+                      onClick={() => deleteLibraryImage(url)}
+                      className="p-2 bg-white/95 rounded-md text-red-600 hover:bg-white"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="px-2.5 py-2">
+                  <select
+                    value=""
+                    onChange={(e) => {
+                      const pid = e.target.value;
+                      if (pid) attachLibraryImage(url, pid);
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-1.5 text-[11px] font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="">একটি প্রোডাক্টে যুক্ত করুন…</option>
+                    {products.map(p => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -290,9 +416,7 @@ export default function AdminGalleryPage() {
                   <button
                     type="button"
                     title="এডিট করুন — ক্রপ, রোটেট, কালার"
-                    onClick={() =>
-                      setEditing({ productId: it.productId, productName: it.productName, imageIndex: it.imageIndex })
-                    }
+                    onClick={() => setEditing({ kind: 'product', productId: it.productId, imageIndex: it.imageIndex })}
                     className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/95 rounded-md text-slate-800 hover:bg-white text-xs font-bold"
                   >
                     <Pencil className="w-3.5 h-3.5" /> এডিট
@@ -329,7 +453,11 @@ export default function AdminGalleryPage() {
       {/* ছবি এডিটর */}
       {editing && (
         <ImageEditor
-          src={items.find(x => x.productId === editing.productId && x.imageIndex === editing.imageIndex)?.url || ''}
+          src={
+            editing.kind === 'library'
+              ? editing.url
+              : items.find(x => x.productId === editing.productId && x.imageIndex === editing.imageIndex)?.url || ''
+          }
           onClose={() => setEditing(null)}
           onSave={handleSave}
         />
