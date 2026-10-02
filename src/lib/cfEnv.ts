@@ -23,6 +23,9 @@ export interface CfEnv {
   aiTextModel: string;
   aiFallbackModel: string;
   cronSecret: string;
+  geminiApiKey: string;
+  geminiModel: string;
+  geminiFallbackModel: string;
 }
 
 function pick(generated: string, fromProcess: string): string {
@@ -40,5 +43,8 @@ export function getCfEnv(): CfEnv {
     aiTextModel: process.env.AI_TEXT_MODEL || '',
     aiFallbackModel: process.env.AI_FALLBACK_MODEL || '',
     cronSecret: pick(GENERATED_ENV.CRON_SECRET, process.env.CRON_SECRET || ''),
+    geminiApiKey: pick(GENERATED_ENV.GEMINI_API_KEY, process.env.GEMINI_API_KEY || ''),
+    geminiModel: process.env.GEMINI_MODEL || '',
+    geminiFallbackModel: process.env.GEMINI_FALLBACK_MODEL || '',
   };
 }

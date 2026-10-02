@@ -11,6 +11,7 @@ import {
 import { generateReport, renderReportEmailHtml } from '@/lib/report';
 import { isEmailConfigured, EMAIL_NOT_CONFIGURED_MSG, sendEmail } from '@/lib/email';
 import { getDailyBrief, getOrders, getProducts, getReports, getStoreSettings, saveDailyBrief, saveReport } from '@/lib/store';
+import { transcribeAudioGemini } from '@/lib/ai';
 import { AIDailyBrief, AIInsights, AISaleMatch, Product } from '@/types';
 
 export const runtime = 'edge';
@@ -539,6 +540,32 @@ function extractUnitCost(message: string): number | undefined {
   return undefined;
 }
 
+/**
+ * ভয়েস কমান্ড: অডিও → Gemini ট্রান্সক্রিপ্ট → parse-intent পাইপলাইন
+ * রেসপন্সে transcript সহ সাধারণ intent ফলাফল যায় — ক্লায়েন্ট পপআপে
+ * "যা শোনা হলো" দেখিয়ে নিশ্চিত করায়, তাই শতভাগ নির্ভুল কাজ হয়।
+ */
+async function handleVoiceIntent(payload: { audioBase64?: string; mimeType?: string }) {
+  const audio = (payload.audioBase64 || '').trim();
+  if (!audio) {
+    return NextResponse.json({ error: 'অডিও পাওয়া যায়নি' }, { status: 400 });
+  }
+
+  let transcript: string;
+  try {
+    transcript = await transcribeAudioGemini(audio, payload.mimeType || 'audio/webm');
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'ভয়েস ট্রান্সক্রিপশন ব্যর্থ' },
+      { status: 500 }
+    );
+  }
+
+  const intentRes = await parseIntent({ message: transcript });
+  const intentData = await intentRes.json().catch(() => ({ intent: 'other' }));
+  return NextResponse.json({ transcript, ...intentData });
+}
+
 async function parseIntent(payload: { message?: string }) {
   if (!isAIConfigured()) return aiUnavailable();
   const message = (payload.message || '').trim();
@@ -751,6 +778,8 @@ export async function POST(request: Request) {
       return parseSaleMatch(body as { message?: string });
     case 'parse-intent':
       return parseIntent(body as { message?: string });
+    case 'voice-intent':
+      return handleVoiceIntent(body as { audioBase64?: string; mimeType?: string });
     case 'generate-report':
       return handleGenerateReport(body as { reportType?: string });
     case 'email-report':

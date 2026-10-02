@@ -24,6 +24,8 @@ import {
   CheckCircle,
   AlertTriangle,
   MessagesSquare,
+  Mic,
+  Square,
 } from 'lucide-react';
 
 interface SaleDraft {
@@ -96,6 +98,11 @@ export default function AdminAiFab() {
   const [newProductDraft, setNewProductDraft] = useState<NewProductDraft | null>(null);
   const [newProductSubmitting, setNewProductSubmitting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [voiceBusy, setVoiceBusy] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const voiceChunksRef = useRef<Blob[]>([]);
+  const messagesRef = useRef<ChatMsg[]>([]);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -111,9 +118,179 @@ export default function AdminAiFab() {
     }
   }, [messages, open]);
 
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
   const showAIError = (err: unknown) => {
     const text = err instanceof Error ? err.message : 'কিছু একটা সমস্যা হয়েছে';
     setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${text}` }]);
+  };
+
+  const blobToBase64 = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => {
+        const str = String(r.result);
+        resolve(str.slice(str.indexOf(',') + 1));
+      };
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+
+  /** AI-র intent-রেসপন্স হ্যান্ডেল — পপআপ খুললে true, নাহলে false (চ্যাটে যায়) */
+  const applyIntentResponse = (data: any, resOk: boolean): boolean => {
+      if (data && !data.configured) {
+        setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${data.error}` }]);
+        return true;
+      }
+
+      // — বিক্রি কনফার্মেশন
+      if (resOk && data?.intent === 'sale' && data?.match?.matched && data?.product) {
+        const p: Product = data.product;
+        const m = data.match;
+        setSaleDraft({
+          product: p,
+          size: m.size || p.sizes[0] || 'Standard',
+          color: m.color || p.colors[0]?.name || 'Default',
+          quantity: m.quantity || 1,
+          confidence: m.confidence || 'medium',
+          clarification: m.clarification,
+          alternatives: m.alternatives || [],
+          paymentMode: 'full',
+          paidAmount: '',
+          customerName: '',
+          customerPhone: '',
+        });
+        return true;
+      }
+
+      // — রিস্টক কনফার্মেশন
+      if (resOk && data?.intent === 'restock' && data?.product) {
+        const p: Product = data.product;
+        setRestockDraft({
+          product: p,
+          quantity: data.quantity || 1,
+          unitCost: data.unitCost ? String(data.unitCost) : p.costPrice ? String(p.costPrice) : '',
+          supplierOrInvoice: data.supplierOrInvoice || '',
+        });
+        return true;
+      }
+
+      // — নতুন প্রোডাক্ট তৈরির ফর্ম (AI প্রি-ফিল করে)
+      if (resOk && data?.intent === 'new-product' && data?.draft) {
+        const d = data.draft;
+        setNewProductDraft({
+          name: d.name || '',
+          category: d.category || 'shoes',
+          subCategory: d.subCategory || '',
+          price: d.price ? String(d.price) : '',
+          costPrice: d.costPrice ? String(d.costPrice) : '',
+          sizes: Array.isArray(d.sizes) ? d.sizes.join(', ') : '',
+          colors: Array.isArray(d.colors) ? d.colors.join(', ') : '',
+          stockCount: d.stockCount ? String(d.stockCount) : '0',
+          supplier: d.supplier || '',
+          description: d.description || '',
+        });
+        return true;
+      }
+
+      // — AI বুঝতে পারেনি কী চায়, প্রশ্ন করে
+      if (resOk && data?.intent === 'other' && data?.clarification) {
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: `🤔 ${data.clarification}` },
+        ]);
+        return true;
+      }
+
+      return false;
+  };
+
+  const handleVoiceBlob = async (blob: Blob, mime: string) => {
+    setVoiceBusy(true);
+    try {
+      const audioB64 = await blobToBase64(blob);
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'voice-intent', audioBase64: audioB64, mimeType: mime }),
+      });
+      const data = await res.json().catch(() => null);
+
+      if (data && !data.configured) {
+        setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${data.error}` }]);
+        return;
+      }
+
+      const transcript = (data?.transcript as string) || '';
+      if (!transcript) {
+        showAIError(new Error(data?.error || 'কথা শোনা যায়নি — আবার চেষ্টা করুন'));
+        return;
+      }
+
+      // দেখাও AI কী শুনলো
+      setMessages(prev => [...prev, { role: 'user', content: `🎙️ "${transcript}"` }]);
+
+      const handled = applyIntentResponse(data, res.ok);
+      if (!handled) {
+        // সাধারণ প্রশ্ন হলে AI চ্যাটে উত্তর
+        const withUser: ChatMsg[] = [...messagesRef.current, { role: 'user', content: transcript }];
+        setMessages([...withUser, { role: 'assistant', content: '' }]);
+        setStreaming(true);
+        await streamChat(withUser, delta => {
+          setMessages(prev => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last?.role === 'assistant') {
+              updated[updated.length - 1] = { ...last, content: last.content + delta };
+            }
+            return updated;
+          });
+        });
+      } else {
+        setOpen(true);
+      }
+    } catch (err) {
+      showAIError(err);
+    } finally {
+      setVoiceBusy(false);
+    }
+  };
+
+  const toggleRecording = async () => {
+    if (recording) {
+      mediaRecorderRef.current?.stop();
+      setRecording(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : 'audio/mp4';
+      const mr = new MediaRecorder(stream, { mimeType: mime });
+      voiceChunksRef.current = [];
+      mr.ondataavailable = e => {
+        if (e.data.size > 0) voiceChunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(voiceChunksRef.current, { type: mime });
+        if (blob.size < 1000) {
+          setToast({ text: '⚠️ খুব ছোট রেকর্ডিং — আবার চেষ্টা করুন', error: true });
+          return;
+        }
+        await handleVoiceBlob(blob, mime);
+      };
+      mr.start();
+      mediaRecorderRef.current = mr;
+      setRecording(true);
+    } catch {
+      setToast({ text: '❌ মাইক্রোফোন অ্যাক্সেস পাওয়া যায়নি — ব্রাউজারের অনুমতি দিন', error: true });
+    }
   };
 
   const handleSend = async () => {
@@ -134,71 +311,10 @@ export default function AdminAiFab() {
       });
       const data = await res.json().catch(() => null);
 
-      if (data && !data.configured) {
-        setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${data.error}` }]);
-        return;
-      }
+      const handled = applyIntentResponse(data, res.ok);
+      if (handled) return;
 
-      // — বিক্রি কনফার্মেশন
-      if (res.ok && data?.intent === 'sale' && data?.match?.matched && data?.product) {
-        const p: Product = data.product;
-        const m = data.match;
-        setSaleDraft({
-          product: p,
-          size: m.size || p.sizes[0] || 'Standard',
-          color: m.color || p.colors[0]?.name || 'Default',
-          quantity: m.quantity || 1,
-          confidence: m.confidence || 'medium',
-          clarification: m.clarification,
-          alternatives: m.alternatives || [],
-          paymentMode: 'full',
-          paidAmount: '',
-          customerName: '',
-          customerPhone: '',
-        });
-        return;
-      }
-
-      // — রিস্টক কনফার্মেশন
-      if (res.ok && data?.intent === 'restock' && data?.product) {
-        const p: Product = data.product;
-        setRestockDraft({
-          product: p,
-          quantity: data.quantity || 1,
-          unitCost: data.unitCost ? String(data.unitCost) : p.costPrice ? String(p.costPrice) : '',
-          supplierOrInvoice: data.supplierOrInvoice || '',
-        });
-        return;
-      }
-
-      // — নতুন প্রোডাক্ট তৈরির ফর্ম (AI প্রি-ফিল করে)
-      if (res.ok && data?.intent === 'new-product' && data?.draft) {
-        const d = data.draft;
-        setNewProductDraft({
-          name: d.name || '',
-          category: d.category || 'shoes',
-          subCategory: d.subCategory || '',
-          price: d.price ? String(d.price) : '',
-          costPrice: d.costPrice ? String(d.costPrice) : '',
-          sizes: Array.isArray(d.sizes) ? d.sizes.join(', ') : '',
-          colors: Array.isArray(d.colors) ? d.colors.join(', ') : '',
-          stockCount: d.stockCount ? String(d.stockCount) : '0',
-          supplier: d.supplier || '',
-          description: d.description || '',
-        });
-        return;
-      }
-
-      // — AI বুঝতে পারেনি কী চায়, প্রশ্ন করে
-      if (res.ok && data?.intent === 'other' && data?.clarification) {
-        setMessages(prev => [
-          ...prev,
-          { role: 'assistant', content: `🤔 ${data.clarification}` },
-        ]);
-        return;
-      }
-
-      // ২) না হলে সাধারণ AI চ্যাট (স্ট্রিমিং)
+      // সাধারণ AI চ্যাট (স্ট্রিমিং)
       setMessages([...withUser, { role: 'assistant', content: '' }]);
       setBusy(false);
       setStreaming(true);
@@ -470,13 +586,32 @@ export default function AdminAiFab() {
 
           {/* ইনপুট */}
           <div className="p-3 border-t border-slate-100 bg-white flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={toggleRecording}
+              disabled={busy || streaming || voiceBusy}
+              title={recording ? 'রেকর্ডিং শেষ করুন' : 'মুখে বলুন — ভয়েস কমান্ড'}
+              aria-label="ভয়েস কমান্ড"
+              className={`p-2.5 rounded-md transition-colors flex-shrink-0 ${
+                recording
+                  ? 'bg-red-600 text-white animate-pulse'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+              } disabled:opacity-50`}
+            >
+              {voiceBusy ? (
+                <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+              ) : recording ? (
+                <Square className="w-4 h-4" />
+              ) : (
+                <Mic className="w-4 h-4" />
+              )}
+            </button>
             <input
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              placeholder="যেমন: JX-SH-101 42 2টি"
+              placeholder={recording ? '🎙️ শুনছি… কথা বলুন' : 'যেমন: JX-SH-101 42 2টি'}
               className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
-              disabled={busy || streaming}
+              disabled={busy || streaming || recording}
             />
             <button
               onClick={handleSend}

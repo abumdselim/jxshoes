@@ -317,3 +317,68 @@ export async function buildStoreContext(orderLimit = 25): Promise<string> {
 
   return lines.join('\n');
 }
+
+
+// ================== VOICE (Gemini অডিও ট্রান্সক্রিপশন) ==================
+/**
+ * বাংলা/ইংরেজি ভয়েস অডিও → টেক্সট। Gemini সরাসরি অডিও বুঝতে পারে।
+ * মডেল ব্যর্থ বা ব্যস্ত হলে ফেলব্যাক মডেলে যায়।
+ */
+const GEMINI_DEFAULT_MODEL = 'gemini-3.8-flash';
+const GEMINI_FALLBACK_MODEL = 'gemini-flash-latest';
+
+const TRANSCRIBE_INSTRUCTION =
+  'এই অডিওটি সাবধানে শুনো এবং হুবহু ট্রান্সক্রাইব করো। এটি বাংলা বা ইংরেজিতে একজন দোকানদারের ভয়েস কমান্ড হতে পারে (যেমন প্রোডাক্ট কোড, সংখ্যা, স্টক, বিক্রি)। বলা হয়েছে এমন শব্দ, সংখ্যা ও কোড অক্ষরে অক্ষরে লেখো। শুধু ট্রান্সক্রিপ্ট দাও — কোনো ব্যাখ্যা, উদ্ধৃতি চিহ্ন বা অতিরিক্ত লেখা নয়।';
+
+export async function transcribeAudioGemini(audioBase64: string, mimeType: string): Promise<string> {
+  const env = getCfEnv();
+  if (!env.geminiApiKey) {
+    throw new Error('ভয়েস এখনো কনফিগার করা হয়নি — Gemini API key দরকার (GEMINI_API_KEY env)');
+  }
+  const models = [env.geminiModel || GEMINI_DEFAULT_MODEL, env.geminiFallbackModel || GEMINI_FALLBACK_MODEL];
+
+  let lastErr = '';
+  for (const model of models) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 900));
+      try {
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+          {
+            method: 'POST',
+            headers: { 'x-goog-api-key': env.geminiApiKey, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: TRANSCRIBE_INSTRUCTION },
+                    { inline_data: { mime_type: mimeType, data: audioBase64 } },
+                  ],
+                },
+              ],
+              generationConfig: { temperature: 0.1, maxOutputTokens: 1200 },
+            }),
+          }
+        );
+
+        if (res.ok) {
+          const json = await res.json().catch(() => null);
+          const parts = json?.candidates?.[0]?.content?.parts || [];
+          const text = parts
+            .map((p: { text?: string }) => p.text || '')
+            .join(' ')
+            .trim()
+            .replace(/^["']+|["']+$/g, ''); // প্রান্তের উদ্ধৃতি চিহ্ন বাদ
+          if (text) return text;
+          lastErr = 'খালি ট্রান্সক্রিপ্ট';
+          break;
+        }
+        lastErr = `HTTP ${res.status}`;
+        if (![429, 500, 502, 503].includes(res.status)) break;
+      } catch (err) {
+        lastErr = err instanceof Error ? err.message : 'অজানা ত্রুটি';
+      }
+    }
+  }
+  throw new Error(`ভয়েস ট্রান্সক্রিপশন ব্যর্থ (${lastErr})`);
+}

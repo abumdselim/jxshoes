@@ -29,6 +29,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_KV_ID: ${{ secrets.CLOUDFLARE_KV_ID }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           cat > src/lib/generatedEnv.ts <<EOF
           // ⚙️ AUTO-GENERATED at build — placeholder is committed, this one is not
@@ -37,6 +38,7 @@ jobs:
             CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}",
             CLOUDFLARE_KV_ID: "${CLOUDFLARE_KV_ID}",
             CRON_SECRET: "${CRON_SECRET}",
+            GEMINI_API_KEY: "${GEMINI_API_KEY}",
           };
           EOF
           echo "generatedEnv.ts written"
