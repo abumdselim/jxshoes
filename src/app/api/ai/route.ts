@@ -570,14 +570,15 @@ async function parseIntent(payload: { message?: string }) {
       content: `তুমি দোকানের ইনভেন্টরি সহকারী। দোকানদারের মেসেজ থেকে ইচ্ছা শনাক্ত করো:
 - "sale": পণ্য বিক্রি হয়েছে ("JX-SH-001 কালো ৪২ এর ২টা গেছে")
 - "restock": আগের পণ্যের স্টক বাড়ানো/চালান এসেছে ("JX-SH-002 এ ১৫টা স্টক, কস্ট ১৬৫০", "রিস্টক করো রেড স্নিকার্স ১০টা")
-- "new-product": সম্পূর্ণ নতুন পণ্য ইনভেন্টরিতে যোগ ("নতুন প্রোডাক্ট: Nike Air Max, দাম ৫৫০০, স্টক ২০")
+- "new-product": সম্পূর্ণ নতুন পণ্য ইনভেন্টরিতে যোগ ("নতুন প্রোডাক্ট: Nike Air Max, দাম ৫৫০০", "Bata Formal Shoe যোগ করো, দাম ৪২০০")
 - "other": এসবের কোনোটাই না
 বাংলা সংখ্যা বুঝবে (২=2)। বাংলা কালারের নাম ইংরেজিতে অনুবাদ করবে (কালো=Black, লাল=Red, সাদা=White, নীল=Blue, বাদামি=Brown, ধূসর=Gray, সবুজ=Green)।
 শুধু JSON দাও:
 {"intent": "sale|restock|new-product|other", "productId": "তালিকার id বা null", "size": null, "color": null, "quantity": সংখ্যা-অথবা-null, "unitCost": সংখ্যা-অথবা-null, "supplierOrInvoice": "স্ট্রিং-অথবা-null",
 "newProduct": {"name": null, "category": "shoes|bags|accessories", "subCategory": null, "price": null, "costPrice": null, "sizes": [], "colors": [], "stockCount": null, "supplier": null, "description": null},
 "clarification": null}
-নিয়ম: productId অবশ্যই তালিকার id হতে হবে। restock/new-product-এ পরিমাণ/দাম না বলা থাকলে null দাও। নতুন পণ্যে নাম না থাকলে intent:"other" + clarification-এ বাংলায় কী জানতে চাইবেন লেখো। নতুন জুতার সাইজ না বলা থাকলে sizes:["39","40","41","42","43","44"], ব্যাগ হলে ["Standard"]।
+নিয়ম: productId অবশ্যই তালিকার id হতে হবে। restock/new-product-এ পরিমাণ/দাম না বলা থাকলে null দাও।
+গুরুত্বপূর্ণ: নতুন পণ্যের জন্য শুধু **নাম আর দাম** থাকলেই intent:"new-product" দাও — সাইজ/কালার/স্টক/সাপ্লায়ার না থাকলে সেগুলোতে null বা খালি অ্যারে দাও (সিস্টেম ডিফল্ট বসাবে), কখনোই বাড়তি তথ্য চাইবে না। intent:"other" + clarification দাও শুধু যদি নামই না থাকে বা মেসেজটা ইনভেন্টরির কাজ না হয়।
 
 প্রোডাক্ট তালিকা (id | SKU | বারকোড | নাম | ক্যাটাগরি | সাইজ | কালার | স্টক):
 ${buildCatalogContext(products)}`,
