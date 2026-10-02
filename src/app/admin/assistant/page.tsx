@@ -137,8 +137,15 @@ export default function AdminAssistantPage() {
       mr.start();
       mediaRecorderRef.current = mr;
       setRecording(true);
-    } catch {
-      setError('মাইক্রোফোন অ্যাক্সেস পাওয়া যায়নি — ব্রাউজারের অনুমতি দিন');
+    } catch (err) {
+      const name = (err as { name?: string })?.name || '';
+      if (name === 'NotAllowedError' || name === 'SecurityError') {
+        setError('মাইক্রোফোনের অনুমতি দেওয়া হয়নি — অ্যাড্রেস বারের বাঁ দিকের মাইক আইকনে ক্লিক করে "Allow" করুন, তারপর আবার চাপুন');
+      } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+        setError('কোনো মাইক্রোফোন পাওয়া যায়নি — ডিভাইস/হেডসেট চেক করুন');
+      } else {
+        setError(err instanceof Error ? err.message : 'মাইক চালু করা যায়নি');
+      }
     }
   };
 
@@ -538,10 +545,6 @@ export default function AdminAssistantPage() {
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <div>
                 <p className="font-bold">{error}</p>
-                <p className="mt-1 opacity-80">
-                  AI কনফিগার করতে: Cloudflare API টোকেনে &quot;Workers AI → Write&quot; পারমিশন
-                  যোগ করুন, তারপর ডিপ্লয় করুন।
-                </p>
               </div>
             </div>
           )}

@@ -320,8 +320,15 @@ export default function AdminAiFab() {
       mr.start();
       mediaRecorderRef.current = mr;
       setRecording(true);
-    } catch {
-      setToast({ text: '❌ মাইক্রোফোন অ্যাক্সেস পাওয়া যায়নি — ব্রাউজারের অনুমতি দিন', error: true });
+    } catch (err) {
+      const name = (err as { name?: string })?.name || '';
+      if (name === 'NotAllowedError' || name === 'SecurityError') {
+        setToast({ text: '❌ মাইক অনুমতি নেই — অ্যাড্রেস বারের মাইক আইকনে ক্লিক করে "Allow" করুন', error: true });
+      } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+        setToast({ text: '❌ কোনো মাইক্রোফোন পাওয়া যায়নি', error: true });
+      } else {
+        setToast({ text: '❌ মাইক চালু করা যায়নি', error: true });
+      }
     }
   };
 
