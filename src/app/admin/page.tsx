@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Product, Order, AIDailyBrief, AIInsights, FastMoverEntry } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
+import { TrendChart, DonutChart, BarList } from '@/components/admin/Charts';
 import {
   TrendingUp,
   Package,
@@ -122,6 +123,81 @@ export default function AdminDashboardPage() {
 
   const shoeCount = products.filter((p) => p.category === 'shoes').length;
   const bagCount = products.filter((p) => p.category === 'bags').length;
+
+  // ================== চার্ট ডেটা ==================
+  const validOrders = useMemo(() => orders.filter(o => o.status !== 'Cancelled'), [orders]);
+
+  // ৩০ দিনের দৈনিক বিক্রি সিরিজ
+  const revenueSeries = useMemo(() => {
+    const dayKey = (t: number) => new Date(t).toLocaleDateString('en-CA');
+    const startToday = new Date();
+    startToday.setHours(0, 0, 0, 0);
+    const revByDay = new Map<string, number>();
+    for (const o of validOrders) {
+      const t = new Date(o.createdAt).getTime();
+      if (t >= startToday.getTime() - 29 * 86400000) {
+        const k = dayKey(t);
+        revByDay.set(k, (revByDay.get(k) || 0) + o.total);
+      }
+    }
+    return Array.from({ length: 30 }, (_, i) => {
+      const d = new Date(startToday.getTime() - (29 - i) * 86400000);
+      const k = dayKey(d.getTime());
+      return { label: k, value: revByDay.get(k) || 0 };
+    });
+  }, [validOrders]);
+
+  // ক্যাটাগরি-ভিত্তিক আয় (জুতা / ব্যাগ / অন্যান্য)
+  const categoryRevenue = useMemo(() => {
+    const catById = new Map(products.map(p => [p.id, p.category]));
+    let shoes = 0, bags = 0, others = 0;
+    for (const o of validOrders) {
+      for (const it of o.items) {
+        const c = catById.get(it.productId);
+        const amt = it.price * it.quantity;
+        if (c === 'bags') bags += amt;
+        else if (c === 'shoes') shoes += amt;
+        else others += amt;
+      }
+    }
+    return [
+      { label: 'জুতা (Shoes)', value: Math.round(shoes), color: '#ea580c' },
+      { label: 'ব্যাগ (Bags)', value: Math.round(bags), color: '#2563eb' },
+      ...(others > 0 ? [{ label: 'অন্যান্য', value: Math.round(others), color: '#94a3b8' }] : []),
+    ].filter(x => x.value > 0);
+  }, [validOrders, products]);
+
+  // টপ ৫ প্রোডাক্ট (আয় অনুযায়ী)
+  const topProducts = useMemo(() => {
+    const byProduct = new Map<string, { name: string; revenue: number }>();
+    for (const o of validOrders) {
+      for (const it of o.items) {
+        const cur = byProduct.get(it.productId) || { name: it.name, revenue: 0 };
+        cur.revenue += it.price * it.quantity;
+        byProduct.set(it.productId, cur);
+      }
+    }
+    const prodName = new Map(products.map(p => [p.id, p.name]));
+    return Array.from(byProduct.entries())
+      .map(([id, v]) => ({ label: prodName.get(id) || v.name, value: v.revenue, display: `৳${v.revenue.toLocaleString('en-BD')}` }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }, [validOrders, products]);
+
+  // অর্ডার স্টেটাস বিভাজন
+  const statusSegments = useMemo(() => {
+    const defs: { key: Order['status']; label: string; color: string }[] = [
+      { key: 'Pending', label: 'অপেক্ষমাণ', color: '#f59e0b' },
+      { key: 'Processing', label: 'প্রসেসিং', color: '#2563eb' },
+      { key: 'Shipped', label: 'শিপড', color: '#8b5cf6' },
+      { key: 'Delivered', label: 'ডেলিভার্ড', color: '#059669' },
+      { key: 'Cancelled', label: 'বাতিল', color: '#dc2626' },
+    ];
+    return defs
+      .map(d => ({ ...d, value: orders.filter(o => o.status === d.key).length }))
+      .filter(d => d.value > 0)
+      .map(d => ({ label: d.label, value: d.value, color: d.color }));
+  }, [orders]);
 
   const handleQuickStatusChange = async (orderId: string, newStatus: Order['status']) => {
     try {
@@ -333,6 +409,59 @@ export default function AdminDashboardPage() {
               {shoeCount} জুতা, {bagCount} ব্যাগ
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* 📊 অ্যানালিটিক্স চার্ট */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* রেভিনিউ ট্রেন্ড */}
+        <div className="lg:col-span-2 bg-white rounded-md border border-slate-200/80 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">বিক্রয় ট্রেন্ড (গত ৩০ দিন)</h2>
+              <p className="text-[11px] text-slate-400 mt-0.5">দৈনিক মোট বিক্রি — পয়েন্টে হোভার করলে দিন ও টাকা দেখাবে</p>
+            </div>
+            <span className="text-xs font-bold text-slate-500">
+              মোট: ৳{revenueSeries.reduce((s2, d) => s2 + d.value, 0).toLocaleString('en-BD')}
+            </span>
+          </div>
+          <TrendChart data={revenueSeries} />
+        </div>
+
+        {/* ক্যাটাগরি ডোনাট */}
+        <div className="bg-white rounded-md border border-slate-200/80 p-6">
+          <h2 className="text-sm font-bold text-slate-900 mb-4">ক্যাটাগরির আয়-অবদান</h2>
+          {categoryRevenue.length > 0 ? (
+            <DonutChart
+              segments={categoryRevenue}
+              centerLabel="মোট আয়"
+              centerValue={`৳${categoryRevenue.reduce((s2, x) => s2 + x.value, 0).toLocaleString('en-BD')}`}
+            />
+          ) : (
+            <p className="text-xs text-slate-400 py-8 text-center">এখনো বিক্রি হয়নি</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* টপ প্রোডাক্ট */}
+        <div className="bg-white rounded-md border border-slate-200/80 p-6">
+          <h2 className="text-sm font-bold text-slate-900 mb-4">সর্বোচ্চ আয়ের প্রোডাক্ট (টপ ৫)</h2>
+          <BarList items={topProducts} />
+        </div>
+
+        {/* অর্ডার স্টেটাস */}
+        <div className="bg-white rounded-md border border-slate-200/80 p-6">
+          <h2 className="text-sm font-bold text-slate-900 mb-4">অর্ডার স্টেটাস বিভাজন</h2>
+          {statusSegments.length > 0 ? (
+            <DonutChart
+              segments={statusSegments}
+              centerLabel="মোট অর্ডার"
+              centerValue={String(orders.length)}
+            />
+          ) : (
+            <p className="text-xs text-slate-400 py-8 text-center">কোনো অর্ডার নেই</p>
+          )}
         </div>
       </div>
 
