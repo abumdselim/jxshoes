@@ -1162,93 +1162,238 @@ export async function saveDailyBrief(brief: AIDailyBrief): Promise<void> {
 /* ── মিডিয়া লাইব্রেরি — আপলোড করা কিন্তু এখনো কোনো প্রোডাক্টে যুক্ত না হওয়া ছবি ── */
 let mediaLibraryCache: string[] | null = null;
 
-export async function getMediaLibrary(): Promise<string[]> {
-  if (mediaLibraryCache) return mediaLibraryCache;
+export async function getMediaLibrary(force = false): Promise<string[]> {
+  if (!force && mediaLibraryCache) return mediaLibraryCache;
   const kv = kvApi('jx_media_library');
-  if (!kv.ok) return [];
-  try {
-    const res = await fetch(kv.url, {
-      headers: { Authorization: `Bearer ${kv.token}` },
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    const parsed = await res.json();
-    mediaLibraryCache = Array.isArray(parsed) ? parsed : [];
-    return mediaLibraryCache;
-  } catch (err) {
-    console.warn('Media library fetch warning:', err);
-    return [];
+  if (!kv.ok) throw new Error('KV credentials missing');
+  let lastErr: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(kv.url, {
+        headers: { Authorization: `Bearer ${kv.token}` },
+        cache: 'no-store',
+      });
+      if (!res.ok) throw new Error(`KV GET failed: ${res.status}`);
+      const parsed = await res.json();
+      mediaLibraryCache = Array.isArray(parsed) ? parsed : [];
+      return mediaLibraryCache;
+    } catch (err) {
+      lastErr = err;
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
+    }
   }
+  throw lastErr instanceof Error ? lastErr : new Error('Media library fetch failed');
 }
 
 export async function saveMediaLibrary(urls: string[]): Promise<void> {
-  mediaLibraryCache = urls;
   const kv = kvApi('jx_media_library');
-  if (!kv.ok) return;
-  try {
-    await fetch(kv.url, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${kv.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(urls),
-    });
-  } catch (err) {
-    console.warn('Media library save warning:', err);
+  if (!kv.ok) throw new Error('KV credentials missing');
+  let lastErr: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(kv.url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${kv.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(urls),
+      });
+      if (!res.ok) throw new Error(`KV PUT failed: ${res.status}`);
+      mediaLibraryCache = urls;
+      return;
+    } catch (err) {
+      lastErr = err;
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
+    }
   }
+  throw lastErr instanceof Error ? lastErr : new Error('Media library save failed');
 }
 
-/* ── নোটিফিকেশন — নতুন অর্ডার, কাস্টমারের অভিযোগ ও পরামর্শ ── */
-let notificationsCache: NotificationItem[] | null = null;
+/* ── নোটিফিকেশন — নতুন অর্ডার, কাস্টমারের অভিযোগ ও পরামর্শ ──
+ * প্রতিটি নোটিফিকেশন = নিজস্ব KV কী (jx_ntf_<id>)। একটি এন্ট্রি লিখলে
+ * অন্য এন্ট্রি ওভাররাইট হয় না — eventually-consistent KV-তে
+ * read-modify-write রেস এভাবেই এড়ানো হয়। নতুনগুলো আগে দেখাতে
+ * Date.now()-ভিত্তিক id (লেক্সিকোগ্রাফিক = কালানুক্রমিক)। */
+
+const NTF_PREFIX = 'jx_ntf_';
 const NOTIFICATIONS_CAP = 200;
 
-export async function getNotifications(): Promise<NotificationItem[]> {
-  if (notificationsCache) return notificationsCache;
-  const kv = kvApi('jx_notifications');
-  if (!kv.ok) return [];
+function ntfApi(id = ''): { ok: boolean; url: string; token: string } {
+  const env = getCfEnv();
+  return {
+    ok: Boolean(env.accountId && env.apiToken && env.kvId),
+    url: `https://api.cloudflare.com/client/v4/accounts/${env.accountId}/storage/kv/namespaces/${env.kvId}/values/${NTF_PREFIX}${id}`,
+    token: env.apiToken,
+  };
+}
+
+function ntfListUrl(): { ok: boolean; url: string; token: string } {
+  const env = getCfEnv();
+  return {
+    ok: Boolean(env.accountId && env.apiToken && env.kvId),
+    url: `https://api.cloudflare.com/client/v4/accounts/${env.accountId}/storage/kv/namespaces/${env.kvId}/keys?prefix=${NTF_PREFIX}&limit=200`,
+    token: env.apiToken,
+  };
+}
+
+function parseNotification(raw: unknown, id: string): NotificationItem | null {
   try {
-    const res = await fetch(kv.url, {
-      headers: { Authorization: `Bearer ${kv.token}` },
-      cache: 'no-store',
-    });
-    if (!res.ok) return [];
-    const parsed = await res.json();
-    notificationsCache = Array.isArray(parsed) ? parsed : [];
-    return notificationsCache;
-  } catch (err) {
-    console.warn('Notifications fetch warning:', err);
-    return [];
+    const n = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    if (!n || typeof n !== 'object' || !n.title) return null;
+    return {
+      id: n.id || id,
+      type: n.type === 'order' || n.type === 'complaint' || n.type === 'feedback' ? n.type : 'feedback',
+      title: String(n.title),
+      message: String(n.message || ''),
+      read: Boolean(n.read),
+      createdAt: String(n.createdAt || ''),
+    };
+  } catch {
+    return null;
   }
 }
 
-export async function saveNotifications(list: NotificationItem[]): Promise<void> {
-  notificationsCache = list.slice(0, NOTIFICATIONS_CAP);
-  const kv = kvApi('jx_notifications');
-  if (!kv.ok) return;
-  try {
-    await fetch(kv.url, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${kv.token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(notificationsCache),
-    });
-  } catch (err) {
-    console.warn('Notifications save warning:', err);
+async function ntfFetchJson(url: string, token: string, init?: RequestInit): Promise<unknown> {
+  let lastErr: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        cache: 'no-store',
+        ...init,
+        headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) },
+      });
+      if (!res.ok) throw new Error(`KV request failed: ${res.status}`);
+      return await res.json();
+    } catch (err) {
+      lastErr = err;
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
+    }
   }
+  throw lastErr instanceof Error ? lastErr : new Error('KV request failed');
+}
+
+/** সব নোটিফিকেশন, নতুন থেকে পুরনো ক্রমে। ফেইল হলে থ্রো — নীরব [] নয়। */
+export async function getNotifications(): Promise<NotificationItem[]> {
+  const list = ntfListUrl();
+  if (!list.ok) throw new Error('KV credentials missing');
+
+  const keysRes = (await ntfFetchJson(list.url, list.token)) as { result?: { name: string }[] };
+  const names = (keysRes.result || []).map(k => k.name);
+  if (names.length === 0) return [];
+
+  const values = await Promise.all(
+    names.map(name => ntfFetchJson(list.url.split('?')[0].replace('/keys', '/values') + '/' + name, list.token).catch(() => null))
+  );
+
+  const items: NotificationItem[] = [];
+  names.forEach((name, i) => {
+    const parsed = parseNotification(values[i], name.slice(NTF_PREFIX.length));
+    if (parsed) items.push(parsed);
+  });
+
+  // লেক্সিকোগ্রাফিক = কালানুক্রমিক — রিভার্স করলেই নতুন আগে
+  return items.reverse();
+}
+
+/** অপঠিত সংখ্যা (সাইডবার ব্যাজের জন্য হালকা কল) */
+export async function countUnreadNotifications(): Promise<number> {
+  return (await getNotifications()).filter(n => !n.read).length;
+}
+
+/** একটি নোটিফিকেশন সেভ — নিজের কী, অন্য কোনো এন্ট্রিতে হাত যায় না */
+export async function putNotification(item: NotificationItem): Promise<void> {
+  const kv = ntfApi(item.id);
+  if (!kv.ok) throw new Error('KV credentials missing');
+  await ntfFetchJson(kv.url, kv.token, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify(item),
+  });
+
+  // ক্যাপ — ২০০-এর বেশি হলে পুরনোগুলো (ক্ষুদ্রতম id) মুছে দেয়
+  const list = ntfListUrl();
+  if (list.ok) {
+    const keysRes = (await fetch(list.url, { cache: 'no-store', headers: { Authorization: `Bearer ${kv.token}` } }).then(r => r.json()).catch(() => null)) as
+      | { result?: { name: string }[] }
+      | null;
+    const names = (keysRes?.result || []).map(k => k.name);
+    if (names.length > NOTIFICATIONS_CAP) {
+      const oldest = names.slice(0, names.length - NOTIFICATIONS_CAP);
+      await Promise.all(
+        oldest.map(name =>
+          fetch(name.replace(`/keys/${NTF_PREFIX}`, `/values/${NTF_PREFIX}`), {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${kv.token}` },
+          }).catch(() => {})
+        )
+      );
+    }
+  }
+}
+
+/** এক/একাধিক নোটিফিকেশন পড়া-হয়েছে চিহ্নিত করা (প্রতিটি নিজের কী-তে) */
+export async function markNotificationsRead(ids: string[]): Promise<void> {
+  await Promise.all(
+    ids.map(async id => {
+      const kv = ntfApi(id);
+      if (!kv.ok) return;
+      try {
+        const raw = await fetch(kv.url, { headers: { Authorization: `Bearer ${kv.token}` }, cache: 'no-store' }).then(r => r.text());
+        const parsed = parseNotification(raw, id);
+        if (!parsed || parsed.read) return;
+        await ntfFetchJson(kv.url, kv.token, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+          body: JSON.stringify({ ...parsed, read: true }),
+        });
+      } catch (err) {
+        console.warn('Notification mark-read warning:', err);
+      }
+    })
+  );
+}
+
+/** এক/একাধিক নোটিফিকেশন মুছা */
+export async function deleteNotifications(ids: string[]): Promise<void> {
+  await Promise.all(
+    ids.map(async id => {
+      const kv = ntfApi(id);
+      if (!kv.ok) return;
+      try {
+        await fetch(kv.url, { method: 'DELETE', headers: { Authorization: `Bearer ${kv.token}` } });
+      } catch (err) {
+        console.warn('Notification delete warning:', err);
+      }
+    })
+  );
+}
+
+/** সব নোটিফিকেশনের id */
+export async function listNotificationIds(): Promise<string[]> {
+  const list = ntfListUrl();
+  if (!list.ok) throw new Error('KV credentials missing');
+  const keysRes = (await ntfFetchJson(list.url, list.token)) as { result?: { name: string }[] };
+  return (keysRes.result || []).map(k => k.name.slice(NTF_PREFIX.length));
 }
 
 export async function addNotification(
   n: Omit<NotificationItem, 'id' | 'read' | 'createdAt'>
-): Promise<void> {
-  const current = await getNotifications();
+): Promise<NotificationItem> {
   const item: NotificationItem = {
     ...n,
     id: `ntf-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     read: false,
     createdAt: new Date().toISOString(),
   };
-  await saveNotifications([item, ...current]);
+  await putNotification(item);
+  return item;
 }
+
+// ================== CUSTOMERS (কাস্টমার ডেটাবেজ) ==================
+
+

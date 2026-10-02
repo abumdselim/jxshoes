@@ -120,7 +120,7 @@ export default function OrderSuccessPage() {
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href="/"
+              href="/shop"
               className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-sm shadow-md transition-all"
             >
               আরো শপিং করুন

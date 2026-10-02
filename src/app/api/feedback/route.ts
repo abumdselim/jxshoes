@@ -23,7 +23,10 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: 'পাঠানো যায়নি — একটু পরে আবার চেষ্টা করুন' }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? `পাঠানো যায়নি — ${err.message}` : 'পাঠানো যায়নি' },
+      { status: 500 }
+    );
   }
 }

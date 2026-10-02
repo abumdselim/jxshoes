@@ -6,7 +6,7 @@
  * - টোকেনে "Workers AI → Write" পারমিশন থাকতে হবে (রান এন্ডপয়েন্টের জন্য রিকোয়ার্ড)
  * - প্রাইমারি মডেল: llama-3.3-70b-fast (দ্রুত, সরাসরি কনটেন্ট, চমৎকার বাংলা —
  *   ২০২৬-১০-০২ আসল টোকেন দিয়ে ভেরিফাই করা)
- * - ফেলব্যাক: gemma-4-26b (সেরা বাংলা, কিন্তু রিজনিং মডেল — আগে "চিন্তা" করে, ধীর)
+ * - ফেলব্যাক: llama-4-scout-17b (দ্রুত MoE, ভালো বাংলা — রিজনিং-বিলম্ব নেই)
  * - AI_TEXT_MODEL / AI_FALLBACK_MODEL env দিয়ে মডেল পরিবর্তনযোগ্য
  *
  * ⚠️ রেসপন্স শেপ: Workers AI-এর নেটিভ এন্ডপয়েন্ট এখন OpenAI-স্টাইল শেপও দেয় —
@@ -32,7 +32,7 @@ interface RunAIOptions {
 }
 
 export const AI_PRIMARY_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
-export const AI_FALLBACK_MODEL = '@cf/google/gemma-4-26b-a4b-it';
+export const AI_FALLBACK_MODEL = '@cf/meta/llama-4-scout-17b-16e-instruct';
 
 export function isAIConfigured(): boolean {
   const env = getCfEnv();

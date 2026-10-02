@@ -510,7 +510,7 @@ export default function AdminProductsPage() {
 
       {/* Add / Edit Product Modal — হেডার/ফুটার স্টিকি, শুধু বডি স্ক্রল হয়; মোবাইলে বটম-শিট */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm !mt-0">
           <div className="min-h-full flex items-end sm:items-center justify-center sm:p-6">
             <div className="bg-white w-full max-w-2xl rounded-t-md sm:rounded-md border border-slate-200 shadow-xl flex flex-col max-h-[92vh] sm:max-h-[88vh] overflow-hidden">
               <div className="flex items-center justify-between border-b border-slate-100 px-5 sm:px-8 py-4 flex-shrink-0 bg-white rounded-t-md">
@@ -894,7 +894,7 @@ export default function AdminProductsPage() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 sm:pt-6">
+                <div className="flex items-center gap-2 md:pt-6">
                   <input
                     type="checkbox"
                     id="inStockCheck"
@@ -907,7 +907,7 @@ export default function AdminProductsPage() {
                   </label>
                 </div>
 
-                <div className="flex items-center gap-2 sm:pt-6">
+                <div className="flex items-center gap-2 md:pt-6">
                   <input
                     type="checkbox"
                     id="featuredCheck"

@@ -220,6 +220,7 @@ export default function AdminGalleryPage() {
       body: JSON.stringify({ urls: [url] }),
     });
     if (res.ok) setLibrary(prev => prev.filter(u => u !== url));
+    else alert('মুছা যায়নি — আবার চেষ্টা করুন।');
   };
 
   if (loading) {

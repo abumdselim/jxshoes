@@ -84,9 +84,9 @@ export default function Footer() {
           <div>
             <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">ক্যাটাগরি</h4>
             <ul className="space-y-2.5 text-sm text-slate-400">
-              <li><a href="/?category=shoes" className="hover:text-orange-400 transition-colors">লেদার জুতা ও স্নিকার্স</a></li>
-              <li><a href="/?category=bags" className="hover:text-orange-400 transition-colors">অফিসিয়াল ও ট্রাভেল ব্যাগ</a></li>
-              <li><a href="/" className="hover:text-orange-400 transition-colors">নতুন আগমন (New Arrivals)</a></li>
+              <li><a href="/shop?category=shoes" className="hover:text-orange-400 transition-colors">লেদার জুতা ও স্নিকার্স</a></li>
+              <li><a href="/shop?category=bags" className="hover:text-orange-400 transition-colors">অফিসিয়াল ও ট্রাভেল ব্যাগ</a></li>
+              <li><a href="/shop" className="hover:text-orange-400 transition-colors">নতুন আগমন (New Arrivals)</a></li>
             </ul>
           </div>
 

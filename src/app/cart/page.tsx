@@ -30,7 +30,7 @@ export default function CartPage() {
             <h2 className="text-xl font-bold text-slate-800">আপনার ব্যাগটি এখন খালি</h2>
             <p className="text-sm text-slate-500 mt-2">নতুন কালেকশন থেকে আপনার পছন্দের জুতা বা ব্যাগ যোগ করুন।</p>
             <a
-              href="/"
+              href="/shop"
               className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-orange-600 text-white font-bold text-sm hover:bg-orange-700 transition-all shadow-md"
             >
               কালেকশন দেখুন

@@ -146,13 +146,15 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         {/* Brand Header — সবসময় উপরে ফিক্সড */}
         <div className="p-5 pb-4 border-b border-slate-800 flex-shrink-0">
           <div className="flex items-center justify-between gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/shopkeeper-logo.png"
-              alt="Shopkeeper"
-              className="w-full max-w-[200px] h-auto"
-              style={{ mixBlendMode: 'screen' }}
-            />
+            <a href="/admin" aria-label="Shopkeeper হোম" className="flex-1 min-w-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/shopkeeper-logo.png"
+                alt="Shopkeeper"
+                className="w-full max-w-[200px] h-auto"
+                style={{ mixBlendMode: 'screen' }}
+              />
+            </a>
             {onCloseMobile && (
               <button
                 onClick={onCloseMobile}
@@ -197,7 +199,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       {/* Bottom Storefront return — সবসময় নিচে ফিক্সড */}
       <div className="p-4 border-t border-slate-800 flex-shrink-0">
         <a
-          href="/"
+          href="/shop"
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-between w-full px-4 py-3 rounded-md bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors"

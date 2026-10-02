@@ -25,6 +25,7 @@ jobs:
 
       - name: Generate runtime env (bakes secrets into edge bundle)
         env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_KV_ID: ${{ secrets.CLOUDFLARE_KV_ID }}
@@ -34,7 +35,8 @@ jobs:
           cat > src/lib/generatedEnv.ts <<EOF
           // ⚙️ AUTO-GENERATED at build — placeholder is committed, this one is not
           export const GENERATED_ENV: Record<string, string> = {
-            CLOUDFLARE_ACCOUNT_ID: "${CLOUDFLARE_ACCOUNT_ID}",
+          ADMIN_PASSWORD: "${ADMIN_PASSWORD}",
+          CLOUDFLARE_ACCOUNT_ID: "${CLOUDFLARE_ACCOUNT_ID}",
             CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}",
             CLOUDFLARE_KV_ID: "${CLOUDFLARE_KV_ID}",
             CRON_SECRET: "${CRON_SECRET}",

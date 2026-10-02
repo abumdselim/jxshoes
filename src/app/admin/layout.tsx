@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/AdminSidebar';
 import AdminAiFab from '@/components/AdminAiFab';
-import { Menu, Search } from 'lucide-react';
+import { Menu, Search, Download } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -14,20 +14,33 @@ export default function AdminLayout({
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [headerQuery, setHeaderQuery] = useState('');
+  const [installEvt, setInstallEvt] = useState<{
+    prompt: () => Promise<void>;
+    userChoice: Promise<{ outcome: string }>;
+  } | null>(null);
   const router = useRouter();
 
-  // ড্রয়ার খোলা থাকলে পেছনের পেজ স্ক্রল বন্ধ + Escape-এ বন্ধ
+  // PWA: service worker রেজিস্টার + ইনস্টল প্রম্পট ধরা
   useEffect(() => {
-    document.body.style.overflow = mobileSidebarOpen ? 'hidden' : '';
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMobileSidebarOpen(false);
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+    const onPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallEvt(e as unknown as { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> });
     };
-    if (mobileSidebarOpen) window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [mobileSidebarOpen]);
+    window.addEventListener('beforeinstallprompt', onPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', onPrompt);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installEvt) return;
+    await installEvt.prompt();
+    await installEvt.userChoice;
+    setInstallEvt(null);
+  };
+
+  // ড্রয়ার খোলা থাকলে পেছনের পেজ স্ক্রল বন্ধ + Escape-এ বন্ধ
 
   const goToSearch = () => {
     const q = headerQuery.trim();
@@ -78,14 +91,16 @@ export default function AdminLayout({
             </button>
           </div>
 
-          {/* লোগো — হেডারের একদম মাঝখানে */}
+          {/* লোগো — হেডারের একদম মাঝখানে; ক্লিক করলে ড্যাশবোর্ডে ফেরে */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <a href="/admin" aria-label="Shopkeeper হোম">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/shopkeeper-logo-orange.png"
                 alt="Shopkeeper"
                 className="h-8 w-auto"
               />
+            </a>
           </div>
 
           <div className="flex items-center gap-1">
@@ -96,6 +111,16 @@ export default function AdminLayout({
             >
               <Search className="w-5 h-5" />
             </button>
+            {installEvt && (
+              <button
+                onClick={handleInstall}
+                aria-label="অ্যাপ ইনস্টল করুন"
+                title="অ্যাপ ইনস্টল করুন"
+                className="p-2 rounded-md text-orange-600 hover:bg-orange-50"
+              >
+                <Download className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </header>
 

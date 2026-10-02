@@ -10,6 +10,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   RotateCcw,
@@ -321,7 +322,11 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
 
   const normDeg = (d: number) => ((d % 360) + 540) % 360 - 180;
 
-  return (
+  // প্যারেন্ট চেইনের space-y margin / backdrop-filter fixed এলিমেন্টকে সরিয়ে
+  // ফেলতে পারে — তাই এডিটরকে body-তে পোর্টাল করা হয় (সবসময় পুরো ভিউপোর্ট জুড়ে)।
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-sm flex flex-col">
       {/* হেডার */}
       <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900 border-b border-white/10 flex-shrink-0">
@@ -603,6 +608,7 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
           <p className="text-[11px] text-red-300">{saveError}</p>
         </div>
       )}
-    </div>
+    </div>,
+    document.body
   );
 }

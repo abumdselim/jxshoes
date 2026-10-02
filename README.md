@@ -71,6 +71,7 @@ Deploys automatically: every push to `main` runs
 | `CLOUDFLARE_KV_ID` | KV namespace id used as the data store |
 | `CRON_SECRET` | Shared secret between the report Worker and `/api/cron/report` |
 | `GEMINI_API_KEY` | Google Gemini key for voice transcription |
+| `ADMIN_PASSWORD` | /admin প্যানেলের পাসওয়ার্ড সুরক্ষা |
 
 ### Cron worker (optional — email reports)
 
@@ -119,7 +120,9 @@ workers/
 ## 🔐 Security Notes
 
 - The admin panel is intentionally unlinked from the storefront; access it by
-  direct URL. *(Adding authentication is recommended before exposing it.)*
+  direct URL. It is password-protected: `/admin` requires a login at `/login`
+  (middleware + `sk_admin` cookie), and the password is configurable via the
+  `ADMIN_PASSWORD` secret — change it and redeploy to rotate.
 - All third-party credentials live in GitHub repository secrets / Cloudflare —
   never committed. `.env` is git-ignored.
 - Media uploads are proxied through `/api/media/*` so storage stays private.

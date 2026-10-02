@@ -35,20 +35,21 @@ export default function MobileBottomNav() {
   const handleSearchSubmit = (keyword?: string) => {
     const q = (keyword !== undefined ? keyword : searchQuery).trim();
     if (q) {
-      router.push(`/?q=${encodeURIComponent(q)}`);
+      router.push(`/shop?q=${encodeURIComponent(q)}`);
     } else {
-      router.push('/');
+      router.push('/shop');
     }
     setIsSearchModalOpen(false);
     setSearchQuery('');
   };
 
-  // If in admin dashboard, product detail (which has its own sticky CTA), or checkout, hide bottom nav
+  // On the marketing landing page, admin dashboard, product detail (which has its own sticky CTA), or checkout, hide bottom nav
+  const isLanding = pathname === '/';
   const isAdmin = pathname.startsWith('/admin');
   const isProduct = pathname.startsWith('/product');
   const isCheckout = pathname.startsWith('/checkout');
 
-  if (isAdmin || isProduct || isCheckout) return null;
+  if (isLanding || isAdmin || isProduct || isCheckout) return null;
 
   return (
     <>
@@ -130,7 +131,7 @@ export default function MobileBottomNav() {
         <div className="grid grid-cols-5 items-center max-w-md mx-auto">
           {/* Tab 1: Home */}
           <a
-            href="/"
+            href="/shop"
             className={`flex flex-col items-center justify-center gap-1 py-1 rounded-xl transition-all relative ${
               pathname === '/'
                 ? 'text-orange-600 font-extrabold'
@@ -146,7 +147,7 @@ export default function MobileBottomNav() {
 
           {/* Tab 2: Collections / Catalog */}
           <a
-            href="/#catalog"
+            href="/shop#catalog"
             className="flex flex-col items-center justify-center gap-1 py-1 rounded-xl text-slate-500 hover:text-orange-600 transition-colors"
           >
             <LayoutGrid className="w-5 h-5" />

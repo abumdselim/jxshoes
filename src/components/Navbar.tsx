@@ -35,9 +35,9 @@ export default function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
     } else {
-      router.push('/');
+      router.push('/shop');
     }
   };
 
@@ -47,7 +47,7 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group">
+          <a href="/shop" className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0 group">
             <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-orange-600 flex items-center justify-center text-white font-extrabold text-xl sm:text-2xl shadow-md group-hover:scale-105 transition-transform">
               SK
             </div>
@@ -63,9 +63,9 @@ export default function Navbar() {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8 font-medium text-slate-700">
-            <a href="/" className="hover:text-orange-600 transition-colors">হোম</a>
-            <a href="/?category=shoes" className="hover:text-orange-600 transition-colors">জুতা (Shoes)</a>
-            <a href="/?category=bags" className="hover:text-orange-600 transition-colors">ব্যাগ (Bags)</a>
+            <a href="/shop" className="hover:text-orange-600 transition-colors">হোম</a>
+            <a href="/shop?category=shoes" className="hover:text-orange-600 transition-colors">জুতা (Shoes)</a>
+            <a href="/shop?category=bags" className="hover:text-orange-600 transition-colors">ব্যাগ (Bags)</a>
           </nav>
 
           {/* Search bar */}
@@ -153,7 +153,7 @@ export default function Navbar() {
           <div className="md:hidden border-t border-slate-100 py-3 px-3 space-y-2 bg-white">
             <div className="flex flex-col space-y-1 font-medium">
               <a
-                href="/"
+                href="/shop"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
               >
@@ -167,7 +167,7 @@ export default function Navbar() {
               </a>
 
               <a
-                href="/?category=shoes"
+                href="/shop?category=shoes"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
               >
@@ -181,7 +181,7 @@ export default function Navbar() {
               </a>
 
               <a
-                href="/?category=bags"
+                href="/shop?category=bags"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 text-slate-800 transition-colors"
               >

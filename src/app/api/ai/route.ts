@@ -119,14 +119,14 @@ async function handleChat(body: { messages?: { role: string; content: string }[]
 
   const history = (body.messages || [])
     .filter(m => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
-    .slice(-12)
+    .slice(-10)
     .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
   if (history.length === 0) {
     return NextResponse.json({ error: 'মেসেজ খালি' }, { status: 400 });
   }
 
-  const context = await buildStoreContext(25);
+  const context = await buildStoreContext(15);
   const system: AIMessage = {
     role: 'system',
     content: `তুমি "Shopkeeper" দোকানের নিজস্ব AI অ্যাসিস্ট্যান্ট — দোকানের মালিকের বিশ্বস্ত ব্যবসায়িক সহকারী। সব উত্তর অবশ্যই সহজ কিন্তু ভদ্র ও পেশাদার বাংলায়।
@@ -135,6 +135,8 @@ async function handleChat(body: { messages?: { role: string; content: string }[]
 - ভাষা মার্জিত ও কর্পোরেট মানের রাখবে; 'মালিক সাহেব', 'সাহেব', 'ভাই' জাতীয় কোনো সম্বোধন করবে না — শুধু 'আপনি' ব্যবহার করবে।
 - শুধু নিচের আসল ডেটা থেকে উত্তর দাও; ডেটায় যা নেই সেটা ধরে না-ও বলবে না — বরং সৎভাবে বলবে তথ্যটা পাওয়া যায়নি।
 - সংখ্যা (সেলস, স্টক, দাম) হুবহু ডেটা থেকে দিবে।
+- প্রশ্নের সাথে সম্পর্কিত তথ্যই শুধু ব্যবহার করবে — অপ্রাসঙ্গিক ডেটার তালিকা গুনে দেখাবে না।
+- প্রশ্ন অস্পষ্ট হলে এক লাইনে স্পষ্টীকরণ চাইবে; জেনেরিক উত্তর দেবে না।
 - উত্তর সংক্ষিপ্ত ও কাজের হতে হবে; দরকার হলে ছোট বুলেট ব্যবহার করবে।
 
 দোকানের আসল ডেটা:
@@ -145,7 +147,7 @@ ${context}`,
 
   if (body.stream) {
     try {
-      const stream = await runAIStream(messages, { maxTokens: 2200, temperature: 0.5 });
+      const stream = await runAIStream(messages, { maxTokens: 1800, temperature: 0.35 });
       return new Response(stream, {
         headers: {
           'Content-Type': 'text/event-stream; charset=utf-8',
@@ -161,7 +163,7 @@ ${context}`,
   }
 
   try {
-    const reply = await runAI(messages, { maxTokens: 2200, temperature: 0.5 });
+    const reply = await runAI(messages, { maxTokens: 1800, temperature: 0.35 });
     return NextResponse.json({ reply, configured: true });
   } catch (error) {
     return NextResponse.json(

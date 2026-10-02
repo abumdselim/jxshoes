@@ -134,7 +134,7 @@ export default function CheckoutPage() {
           <h2 className="text-2xl font-bold text-slate-800">চেকআউট করার জন্য কোনো পণ্য নেই!</h2>
           <p className="text-sm text-slate-500 mt-2">দয়া করে কার্টে জুতা বা ব্যাগ যোগ করুন।</p>
           <a
-            href="/"
+            href="/shop"
             className="mt-6 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-orange-600 text-white font-bold text-sm"
           >
             শপ ব্রাউজ করুন

@@ -77,7 +77,7 @@ export default function ProductDetailPage() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 py-20 text-center">
           <p className="text-xl font-bold text-slate-800">প্রোডাক্টটি খুঁজে পাওয়া যায়নি!</p>
-          <a href="/" className="mt-4 inline-flex items-center gap-2 text-orange-600 font-semibold text-sm">
+          <a href="/shop" className="mt-4 inline-flex items-center gap-2 text-orange-600 font-semibold text-sm">
             <ArrowLeft className="w-4 h-4" /> হোমপেইজে ফিরে যান
           </a>
         </div>
@@ -106,9 +106,9 @@ export default function ProductDetailPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-1 pb-24 md:pb-10">
         {/* Breadcrumb */}
         <div className="mb-4 sm:mb-6 flex items-center gap-2 text-xs font-medium text-slate-500 overflow-x-auto whitespace-nowrap">
-          <a href="/" className="hover:text-orange-600">হোম</a>
+          <a href="/shop" className="hover:text-orange-600">হোম</a>
           <span>/</span>
-          <a href={`/?category=${product.category}`} className="hover:text-orange-600 capitalize">
+          <a href={`/shop?category=${product.category}`} className="hover:text-orange-600 capitalize">
             {product.category === 'shoes' ? 'জুতা (Shoes)' : 'ব্যাগ (Bags)'}
           </a>
           <span>/</span>
