@@ -88,7 +88,7 @@ export default function AdminAssistantPage() {
       {/* হেডার */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-600/30">
+          <div className="w-11 h-11 rounded-2xl bg-orange-600 flex items-center justify-center shadow-lg shadow-orange-600/30">
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
@@ -117,7 +117,7 @@ export default function AdminAssistantPage() {
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 bg-slate-50/60">
           {messages.length === 0 && (
             <div className="text-center space-y-5 py-12">
-              <div className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center shadow-xl shadow-orange-600/30">
+              <div className="w-16 h-16 mx-auto rounded-3xl bg-orange-600 flex items-center justify-center shadow-xl shadow-orange-600/30">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <div>
@@ -149,7 +149,7 @@ export default function AdminAssistantPage() {
           {messages.map((m, i) => (
             <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {m.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center flex-shrink-0 shadow-md">
+                <div className="w-8 h-8 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               )}

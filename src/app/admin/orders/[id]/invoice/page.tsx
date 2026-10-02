@@ -136,7 +136,7 @@ export default function InvoicePage({
         >
 
           {/* ── Header band ── */}
-          <div className="bg-gradient-to-r from-orange-600 to-orange-500 px-8 py-6 text-white">
+          <div className="bg-orange-600 px-8 py-6 text-white">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3 mb-1">

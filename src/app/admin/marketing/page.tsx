@@ -174,7 +174,7 @@ export default function AdminMarketingPage() {
                 type="button"
                 onClick={generateBannerCopy}
                 disabled={aiBannerLoading}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-slate-900 to-slate-700 hover:opacity-90 text-white text-xs font-bold shadow-md transition-all disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all disabled:opacity-60"
               >
                 {aiBannerLoading ? (
                   <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />

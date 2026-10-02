@@ -768,7 +768,7 @@ export default function AdminProductsPage() {
                     type="button"
                     onClick={generateDescription}
                     disabled={aiDescLoading}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-orange-600 to-amber-500 text-white text-[10px] font-black shadow-md shadow-orange-600/25 hover:opacity-90 disabled:opacity-60 transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600 text-white text-[10px] font-black shadow-md shadow-orange-600/25 hover:opacity-90 disabled:opacity-60 transition-all"
                   >
                     {aiDescLoading ? (
                       <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />

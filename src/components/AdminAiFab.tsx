@@ -376,7 +376,7 @@ export default function AdminAiFab() {
         className={`fixed bottom-6 right-5 sm:right-8 z-40 group flex items-center gap-2 rounded-full shadow-2xl transition-all ${
           open
             ? 'bg-slate-900 text-white px-5 py-3.5'
-            : 'bg-gradient-to-r from-orange-600 to-amber-500 text-white px-5 py-3.5 hover:scale-105 shadow-orange-600/40'
+            : 'bg-orange-600 text-white px-5 py-3.5 hover:scale-105 shadow-orange-600/40'
         }`}
         aria-label="AI কে বলুন"
       >
@@ -394,7 +394,7 @@ export default function AdminAiFab() {
           {/* হেডার */}
           <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-orange-600 flex items-center justify-center">
                 <Bot className="w-4 h-4" />
               </div>
               <div>
@@ -499,7 +499,7 @@ export default function AdminAiFab() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
             {/* হেডার */}
-            <div className="bg-gradient-to-r from-orange-600 to-amber-500 text-white px-6 py-4 flex items-center justify-between">
+            <div className="bg-orange-600 text-white px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <ShoppingBag className="w-5 h-5" />
                 <div>
@@ -738,7 +738,7 @@ export default function AdminAiFab() {
       {restockDraft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
-            <div className="bg-gradient-to-r from-emerald-600 to-teal-500 text-white px-6 py-4 flex items-center justify-between">
+            <div className="bg-emerald-600 text-white px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Plus className="w-5 h-5" />
                 <div>
@@ -826,7 +826,7 @@ export default function AdminAiFab() {
       {newProductDraft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5" />
                 <div>

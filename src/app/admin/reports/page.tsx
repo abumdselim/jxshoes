@@ -188,7 +188,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
           <button
             onClick={() => generate('monthly')}
             disabled={generating !== null}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-amber-500 hover:opacity-90 text-white text-xs font-bold shadow-lg shadow-orange-600/30 transition-all disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-lg shadow-orange-600/30 transition-all disabled:opacity-60"
           >
             {generating === 'monthly' ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

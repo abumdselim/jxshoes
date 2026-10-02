@@ -32,26 +32,26 @@ type IconComponent = React.ComponentType<{ className?: string }>;
 
 interface CatVisual {
   Icon: IconComponent;
-  gradient: string;
+  solid: string;
   shadow: string;
 }
 
 /** ক্যাটাগরির নাম/প্যারেন্ট টাইপ থেকে আইকন + গ্রেডিয়েন্ট (ক্রম গুরুত্বপূর্ণ — আগের ম্যাচ জেতে) */
 function getCategoryVisual(cat: CategoryItem): CatVisual {
   const n = cat.name;
-  if (/loafer|লোফার|moccasin/i.test(n)) return { Icon: Footprints, gradient: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/30' };
-  if (/sneaker|স্নিকার্স|sports|স্পোর্টস/i.test(n)) return { Icon: Zap, gradient: 'from-orange-500 to-red-600', shadow: 'shadow-orange-500/30' };
-  if (/formal|ফর্মাল|oxford/i.test(n)) return { Icon: Crown, gradient: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/30' };
-  if (/boot|বুট|hiking|হাইকিং/i.test(n)) return { Icon: Mountain, gradient: 'from-emerald-600 to-teal-700', shadow: 'shadow-emerald-500/30' };
-  if (/sandal|স্যাান্ডেল|স্যান্ডেল|চটি|slipper/i.test(n)) return { Icon: Sun, gradient: 'from-yellow-500 to-amber-600', shadow: 'shadow-yellow-500/30' };
-  if (/laptop|office|ল্যাপটপ|অফিস/i.test(n)) return { Icon: Briefcase, gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/30' };
-  if (/travel|gym|ট্রাভেল|জিম|ডাফেল/i.test(n)) return { Icon: Luggage, gradient: 'from-teal-500 to-cyan-600', shadow: 'shadow-teal-500/30' };
-  if (/backpack|ব্যাকপ্যাক/i.test(n)) return { Icon: Backpack, gradient: 'from-rose-500 to-pink-600', shadow: 'shadow-rose-500/30' };
+  if (/loafer|লোফার|moccasin/i.test(n)) return { Icon: Footprints, solid: 'bg-amber-600', shadow: 'shadow-amber-500/30' };
+  if (/sneaker|স্নিকার্স|sports|স্পোর্টস/i.test(n)) return { Icon: Zap, solid: 'bg-orange-600', shadow: 'shadow-orange-500/30' };
+  if (/formal|ফর্মাল|oxford/i.test(n)) return { Icon: Crown, solid: 'bg-violet-600', shadow: 'shadow-violet-500/30' };
+  if (/boot|বুট|hiking|হাইকিং/i.test(n)) return { Icon: Mountain, solid: 'bg-emerald-700', shadow: 'shadow-emerald-500/30' };
+  if (/sandal|স্যাান্ডেল|স্যান্ডেল|চটি|slipper/i.test(n)) return { Icon: Sun, solid: 'bg-yellow-500', shadow: 'shadow-yellow-500/30' };
+  if (/laptop|office|ল্যাপটপ|অফিস/i.test(n)) return { Icon: Briefcase, solid: 'bg-indigo-600', shadow: 'shadow-blue-500/30' };
+  if (/travel|gym|ট্রাভেল|জিম|ডাফেল/i.test(n)) return { Icon: Luggage, solid: 'bg-teal-600', shadow: 'shadow-teal-500/30' };
+  if (/backpack|ব্যাকপ্যাক/i.test(n)) return { Icon: Backpack, solid: 'bg-rose-600', shadow: 'shadow-rose-500/30' };
 
   // নামে না মিললে প্যারেন্ট টাইপ দিয়ে ডিফল্ট
-  if (cat.parentType === 'bags') return { Icon: ShoppingBag, gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-500/30' };
-  if (cat.parentType === 'accessories') return { Icon: Watch, gradient: 'from-violet-500 to-fuchsia-600', shadow: 'shadow-violet-500/30' };
-  return { Icon: Footprints, gradient: 'from-orange-500 to-amber-600', shadow: 'shadow-orange-500/30' };
+  if (cat.parentType === 'bags') return { Icon: ShoppingBag, solid: 'bg-blue-600', shadow: 'shadow-blue-500/30' };
+  if (cat.parentType === 'accessories') return { Icon: Watch, solid: 'bg-fuchsia-600', shadow: 'shadow-violet-500/30' };
+  return { Icon: Footprints, solid: 'bg-orange-600', shadow: 'shadow-orange-500/30' };
 }
 
 export default function AdminCategoriesPage() {
@@ -150,7 +150,7 @@ export default function AdminCategoriesPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {categories.map((cat) => {
-            const { Icon, gradient, shadow } = getCategoryVisual(cat);
+            const { Icon, solid, shadow } = getCategoryVisual(cat);
             return (
               <div
                 key={cat.id}
@@ -159,7 +159,7 @@ export default function AdminCategoriesPage() {
                 <div className="flex items-center gap-3.5">
                   {/* মডার্ন আইকন টাইল — ছবির বদলে */}
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg ${shadow} flex-shrink-0`}
+                    className={`w-16 h-16 rounded-2xl ${solid} flex items-center justify-center shadow-lg ${shadow} flex-shrink-0`}
                   >
                     <Icon className="w-8 h-8 text-white" />
                   </div>

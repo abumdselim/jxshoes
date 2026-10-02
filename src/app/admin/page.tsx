@@ -151,8 +151,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* AI গ্রিটিং + ডেইলি ব্রিফ */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-orange-950 text-white p-6 sm:p-8 shadow-xl">
-        <div className="absolute -top-16 -right-16 w-64 h-64 bg-orange-600/20 rounded-full blur-3xl" />
+      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 sm:p-8 shadow-xl">
         <div className="relative">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
@@ -341,7 +340,7 @@ export default function AdminDashboardPage() {
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg shadow-red-500/25">
+            <div className="w-10 h-10 rounded-2xl bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/25">
               <Flame className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -367,9 +366,9 @@ export default function AdminDashboardPage() {
           <div className="divide-y divide-slate-100">
             {fastMovers.map((m, i) => {
               const rankStyles = [
-                'bg-gradient-to-br from-yellow-400 to-amber-600 shadow-amber-500/40',
-                'bg-gradient-to-br from-slate-300 to-slate-500 shadow-slate-400/40',
-                'bg-gradient-to-br from-orange-400 to-red-600 shadow-orange-500/40',
+                'bg-amber-500 shadow-amber-500/40',
+                'bg-slate-400 shadow-slate-400/40',
+                'bg-orange-600 shadow-orange-500/40',
               ];
               return (
                 <div key={m.productId} className="flex items-center gap-3.5 px-5 sm:px-6 py-3.5 hover:bg-slate-50/60 transition-colors">
@@ -426,7 +425,7 @@ export default function AdminDashboardPage() {
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-600 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-600/25">
+            <div className="w-10 h-10 rounded-2xl bg-orange-600 flex items-center justify-center shadow-lg shadow-orange-600/25">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
