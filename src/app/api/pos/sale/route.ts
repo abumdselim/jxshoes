@@ -16,6 +16,9 @@ export async function POST(request: Request) {
 
     const order = await createPosSale(body.items, {
       customerName: typeof body.customerName === 'string' ? body.customerName : undefined,
+      customerPhone: typeof body.customerPhone === 'string' ? body.customerPhone : undefined,
+      customerAddress: typeof body.customerAddress === 'string' ? body.customerAddress : undefined,
+      paidAmount: body.paidAmount !== undefined ? Number(body.paidAmount) : undefined,
       note: typeof body.note === 'string' ? body.note : undefined,
     });
 

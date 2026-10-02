@@ -8,7 +8,9 @@ import {
   runAIJson,
   runAIStream,
 } from '@/lib/ai';
-import { getDailyBrief, getProducts, saveDailyBrief } from '@/lib/store';
+import { generateReport, renderReportEmailHtml } from '@/lib/report';
+import { isEmailConfigured, EMAIL_NOT_CONFIGURED_MSG, sendEmail } from '@/lib/email';
+import { getDailyBrief, getOrders, getProducts, getReports, getStoreSettings, saveDailyBrief, saveReport } from '@/lib/store';
 import { AIDailyBrief, AIInsights, AISaleMatch, Product } from '@/types';
 
 export const runtime = 'edge';
@@ -394,6 +396,131 @@ ${buildCatalogContext(products)}`,
   }
 }
 
+// ================== AI REPORTS (সাপ্তাহিক/মাসিক) ==================
+async function handleGenerateReport(payload: { reportType?: string }) {
+  if (!isAIConfigured()) return aiUnavailable();
+  const type = payload.reportType === 'monthly' ? 'monthly' : 'weekly';
+  try {
+    const report = await generateReport(type);
+    return NextResponse.json({ report, configured: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'রিপোর্ট তৈরি করা যায়নি', configured: true },
+      { status: 500 }
+    );
+  }
+}
+
+async function handleEmailReport(payload: { reportId?: string; to?: string }) {
+  if (!payload.reportId) {
+    return NextResponse.json({ error: 'রিপোর্ট আইডি প্রয়োজন' }, { status: 400 });
+  }
+  const reports = await getReports();
+  const report = reports.find(r => r.id === payload.reportId);
+  if (!report) {
+    return NextResponse.json({ error: 'রিপোর্ট পাওয়া যায়নি' }, { status: 404 });
+  }
+
+  const settings = await getStoreSettings();
+  const to = (payload.to || settings.email || '').trim();
+  if (!/^\S+@\S+\.\S+$/.test(to)) {
+    return NextResponse.json({ error: 'সঠিক ইমেইল ঠিকানা দিন (সেটিংসে বা এখানে)' }, { status: 400 });
+  }
+  if (!isEmailConfigured()) {
+    return NextResponse.json({ error: EMAIL_NOT_CONFIGURED_MSG, configured: false }, { status: 503 });
+  }
+
+  const html = renderReportEmailHtml(report, settings.storeName);
+  const text = [
+    report.headline,
+    '',
+    report.executiveSummary,
+    '',
+    ...report.scorecard.map(s => `${s.label}: ${s.value}`),
+    '',
+    'AI-এর পরামর্শ:',
+    ...report.recommendations.map(r => `- ${r}`),
+  ].join('\n');
+
+  const result = await sendEmail({
+    to,
+    subject: `${report.type === 'weekly' ? 'সাপ্তাহিক' : 'মাসিক'} বিজনেস রিপোর্ট — ${settings.storeName}`,
+    html,
+    text,
+    fromName: settings.storeName,
+  });
+
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: 500 });
+  }
+
+  report.emailedTo = to;
+  await saveReport(report);
+  return NextResponse.json({ success: true, to, delivered: result.delivered || [] });
+}
+
+// ================== AI RESTOCK PLAN (রিস্টক প্ল্যান) ==================
+async function handleRestockPlan() {
+  if (!isAIConfigured()) return aiUnavailable();
+
+  const [products, orders] = await Promise.all([getProducts(), getOrders()]);
+  const monthAgo = Date.now() - 30 * 86400000;
+  const soldBy = new Map<string, number>();
+  for (const o of orders) {
+    if (o.status === 'Cancelled') continue;
+    if (new Date(o.createdAt).getTime() < monthAgo) continue;
+    for (const it of o.items) {
+      soldBy.set(it.productId, (soldBy.get(it.productId) || 0) + it.quantity);
+    }
+  }
+
+  const catalog = products
+    .map(p => {
+      const variants = (p.variants || []).map(v => `${v.size}/${v.color}:${v.stock}`).join(', ');
+      return `${p.id} | ${p.sku} | ${p.name} | স্টক:${p.stockCount} | অ্যালার্ট:${p.minStockAlert ?? 5} | ৩০দিনেরবিক্রি:${soldBy.get(p.id) || 0} | ক্রয়মূল্য:৳${p.costPrice ?? '?'}${variants ? ` | ভ্যারিয়েন্ট:${variants}` : ''}`;
+    })
+    .join('\n');
+
+  const messages: AIMessage[] = [
+    {
+      role: 'system',
+      content: `তুমি দোকানের ইনভেন্টরি প্ল্যানিং AI। প্রতিটি প্রোডাক্টের স্টক, মিনিমাম অ্যালার্ট ও গত ৩০ দিনের বিক্রির গতি দেখে বলো কত করে রিস্টক করা উচিত।
+হিসাবের ধারণা: ৩০ দিনের বিক্রি × ১.৫ (ঢাকার জন্য ঢাল) − বর্তমান স্টক = সাজেস্টেড; বিক্রি না হলে ছোট/শূন্য; স্টক-আউট বা দ্রুতবিক্রিতে বেশি। বানানো সংখ্যা নয় — ডেটা থেকে হিসাব করবে।
+শুধু JSON দাও:
+{"summary": "২-৩ বাক্যে সামগ্রিক রিস্টক পরিস্থিতি", "plan": [{"productId": "তালিকার id", "productName": "নাম", "recommendedQuantity": সংখ্যা, "reason": "কেন এত (বাংলায়, ১ বাক্য)"}]}
+plan-এ এমন প্রোডাক্ট রাখো যেগুলোর সত্যিই রিস্টক দরকার (স্টক কম/শেষ বা বিক্রি বেশি); দরকার নেই এমন বাদ দাও। recommendedQuantity অবশ্যই অ-ঋণাত্মক পূর্ণসংখ্যা।
+
+প্রোডাক্ট তালিকা:
+${catalog}`,
+    },
+    { role: 'user', content: 'রিস্টক প্ল্যান দাও।' },
+  ];
+
+  try {
+    const parsed = await runAIJson<{
+      summary?: string;
+      plan?: { productId?: string; productName?: string; recommendedQuantity?: number; reason?: string }[];
+    }>(messages, { maxTokens: 1800 });
+
+    const validIds = new Set(products.map(p => p.id));
+    const plan = (Array.isArray(parsed.plan) ? parsed.plan : [])
+      .filter(p => p.productId && validIds.has(p.productId) && Number(p.recommendedQuantity) > 0)
+      .map(p => ({
+        productId: p.productId!,
+        productName: p.productName || products.find(x => x.id === p.productId)?.name || '',
+        recommendedQuantity: Math.round(Number(p.recommendedQuantity)),
+        reason: p.reason || '',
+      }));
+
+    return NextResponse.json({ summary: parsed.summary || '', plan, configured: true });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'রিস্টক প্ল্যান তৈরি করা যায়নি', configured: true },
+      { status: 500 }
+    );
+  }
+}
+
 // ================== ROUTE HANDLERS ==================
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -425,6 +552,12 @@ export async function POST(request: Request) {
       return generateBannerCopy(body as { storeName?: string; tagline?: string });
     case 'parse-sale':
       return parseSaleMatch(body as { message?: string });
+    case 'generate-report':
+      return handleGenerateReport(body as { reportType?: string });
+    case 'email-report':
+      return handleEmailReport(body as { reportId?: string; to?: string });
+    case 'restock-plan':
+      return handleRestockPlan();
     default:
       return NextResponse.json({ error: 'অজানা action' }, { status: 400 });
   }

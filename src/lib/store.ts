@@ -9,7 +9,12 @@ import {
   Coupon,
   InventoryMovement,
   ProductVariant,
-  AIDailyBrief
+  AIDailyBrief,
+  Customer,
+  Expense,
+  DuePayment,
+  FinanceSummary,
+  StoredReport
 } from '@/types';
 import {
   initialProducts,
@@ -19,7 +24,10 @@ import {
   initialHeroBanner,
   initialFlashDeal,
   initialCoupons,
-  initialInventoryMovements
+  initialInventoryMovements,
+  initialCustomers,
+  initialExpenses,
+  initialDuePayments
 } from './initialData';
 
 export interface FullStoreData {
@@ -31,6 +39,9 @@ export interface FullStoreData {
   flashDeal: FlashDealSettings;
   coupons: Coupon[];
   inventoryMovements: InventoryMovement[];
+  customers: Customer[];
+  expenses: Expense[];
+  duePayments: DuePayment[];
 }
 
 const CF_KV_NAMESPACE_ID = process.env.CLOUDFLARE_KV_ID || '';
@@ -48,6 +59,9 @@ let cachedData: FullStoreData = {
   flashDeal: initialFlashDeal,
   coupons: initialCoupons,
   inventoryMovements: initialInventoryMovements,
+  customers: initialCustomers,
+  expenses: initialExpenses,
+  duePayments: initialDuePayments,
 };
 
 let hasFetchedKV = false;
@@ -74,6 +88,9 @@ export async function getStoreData(): Promise<FullStoreData> {
           flashDeal: parsed.flashDeal || initialFlashDeal,
           coupons: parsed.coupons || initialCoupons,
           inventoryMovements: parsed.inventoryMovements || initialInventoryMovements,
+          customers: parsed.customers || [],
+          expenses: parsed.expenses || [],
+          duePayments: parsed.duePayments || [],
         };
         hasFetchedKV = true;
         return cachedData;
@@ -326,6 +343,42 @@ export async function adjustProductStock(
   return prod;
 }
 
+// ================== CUSTOMER LEDGER (বাকির খাতা) ==================
+
+/** ফোন নম্বর দিয়ে কাস্টমার আপসার্ট — অর্ডার/সেলের সাথে লেজার সিংক রাখে */
+function upsertCustomerInData(
+  data: FullStoreData,
+  info: { name?: string; phone: string; address?: string },
+  purchaseAmount: number,
+  dueDelta: number
+): Customer {
+  if (!data.customers) data.customers = [];
+  const phone = (info.phone || '').trim();
+  let cust = phone ? data.customers.find(c => c.phone === phone) : undefined;
+
+  if (!cust) {
+    cust = {
+      id: `cust-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      name: (info.name || 'নাম নেই').trim(),
+      phone,
+      address: info.address,
+      dueAmount: 0,
+      totalPurchases: 0,
+      orderCount: 0,
+      createdAt: new Date().toISOString(),
+    };
+    data.customers.unshift(cust);
+  } else if (cust.name === 'নাম নেই' && info.name && info.name.trim()) {
+    cust.name = info.name.trim();
+  }
+
+  cust.totalPurchases = Math.max(0, (cust.totalPurchases || 0) + purchaseAmount);
+  cust.orderCount = (cust.orderCount || 0) + 1;
+  cust.dueAmount = Math.max(0, (cust.dueAmount || 0) + dueDelta);
+  if (info.address) cust.address = info.address;
+  return cust;
+}
+
 // ================== ORDERS ==================
 export async function getOrders(): Promise<Order[]> {
   const data = await getStoreData();
@@ -342,13 +395,33 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
   const id = `ord-${Date.now()}`;
   const orderNumber = `JX-${Math.floor(1000 + Math.random() * 9000)}`;
 
+  // লাভ-ক্ষতি নিখুঁত রাখতে বিক্রির সময়ের ক্রয়মূল্য স্ন্যাপশট নেওয়া হয়
+  const itemsWithCost: OrderItem[] = orderData.items.map(it => {
+    if (it.costPrice !== undefined) return it;
+    const prod = data.products.find(p => p.id === it.productId);
+    return { ...it, costPrice: prod?.costPrice };
+  });
+
   const newOrder: Order = {
     ...orderData,
+    items: itemsWithCost,
     id,
     orderNumber,
+    paidAmount: orderData.paidAmount ?? orderData.total,
+    dueAmount: orderData.dueAmount ?? 0,
     status: 'Pending',
     createdAt: new Date().toISOString(),
   };
+
+  // কাস্টমার ডেটাবেজে যুক্ত/আপডেট (অনলাইন অর্ডারে বাকি হয় না)
+  if (orderData.phone) {
+    newOrder.customerId = upsertCustomerInData(
+      data,
+      { name: orderData.customerName, phone: orderData.phone, address: orderData.address },
+      orderData.total,
+      0
+    ).id;
+  }
 
   // Deduct stock for each ordered item and record inventory movements
   if (!data.inventoryMovements) data.inventoryMovements = [];
@@ -553,7 +626,13 @@ export interface PosSaleItemInput {
 
 export async function createPosSale(
   items: PosSaleItemInput[],
-  options?: { customerName?: string; note?: string }
+  options?: {
+    customerName?: string;
+    customerPhone?: string;
+    customerAddress?: string;
+    paidAmount?: number; // দেওয়া না থাকলে পুরো টাকা ক্যাশে ধরা হয়
+    note?: string;
+  }
 ): Promise<Order | null> {
   const data = await getStoreData();
   if (!items || items.length === 0) return null;
@@ -586,6 +665,7 @@ export async function createPosSale(
     const size = item.size || variant?.size || prod.sizes[0] || 'Standard';
     const color = item.color || variant?.color || prod.colors[0]?.name || 'Default';
     const unitPrice = variant?.price ?? prod.price;
+    const unitCost = variant?.costPrice ?? prod.costPrice;
 
     const prevStock = prod.stockCount;
     prod.stockCount = Math.max(0, prod.stockCount - qty);
@@ -596,6 +676,7 @@ export async function createPosSale(
       productId: prod.id,
       name: prod.name,
       price: unitPrice,
+      costPrice: unitCost,
       quantity: qty,
       selectedSize: size,
       selectedColor: color,
@@ -622,27 +703,307 @@ export async function createPosSale(
 
   if (orderItems.length === 0) return null;
 
+  // বাকি হিসাব: যত আদায় হয়েছে বাকিটা কাস্টমারের খাতায় যায়
+  const total = subtotal;
+  const paid = Math.min(Math.max(0, Number(options?.paidAmount ?? total)), total);
+  const due = Math.max(0, total - paid);
+
   const newOrder: Order = {
     id: `ord-${Date.now()}`,
     orderNumber: `JX-${Math.floor(1000 + Math.random() * 9000)}`,
     source: 'in-store',
     customerName: options?.customerName?.trim() || 'দোকানে সরাসরি বিক্রি',
-    phone: '',
-    address: '',
+    phone: options?.customerPhone?.trim() || '',
+    address: options?.customerAddress?.trim() || '',
     city: 'Inside Dhaka',
     paymentMethod: 'Cash on Delivery',
     items: orderItems,
     subtotal,
     deliveryFee: 0,
-    total: subtotal,
+    total,
+    paidAmount: paid,
+    dueAmount: due,
     status: 'Delivered',
     note: options?.note,
     createdAt: new Date().toISOString(),
   };
 
+  // ফোন নম্বর দিলে বা বাকি থাকলে কাস্টমার খাতা আপডেট
+  if (options?.customerPhone?.trim() || due > 0) {
+    newOrder.customerId = upsertCustomerInData(
+      data,
+      {
+        name: options?.customerName,
+        phone: options?.customerPhone || `pos-${Date.now()}`,
+        address: options?.customerAddress,
+      },
+      total,
+      due
+    ).id;
+  }
+
   data.orders.unshift(newOrder);
   await saveStoreData(data);
   return newOrder;
+}
+
+// ================== CUSTOMERS (কাস্টমার ডেটাবেজ) ==================
+export async function getCustomers(): Promise<Customer[]> {
+  const data = await getStoreData();
+  return [...(data.customers || [])].sort((a, b) => {
+    if (b.dueAmount !== a.dueAmount) return b.dueAmount - a.dueAmount; // বেশি বাকি আগে
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+}
+
+export async function saveCustomer(
+  input: Partial<Customer> & { name: string; phone: string }
+): Promise<Customer> {
+  const data = await getStoreData();
+  if (!data.customers) data.customers = [];
+
+  const phone = input.phone.trim();
+  const existing =
+    (input.id && data.customers.find(c => c.id === input.id)) ||
+    data.customers.find(c => c.phone === phone);
+
+  if (existing) {
+    existing.name = input.name.trim();
+    existing.phone = phone;
+    if (input.address !== undefined) existing.address = input.address;
+    if (input.note !== undefined) existing.note = input.note;
+    if (input.dueAmount !== undefined) existing.dueAmount = Math.max(0, Number(input.dueAmount));
+    await saveStoreData(data);
+    return existing;
+  }
+
+  const cust: Customer = {
+    id: `cust-${Date.now()}`,
+    name: input.name.trim(),
+    phone,
+    address: input.address,
+    dueAmount: Math.max(0, Number(input.dueAmount) || 0), // পুরনো খাতা মাইগ্রেটের জন্য
+    totalPurchases: 0,
+    orderCount: 0,
+    note: input.note,
+    createdAt: new Date().toISOString(),
+  };
+  data.customers.unshift(cust);
+  await saveStoreData(data);
+  return cust;
+}
+
+export async function deleteCustomer(id: string): Promise<boolean> {
+  const data = await getStoreData();
+  const before = data.customers.length;
+  data.customers = (data.customers || []).filter(c => c.id !== id);
+  if (data.customers.length !== before) {
+    await saveStoreData(data);
+    return true;
+  }
+  return false;
+}
+
+/** বাকি আদায় — কাস্টমারের খাতা কমায় + কালেকশন রেকর্ড রাখে */
+export async function recordDuePayment(input: {
+  customerId: string;
+  amount: number;
+  method: DuePayment['method'];
+  note?: string;
+}): Promise<{ customer: Customer; payment: DuePayment } | null> {
+  const data = await getStoreData();
+  const cust = (data.customers || []).find(c => c.id === input.customerId);
+  if (!cust) return null;
+
+  const amount = Math.max(1, Number(input.amount) || 0);
+  const payment: DuePayment = {
+    id: `pay-${Date.now()}`,
+    customerId: cust.id,
+    customerName: cust.name,
+    customerPhone: cust.phone,
+    amount,
+    method: input.method,
+    note: input.note,
+    createdAt: new Date().toISOString(),
+  };
+
+  cust.dueAmount = Math.max(0, cust.dueAmount - amount);
+  if (!data.duePayments) data.duePayments = [];
+  data.duePayments.unshift(payment);
+  await saveStoreData(data);
+  return { customer: cust, payment };
+}
+
+export async function getDuePayments(): Promise<DuePayment[]> {
+  const data = await getStoreData();
+  return [...(data.duePayments || [])].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+// ================== EXPENSES (খরচের খাতা) ==================
+export async function getExpenses(): Promise<Expense[]> {
+  const data = await getStoreData();
+  return [...(data.expenses || [])].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+}
+
+export async function saveExpense(input: {
+  category: string;
+  amount: number;
+  note?: string;
+}): Promise<Expense> {
+  const data = await getStoreData();
+  if (!data.expenses) data.expenses = [];
+  const exp: Expense = {
+    id: `exp-${Date.now()}`,
+    category: input.category.trim() || 'অন্যান্য',
+    amount: Math.max(0, Number(input.amount) || 0),
+    note: input.note,
+    createdAt: new Date().toISOString(),
+  };
+  data.expenses.unshift(exp);
+  await saveStoreData(data);
+  return exp;
+}
+
+export async function deleteExpense(id: string): Promise<boolean> {
+  const data = await getStoreData();
+  const before = data.expenses.length;
+  data.expenses = (data.expenses || []).filter(e => e.id !== id);
+  if (data.expenses.length !== before) {
+    await saveStoreData(data);
+    return true;
+  }
+  return false;
+}
+
+// ================== FINANCE SUMMARY (লাভ-ক্ষতি ও হিসাব) ==================
+export async function computeFinanceSummary(): Promise<FinanceSummary> {
+  const data = await getStoreData();
+  const now = new Date();
+  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const weekAgo = startOfDay - 6 * 86400000;
+  const monthAgo = startOfDay - 29 * 86400000;
+
+  const validOrders = data.orders.filter(o => o.status !== 'Cancelled');
+  const inRange = (o: { createdAt: string }, from: number) =>
+    new Date(o.createdAt).getTime() >= from;
+
+  let revenue = 0;
+  let cogs = 0;
+  for (const o of validOrders) {
+    revenue += o.total;
+    for (const it of o.items) {
+      let cost = it.costPrice;
+      if (cost === undefined) {
+        // পুরনো অর্ডারে স্ন্যাপশট না থাকলে বর্তমান ক্রয়মূল্য বা ৬৫% অনুমান
+        const prod = data.products.find(p => p.id === it.productId);
+        cost = prod?.costPrice ?? Math.round(it.price * 0.65);
+      }
+      cogs += cost * it.quantity;
+    }
+  }
+
+  const grossProfit = revenue - cogs;
+  const operatingExpenses = (data.expenses || []).reduce((s, e) => s + e.amount, 0);
+
+  const expenseMap = new Map<string, number>();
+  for (const e of data.expenses || []) {
+    expenseMap.set(e.category, (expenseMap.get(e.category) || 0) + e.amount);
+  }
+
+  // গত ৩০ দিনের দৈনিক বিক্রি সিরিজ (তারিখ অনুযায়ী)
+  const dayKey = (t: number) => new Date(t).toLocaleDateString('en-CA');
+  const revByDay = new Map<string, number>();
+  for (const o of validOrders) {
+    if (inRange(o, monthAgo)) {
+      const key = dayKey(new Date(o.createdAt).getTime());
+      revByDay.set(key, (revByDay.get(key) || 0) + o.total);
+    }
+  }
+  const dailyRevenue: { date: string; revenue: number }[] = [];
+  for (let i = 0; i < 30; i++) {
+    const key = dayKey(startOfDay - i * 86400000);
+    dailyRevenue.unshift({ date: key, revenue: revByDay.get(key) || 0 });
+  }
+
+  const todayOrders = validOrders.filter(o => inRange(o, startOfDay));
+  const totalDues = (data.customers || []).reduce((s, c) => s + (c.dueAmount || 0), 0);
+  const allPayments = data.duePayments || [];
+
+  return {
+    revenue,
+    cogs: Math.round(cogs),
+    grossProfit: Math.round(grossProfit),
+    operatingExpenses,
+    netProfit: Math.round(grossProfit - operatingExpenses),
+    totalDues,
+    totalCollected: allPayments.reduce((s, p) => s + p.amount, 0),
+    orderCount: validOrders.length,
+    customerCount: (data.customers || []).length,
+    expenseByCategory: Array.from(expenseMap.entries())
+      .map(([category, amount]) => ({ category, amount }))
+      .sort((a, b) => b.amount - a.amount),
+    dailyRevenue,
+    today: {
+      revenue: todayOrders.reduce((s, o) => s + o.total, 0),
+      orders: todayOrders.length,
+      collected: allPayments
+        .filter(p => new Date(p.createdAt).getTime() >= startOfDay)
+        .reduce((s, p) => s + p.amount, 0),
+    },
+    last7: {
+      revenue: validOrders.filter(o => inRange(o, weekAgo)).reduce((s, o) => s + o.total, 0),
+      orders: validOrders.filter(o => inRange(o, weekAgo)).length,
+    },
+    last30: {
+      revenue: validOrders.filter(o => inRange(o, monthAgo)).reduce((s, o) => s + o.total, 0),
+      orders: validOrders.filter(o => inRange(o, monthAgo)).length,
+    },
+  };
+}
+
+// ================== AI REPORTS STORAGE (আলাদা KV কি) ==================
+let reportsCache: StoredReport[] | null = null;
+
+export async function getReports(): Promise<StoredReport[]> {
+  if (reportsCache) return reportsCache;
+  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return [];
+  try {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_reports`;
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${CF_API_TOKEN}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const parsed = await res.json();
+    reportsCache = Array.isArray(parsed) ? parsed : [];
+    return reportsCache;
+  } catch (err) {
+    console.warn('Reports KV fetch warning:', err);
+    return [];
+  }
+}
+
+export async function saveReport(report: StoredReport): Promise<void> {
+  const list = (await getReports()).filter(r => r.id !== report.id);
+  reportsCache = [report, ...list].slice(0, 24); // সর্বশেষ ২৪টা রিপোর্ট
+  if (!(CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID)) return;
+  try {
+    const url = `https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/storage/kv/namespaces/${CF_KV_NAMESPACE_ID}/values/jx_ai_reports`;
+    await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${CF_API_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reportsCache),
+    });
+  } catch (err) {
+    console.warn('Reports KV save warning:', err);
+  }
 }
 
 // ================== AI DAILY BRIEF CACHE (আলাদা KV কি, দিনে ১ বার জেনারেট) ==================

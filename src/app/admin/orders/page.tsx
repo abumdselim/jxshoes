@@ -11,7 +11,8 @@ import {
   Printer,
   Search,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle
 } from 'lucide-react';
 
 export default function AdminOrdersPage() {
@@ -190,6 +191,12 @@ export default function AdminOrdersPage() {
                     কাস্টমার তথ্য
                   </span>
                   <div className="font-bold text-sm text-slate-900">{order.customerName}</div>
+                  {(order.dueAmount || 0) > 0 && (
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-red-700 font-black text-[11px]">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      বাকি আছে: ৳{(order.dueAmount || 0).toLocaleString('en-BD')} (আদায় ৳{(order.paidAmount || 0).toLocaleString('en-BD')})
+                    </div>
+                  )}
                   <div className="flex items-center gap-1.5 text-slate-600">
                     <Phone className="w-3.5 h-3.5 text-orange-600" />
                     <a href={`tel:${order.phone}`} className="font-semibold hover:underline">

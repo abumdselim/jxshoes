@@ -33,6 +33,10 @@ interface SaleDraft {
   confidence: 'high' | 'medium' | 'low';
   clarification?: string;
   alternatives: { productId: string; productName: string }[];
+  paymentMode: 'full' | 'due';
+  paidAmount: string;
+  customerName: string;
+  customerPhone: string;
 }
 
 export default function AdminAiFab() {
@@ -98,6 +102,10 @@ export default function AdminAiFab() {
           confidence: m.confidence || 'medium',
           clarification: m.clarification,
           alternatives: m.alternatives || [],
+          paymentMode: 'full',
+          paidAmount: '',
+          customerName: '',
+          customerPhone: '',
         });
         return;
       }
@@ -132,8 +140,18 @@ export default function AdminAiFab() {
     }
   };
 
+  const draftUnitPrice = saleDraft
+    ? (saleDraft.product.variants?.find(
+        v => v.size === saleDraft.size && v.color === saleDraft.color
+      )?.price ?? saleDraft.product.price)
+    : 0;
+  const draftTotal = draftUnitPrice * (saleDraft?.quantity || 0);
+  const draftPaid = saleDraft?.paymentMode === 'full' ? draftTotal : Number(saleDraft?.paidAmount || 0);
+  const draftDue = Math.max(0, draftTotal - draftPaid);
+
   const confirmSale = async () => {
     if (!saleDraft || submitting) return;
+    if (saleDraft.paymentMode === 'due' && !saleDraft.customerPhone.trim()) return;
     setSubmitting(true);
     try {
       const variant = saleDraft.product.variants?.find(
@@ -152,13 +170,20 @@ export default function AdminAiFab() {
               color: saleDraft.color,
             },
           ],
+          customerName: saleDraft.customerName || undefined,
+          customerPhone: saleDraft.customerPhone || undefined,
+          paidAmount: saleDraft.paymentMode === 'full' ? undefined : draftPaid,
           note: 'AI কুইক সেল (কোড মেসেজ থেকে)',
         }),
       });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.success) {
+        const due = data.order.dueAmount || 0;
         setToast({
-          text: `✅ বিক্রি সম্পন্ন! অর্ডার ${data.order.orderNumber} — স্টক আপডেট হয়েছে`,
+          text:
+            due > 0
+              ? `✅ বিক্রি সম্পন্ন! ${data.order.orderNumber} — বাকি ৳${due.toLocaleString('en-BD')} কাস্টমারের খাতায় যোগ হয়েছে`
+              : `✅ বিক্রি সম্পন্ন! অর্ডার ${data.order.orderNumber} — স্টক আপডেট হয়েছে`,
         });
         setSaleDraft(null);
         setOpen(false);
@@ -444,11 +469,69 @@ export default function AdminAiFab() {
               <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
                 <span className="text-xs font-bold text-slate-600">মোট মূল্য</span>
                 <span className="text-lg font-black text-slate-900">
-                  ৳
-                  {((saleDraft.product.variants?.find(
-                    v => v.size === saleDraft.size && v.color === saleDraft.color
-                  )?.price ?? saleDraft.product.price) * saleDraft.quantity).toLocaleString('en-BD')}
+                  ৳{draftTotal.toLocaleString('en-BD')}
                 </span>
+              </div>
+
+              {/* পেমেন্ট — পুরো ক্যাশ নাকি বাকিতে */}
+              <div>
+                <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">
+                  পেমেন্ট
+                </label>
+                <div className="grid grid-cols-2 gap-2 mb-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setSaleDraft({ ...saleDraft, paymentMode: 'full' })}
+                    className={`px-3 py-2.5 rounded-xl text-[11px] font-black border transition-all ${
+                      saleDraft.paymentMode === 'full'
+                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/25'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-400'
+                    }`}
+                  >
+                    ✅ পুরো ক্যাশ
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSaleDraft({ ...saleDraft, paymentMode: 'due' })}
+                    className={`px-3 py-2.5 rounded-xl text-[11px] font-black border transition-all ${
+                      saleDraft.paymentMode === 'due'
+                        ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-500/25'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-red-400'
+                    }`}
+                  >
+                    📋 বাকিতে (Due)
+                  </button>
+                </div>
+
+                {saleDraft.paymentMode === 'due' && (
+                  <div className="space-y-2 bg-red-50/60 border border-red-100 rounded-xl p-3">
+                    <input
+                      value={saleDraft.customerPhone}
+                      onChange={e => setSaleDraft({ ...saleDraft, customerPhone: e.target.value })}
+                      placeholder="কাস্টমারের ফোন (বাধ্যতামূলক) — খাতা এই নম্বরে খুলবে"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
+                    />
+                    <input
+                      value={saleDraft.customerName}
+                      onChange={e => setSaleDraft({ ...saleDraft, customerName: e.target.value })}
+                      placeholder="কাস্টমারের নাম"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
+                    />
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-slate-600 whitespace-nowrap">আদায় ৳</span>
+                      <input
+                        type="number"
+                        value={saleDraft.paidAmount}
+                        onChange={e => setSaleDraft({ ...saleDraft, paidAmount: e.target.value })}
+                        placeholder="0"
+                        className="w-24 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-red-400"
+                      />
+                      <span className="text-[11px] font-black text-red-600 ml-auto">
+                        বাকি থাকবে: ৳{draftDue.toLocaleString('en-BD')}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* অ্যাকশন */}
@@ -461,7 +544,11 @@ export default function AdminAiFab() {
                 </button>
                 <button
                   onClick={confirmSale}
-                  disabled={submitting || (draftStock ?? 0) < saleDraft.quantity}
+                  disabled={
+                    submitting ||
+                    (draftStock ?? 0) < saleDraft.quantity ||
+                    (saleDraft.paymentMode === 'due' && !saleDraft.customerPhone.trim())
+                  }
                   className="flex-1 px-4 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-black shadow-lg shadow-orange-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {submitting ? (

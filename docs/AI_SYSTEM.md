@@ -65,9 +65,48 @@ Workers AI REST API (src/lib/ai.ts)
 | `product-content` | `{ name, category, subCategory, colors, sizes, price }` | `{ description }` | প্রোডাক্ট ফর্ম |
 | `banner-copy` | `{ storeName, tagline }` | `{ badgeText, titlePart1, titleHighlight, subtitle, ctaText }` | মার্কেটিং পেজ |
 | `parse-sale` | `{ message }` | `{ match: AISaleMatch, product: Product \| null }` | AI FAB কুইক সেল |
+| `generate-report` | `{ reportType: 'weekly'\|'monthly' }` | `{ report: StoredReport }` | রিপোর্ট পেজ |
+| `email-report` | `{ reportId, to? }` | `{ success, to }` | রিপোর্ট পেজ ইমেইল বাটন |
+| `restock-plan` | — | `{ summary, plan: [{ productId, productName, recommendedQuantity, reason }] }` | ইনভেন্টরি লো-স্টক ট্যাব |
 | `daily-brief-refresh` | — | `{ brief }` | ড্যাশবোর্ড "নতুন ব্রিফিং" |
 
 **AI কনফিগার না থাকলে:** সব অ্যাকশন `503` + `{ error, configured: false }` — UI তে বন্ধুত্বপূর্ণ বাংলা নির্দেশনা দেখায়।
+
+### রিপোর্ট-সংক্রান্ত অন্যান্য রাউট
+
+| রাউট | কাজ |
+|---|---|
+| `GET /api/reports` | রিপোর্ট হিস্ট্রি (KV `jx_ai_reports`, শেষ ২৪টা) |
+| `GET /api/cron/report?type=auto\|weekly\|monthly&send=1&to=…` | Cron Worker-এর এন্ডপয়েন্ট — হেডার `x-cron-secret: <CRON_SECRET>` লাগবে; `type=auto` হলে মাসের ১ তারিখে মাসিক, সোমবারে সাপ্তাহিক, অন্য দিনে skip |
+| `GET /api/finance` | P&L সামারি (`computeFinanceSummary`) |
+| `GET/POST/DELETE /api/customers` (+`/payment`) | কাস্টমার লেজার ও বাকি আদায় |
+| `GET/POST/DELETE /api/expenses` | খরচের খাতা |
+| `POST /api/pos/sale` | ইন-স্টোর সেল (এখন বাকি/কাস্টমার সাপোর্টসহ) |
+
+### রিপোর্ট সিস্টেমের নকশা (গুরুত্বপূর্ণ)
+
+- **সংখ্যা AI-কে দিয়ে হিসাব করানো হয় না** — স্কোরকার্ড (মোট বিক্রি, গ্রস প্রফিট, গ্রোথ %) কোডে গণনা হয় (`src/lib/report.ts` → `gatherPeriodStats`)। AI শুধু বিশ্লেষণ ও পরামর্শ লেখে। এতে হিসাব নিখুঁত থাকে।
+- লাভের হিসাব: প্রতিটা সেলের আইটেমে **ক্রয়মূল্যের স্ন্যাপশট** (`OrderItem.costPrice`) সেলের সময়েই সেভ হয়; পুরনো ডেটায় না থাকলে বর্তমান ক্রয়মূল্য → না মিললে ৬৫% অনুমান।
+- ইমেইল HTML: `renderReportEmailHtml()` — inline CSS (ইমেইল ক্লায়েন্ট সেফ), `html` + `text` দুই ভার্সনই যায় (ডেলিভারেবিলিটির জন্য)।
+
+### ইমেইল ডেলিভারি সেটআপ (Cloudflare Email Service REST)
+
+```
+POST https://api.cloudflare.com/client/v4/accounts/{id}/email/sending/send
+Authorization: Bearer <API_TOKEN>
+{ "to": "...", "from": { "address": "reports@yourdomain.com", "name": "..." },
+  "subject": "...", "html": "...", "text": "..." }
+```
+⚠️ REST API-তে `from` অবজেক্টে **`address`** ব্যবহার হয় (`email` নয়), `reply_to` snake_case।
+
+প্রয়োজন:
+1. ডোমেইন Cloudflare-এ + `npx wrangler email sending enable yourdomain.com`
+2. টোকেনে Email Sending পারমিশন
+3. Pages env: `EMAIL_FROM_ADDRESS` (বাধ্যতামূলক), `EMAIL_FROM_NAME` (ঐচ্ছিক), `CRON_SECRET` (ক্রনের জন্য)
+
+### অটো-রিপোর্ট (Cron Worker)
+
+`workers/report-cron/` — ছোট Worker, ক্রন ট্রিগার: `0 2 * * 1` (সোমবার ০২:০০ UTC = বাংলাদেশ সকাল ৮টা, সাপ্তাহিক) ও `0 2 1 * *` (মাসের ১ তারিখ, মাসিক)। মূল অ্যাপের `/api/cron/report` কল করে — সব AI/ইমেইল লজিক এক জায়গায় থাকে। সেটআপ: `workers/report-cron/README.md`।
 
 ### `POST /api/pos/sale`
 ```jsonc

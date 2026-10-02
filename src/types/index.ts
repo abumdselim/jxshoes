@@ -53,6 +53,7 @@ export interface OrderItem {
   productId: string;
   name: string;
   price: number;
+  costPrice?: number; // বিক্রির সময়ের ক্রয়মূল্য স্ন্যাপশট — নিখুঁত লাভ-ক্ষতি হিসাবের জন্য
   quantity: number;
   selectedSize: string;
   selectedColor: string;
@@ -63,6 +64,7 @@ export interface Order {
   id: string;
   orderNumber: string;
   source?: 'online' | 'in-store'; // in-store = POS quick sale from admin
+  customerId?: string; // কাস্টমার ডেটাবেজের সাথে লিংক (ফোন নম্বরে ম্যাচ করে)
   customerName: string;
   phone: string;
   address: string;
@@ -77,8 +79,58 @@ export interface Order {
   couponCode?: string;
   deliveryFee: number;
   total: number;
+  paidAmount?: number; // যত টাকা আদায় হয়েছে (বাকি সিস্টেমের জন্য; ডিফল্ট = total)
+  dueAmount?: number; // total - paidAmount; বাকির খাতায় যায়
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   createdAt: string;
+}
+
+export interface Customer {
+  id: string;
+  name: string;
+  phone: string; // ইউনিক কি হিসেবে ব্যবহৃত হয় (আপসার্ট কি)
+  address?: string;
+  dueAmount: number; // মোট বাকি (receivable)
+  totalPurchases: number; // সর্বমোট কেনাকাটার মূল্য
+  orderCount: number;
+  note?: string;
+  createdAt: string;
+}
+
+export interface Expense {
+  id: string;
+  category: string; // 'দোকান ভাড়া' | 'বিদ্যুৎ বিল' | 'কর্মচারী বেতন' | 'পরিবহন' | 'ক্রয় (Purchase)' | 'অন্যান্য'
+  amount: number;
+  note?: string;
+  createdAt: string;
+}
+
+export interface DuePayment {
+  id: string;
+  customerId: string;
+  customerName: string;
+  customerPhone: string;
+  amount: number;
+  method: 'Cash' | 'bKash' | 'Nagad';
+  note?: string;
+  createdAt: string;
+}
+
+export interface FinanceSummary {
+  revenue: number; // মোট বিক্রি (বাতিল বাদে)
+  cogs: number; // বিক্রীত পণ্যের ক্রয়মূল্য (cost of goods sold)
+  grossProfit: number;
+  operatingExpenses: number;
+  netProfit: number;
+  totalDues: number; // গ্রাহকদের মোট বাকি (receivable)
+  totalCollected: number; // বাকি আদায়
+  orderCount: number;
+  customerCount: number;
+  expenseByCategory: { category: string; amount: number }[];
+  dailyRevenue: { date: string; revenue: number }[]; // গত ৩০ দিনের সিরিজ
+  today: { revenue: number; orders: number; collected: number };
+  last7: { revenue: number; orders: number };
+  last30: { revenue: number; orders: number };
 }
 
 export interface CategoryItem {
@@ -164,4 +216,24 @@ export interface AISaleMatch {
   confidence: 'high' | 'medium' | 'low';
   clarification?: string; // AI যদি নিশ্চিত না হয়, দোকানদারকে কী জিজ্ঞেস করা হবে
   alternatives?: { productId: string; productName: string; size?: string; color?: string }[];
+}
+
+export interface AIReportSection {
+  title: string;
+  body: string;
+  highlights?: string[];
+}
+
+export interface StoredReport {
+  id: string;
+  type: 'weekly' | 'monthly';
+  periodStart: string;
+  periodEnd: string;
+  headline: string;
+  executiveSummary: string;
+  sections: AIReportSection[];
+  scorecard: { label: string; value: string }[]; // মূল সংখ্যাগুলোর কার্ড
+  recommendations: string[];
+  generatedAt: string;
+  emailedTo?: string; // ইমেইল পাঠানো হলে ঠিকানা + সময় রেকর্ড থাকে
 }

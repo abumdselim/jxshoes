@@ -73,6 +73,31 @@ export default function AdminInventoryPage() {
   // Success / Alert message
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // AI Restock Plan State
+  const [aiPlan, setAiPlan] = useState<{ summary: string; plan: { productId: string; productName: string; recommendedQuantity: number; reason: string }[] } | null>(null);
+  const [aiPlanLoading, setAiPlanLoading] = useState(false);
+
+  const loadRestockPlan = async () => {
+    setAiPlanLoading(true);
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'restock-plan' }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.plan !== undefined) {
+        setAiPlan({ summary: data.summary || '', plan: data.plan || [] });
+      } else {
+        showFeedback('error', data?.error || 'AI রিস্টক প্ল্যান আনা যায়নি');
+      }
+    } catch {
+      showFeedback('error', 'সার্ভারে সংযোগ করা যায়নি');
+    } finally {
+      setAiPlanLoading(false);
+    }
+  };
+
   const loadInventory = async () => {
     try {
       setLoading(true);
@@ -762,13 +787,84 @@ export default function AdminInventoryPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => window.print()}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm"
-            >
-              প্রিন্ট রি-অর্ডার স্লিপ
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={loadRestockPlan}
+                disabled={aiPlanLoading}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-60 inline-flex items-center gap-1.5"
+              >
+                {aiPlanLoading ? (
+                  <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                )}
+                AI রিস্টক প্ল্যান
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm"
+              >
+                প্রিন্ট রি-অর্ডার স্লিপ
+              </button>
+            </div>
           </div>
+
+          {/* AI রিস্টক প্ল্যান */}
+          {aiPlanLoading && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-3 text-sm text-slate-600">
+              <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              AI প্রতিটা প্রোডাক্টের বিক্রির গতি আর স্টক মিলিয়ে হিসাব করছে…
+            </div>
+          )}
+
+          {aiPlan && !aiPlanLoading && (
+            <div className="bg-white border-2 border-slate-900 rounded-2xl overflow-hidden">
+              <div className="bg-slate-900 text-white px-5 py-3.5">
+                <div className="text-xs font-black flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" /> AI রিস্টক প্ল্যান
+                </div>
+                {aiPlan.summary && <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{aiPlan.summary}</p>}
+              </div>
+              <div className="divide-y divide-slate-100">
+                {aiPlan.plan.map(item => {
+                  const prod = products.find(p => p.id === item.productId);
+                  return (
+                    <div key={item.productId} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5">
+                      {prod?.images[0] && (
+                        <img src={prod.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover border" />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-black text-slate-900">{item.productName}</div>
+                        <div className="text-[11px] text-slate-500">{item.reason}</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-black text-emerald-700 whitespace-nowrap">
+                          +{item.recommendedQuantity} টি
+                        </span>
+                        <button
+                          onClick={() => {
+                            const target = products.find(p => p.id === item.productId);
+                            if (target) {
+                              openRestockModal(target);
+                              setRestockQty(item.recommendedQuantity);
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-bold shadow-sm"
+                        >
+                          চালান দিন
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+                {aiPlan.plan.length === 0 && (
+                  <div className="px-5 py-6 text-center text-sm text-emerald-700 font-bold">
+                    🎉 AI বলছে — এই মুহূর্তে রিস্টক করার কিছু নেই, সব ঠিক আছে!
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {lowStockList.map((p) => (

@@ -7,7 +7,10 @@ import {
   StoreSettings,
   HeroBannerSettings,
   FlashDealSettings,
-  Coupon
+  Coupon,
+  Customer,
+  Expense,
+  DuePayment
 } from '@/types';
 
 export const initialCategories: CategoryItem[] = [
@@ -623,6 +626,7 @@ export const initialOrders: Order[] = [
         productId: "prod-5",
         name: "Heritage Chelsea Leather Boots",
         price: 4500,
+        costPrice: 2850,
         quantity: 1,
         selectedSize: "43",
         selectedColor: "Dark Walnut",
@@ -634,6 +638,88 @@ export const initialOrders: Order[] = [
     total: 4620,
     status: "Delivered",
     createdAt: "2026-09-30T16:00:00Z"
+  }
+];
+
+// পুরনো দোকানের বাকি খাতা মাইগ্রেট করা কাস্টমারসহ নমুনা ডেটা
+export const initialCustomers: Customer[] = [
+  {
+    id: "cust-1",
+    name: "Md. Tanvir Ahmed",
+    phone: "01712345678",
+    address: "House 24, Road 7, Dhanmondi, Dhaka",
+    dueAmount: 0,
+    totalPurchases: 3910,
+    orderCount: 1,
+    createdAt: "2026-10-01T09:30:00Z"
+  },
+  {
+    id: "cust-2",
+    name: "Farhana Yasmin",
+    phone: "01987654321",
+    address: "GEC Circle, Nasirabad, Chattogram",
+    dueAmount: 0,
+    totalPurchases: 5070,
+    orderCount: 1,
+    createdAt: "2026-10-01T11:15:00Z"
+  },
+  {
+    id: "cust-3",
+    name: "Ashikur Rahman",
+    phone: "01819998877",
+    address: "Sector 4, Uttara, Dhaka",
+    dueAmount: 0,
+    totalPurchases: 5160,
+    orderCount: 1,
+    createdAt: "2026-10-01T14:20:00Z"
+  },
+  {
+    id: "cust-4",
+    name: "Zubair Hasan",
+    phone: "01611223344",
+    address: "Zindabazar, Sylhet Sadar, Sylhet",
+    dueAmount: 2000,
+    totalPurchases: 4620,
+    orderCount: 1,
+    note: "পুরনো দোকানের বাকি খাতা থেকে মাইগ্রেটেড — ঈদের আগে পরিশোধ করবেন বলেছেন",
+    createdAt: "2026-09-30T16:00:00Z"
+  }
+];
+
+export const initialExpenses: Expense[] = [
+  {
+    id: "exp-1",
+    category: "দোকান ভাড়া",
+    amount: 15000,
+    note: "সেপ্টেম্বর মাসের ভাড়া",
+    createdAt: "2026-10-01T10:00:00Z"
+  },
+  {
+    id: "exp-2",
+    category: "বিদ্যুৎ বিল",
+    amount: 3450,
+    note: "সেপ্টেম্বর মাসের বিল",
+    createdAt: "2026-10-01T10:05:00Z"
+  },
+  {
+    id: "exp-3",
+    category: "কর্মচারী বেতন",
+    amount: 12000,
+    note: "১ জন সেলসম্যান — সেপ্টেম্বর",
+    createdAt: "2026-10-01T10:10:00Z"
+  }
+];
+
+export const initialDuePayments: DuePayment[] = [
+  {
+    id: "pay-1",
+    customerId: "cust-4",
+    customerName: "Zubair Hasan",
+    customerPhone: "01611223344",
+    amount: 500,
+    method: "bKash",
+    note: "আংশিক পরিশোধ (bKash)",
+    createdAt: "2026-10-01T18:00:00Z"
   }
 ];
 

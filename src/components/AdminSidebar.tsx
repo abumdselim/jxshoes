@@ -13,7 +13,11 @@ import {
   ExternalLink,
   ShieldCheck,
   X,
-  Bot
+  Bot,
+  Users,
+  Receipt,
+  Calculator,
+  FileText
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -60,6 +64,30 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       href: '/admin/orders',
       icon: ShoppingCart,
       active: pathname.startsWith('/admin/orders'),
+    },
+    {
+      label: 'কাস্টমার ও বাকির খাতা',
+      href: '/admin/customers',
+      icon: Users,
+      active: pathname.startsWith('/admin/customers'),
+    },
+    {
+      label: 'খরচের খাতা',
+      href: '/admin/expenses',
+      icon: Receipt,
+      active: pathname.startsWith('/admin/expenses'),
+    },
+    {
+      label: 'হিসাব ও লাভ-ক্ষতি',
+      href: '/admin/finance',
+      icon: Calculator,
+      active: pathname.startsWith('/admin/finance'),
+    },
+    {
+      label: 'AI বিজনেস রিপোর্ট',
+      href: '/admin/reports',
+      icon: FileText,
+      active: pathname.startsWith('/admin/reports'),
     },
     {
       label: 'ব্যানার ও কুপন (Marketing)',
