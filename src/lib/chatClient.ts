@@ -43,7 +43,14 @@ export async function streamChat(
       if (!payload || payload === '[DONE]') continue;
       try {
         const json = JSON.parse(payload);
-        if (typeof json.response === 'string' && json.response) onDelta(json.response);
+        // Workers AI স্ট্রিমিং: OpenAI-স্টাইল delta.content (llama + gemma দুটোই);
+        // legacy "response" ফিল্ডও ফলব্যাক হিসেবে রাখা। Gemma-র reasoning_content
+        // চাংকগুলো delta.content খালি রাখে — অটোমেটিক স্কিপ হয়ে যায়।
+        let delta: string | null = null;
+        const d = json?.choices?.[0]?.delta;
+        if (d && typeof d.content === 'string' && d.content) delta = d.content;
+        else if (typeof json.response === 'string' && json.response) delta = json.response;
+        if (delta) onDelta(delta);
         if (json.error) throw new Error(String(json.error));
       } catch (e) {
         // ভাঙা চাংক JSON পার্স এরর হলে স্কিপ, কিন্তু আসল এরর হলে ছড়াতে দাও

@@ -66,6 +66,32 @@ let cachedData: FullStoreData = {
 
 let hasFetchedKV = false;
 
+/**
+ * সেলফ-হিলিং ডেটা মাইগ্রেশন:
+ * পুরনো KV ডেটায় SKU/বারকোড নেই এমন প্রোডাক্টকে ডিটারমিনিস্টিক কোড দেয়
+ * (প্রোডাক্ট আইডির সংখ্যা থেকে — prod-1 → JX-SH-001), যাতে কোড-দিয়ে-সেল,
+ * বারকোড, ইনভেন্টরি — সব জায়গায় সঠিক কোড থাকে।
+ * রিটার্ন করে কিছু বদলেছে কিনা; বদলে থাকলে কলার KV-তে সেভ করে।
+ */
+function migrateStoreData(data: FullStoreData): boolean {
+  let changed = false;
+  const catCode = (c?: string) => (c === 'bags' ? 'BG' : c === 'accessories' ? 'AC' : 'SH');
+  for (const p of data.products || []) {
+    const num = (p.id.match(/(\d+)/) || [])[1];
+    if (!p.sku) {
+      const suffix = num ? num.padStart(3, '0') : String(Date.now()).slice(-4);
+      p.sku = `JX-${catCode(p.category)}-${suffix}`;
+      changed = true;
+    }
+    if (!p.barcode) {
+      const suffix = num ? num.padStart(6, '0') : String(Date.now()).slice(-6);
+      p.barcode = `890100${suffix}`;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
 export async function getStoreData(): Promise<FullStoreData> {
   // If we have Cloudflare KV credentials, sync with Cloudflare KV
   if (CF_API_TOKEN && CF_ACCOUNT_ID && CF_KV_NAMESPACE_ID) {
@@ -93,6 +119,10 @@ export async function getStoreData(): Promise<FullStoreData> {
           duePayments: parsed.duePayments || [],
         };
         hasFetchedKV = true;
+        // পুরনো ডেটায় SKU/বারকোড মিসিং থাকলে বসিয়ে KV-তে সেভ (একবারই হবে)
+        if (migrateStoreData(cachedData)) {
+          await saveStoreData(cachedData);
+        }
         return cachedData;
       }
     } catch (err) {

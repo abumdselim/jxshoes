@@ -4,9 +4,15 @@
  * - store.ts / upload route-এর KV/R2 REST প্যাটার্নের মতোই বিদ্যমান
  *   CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN env ব্যবহার করে
  * - টোকেনে "Workers AI → Write" পারমিশন থাকতে হবে (রান এন্ডপয়েন্টের জন্য রিকোয়ার্ড)
- * - প্রাইমারি মডেল: Gemma (Gemma ফ্যামিলি অফিসিয়ালি বাংলা সাপোর্ট করে),
- *   ফেলব্যাক: llama-3.3-70b-instruct-fp8-fast (JSON মোড + স্ট্রিমিং সাপোর্টেড)
+ * - প্রাইমারি মডেল: llama-3.3-70b-fast (দ্রুত, সরাসরি কনটেন্ট, চমৎকার বাংলা —
+ *   ২০২৬-১০-০২ আসল টোকেন দিয়ে ভেরিফাই করা)
+ * - ফেলব্যাক: gemma-4-26b (সেরা বাংলা, কিন্তু রিজনিং মডেল — আগে "চিন্তা" করে, ধীর)
  * - AI_TEXT_MODEL / AI_FALLBACK_MODEL env দিয়ে মডেল পরিবর্তনযোগ্য
+ *
+ * ⚠️ রেসপন্স শেপ: Workers AI-এর নেটিভ এন্ডপয়েন্ট এখন OpenAI-স্টাইল শেপও দেয় —
+ *   llama: result.choices[0].message.content (+ JSON হলে result.response পার্সড অবজেক্ট)
+ *   gemma: result.choices[0].message.content (+ reasoning_content — ইগনোর করতে হবে)
+ *   তাই extractResponseText() দুই শেপই সামলায়। স্ট্রিমিংয়ে delta.content আসে।
  *
  * শুধু সার্ভার-সাইড (edge API routes) থেকে ব্যবহারযোগ্য — টোকেন কখনো
  * ব্রাউজারে পাঠানো যাবে না।
@@ -28,9 +34,9 @@ const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID || '';
 const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN || '';
 
 export const AI_PRIMARY_MODEL =
-  process.env.AI_TEXT_MODEL || '@cf/google/gemma-4-26b-a4b-it';
+  process.env.AI_TEXT_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 export const AI_FALLBACK_MODEL =
-  process.env.AI_FALLBACK_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
+  process.env.AI_FALLBACK_MODEL || '@cf/google/gemma-4-26b-a4b-it';
 
 export function isAIConfigured(): boolean {
   return Boolean(CF_ACCOUNT_ID && CF_API_TOKEN);
@@ -52,6 +58,27 @@ function buildRequestBody(messages: AIMessage[], opts: RunAIOptions, stream: boo
   });
 }
 
+/**
+ * দুই ধরনের রেসপন্স শেপ থেকে টেক্সট বের করে:
+ * ১) legacy: result.response (স্ট্রিং, বা JSON হলে পার্সড অবজেক্ট)
+ * ২) OpenAI-স্টাইল: result.choices[0].message.content
+ */
+function extractResponseText(result: unknown): string {
+  const r = result as {
+    response?: unknown;
+    choices?: { message?: { content?: unknown } }[];
+  } | null;
+  if (!r) return '';
+  if (typeof r.response === 'string' && r.response.trim()) return r.response;
+  if (r.response && typeof r.response === 'object') {
+    const s = JSON.stringify(r.response);
+    if (s && s !== '{}') return s;
+  }
+  const content = r.choices?.[0]?.message?.content;
+  if (typeof content === 'string' && content.trim()) return content;
+  return '';
+}
+
 async function callModel(model: string, messages: AIMessage[], opts: RunAIOptions): Promise<string> {
   const res = await fetch(aiRunUrl(model), {
     method: 'POST',
@@ -68,8 +95,8 @@ async function callModel(model: string, messages: AIMessage[], opts: RunAIOption
     throw new Error(`Workers AI (${model}): ${errText}`);
   }
 
-  const text: unknown = json?.result?.response;
-  if (typeof text !== 'string' || !text.trim()) {
+  const text = extractResponseText(json.result);
+  if (!text.trim()) {
     throw new Error(`Workers AI (${model}): খালি উত্তর`);
   }
   return text;
@@ -185,7 +212,7 @@ export async function buildStoreContext(orderLimit = 25): Promise<string> {
       .map(v => `${v.size}/${v.color}:${v.stock}`)
       .join(', ');
     lines.push(
-      `${p.sku} | ${p.barcode || '-'} | ${p.name} | ${p.category}${p.subCategory ? '/' + p.subCategory : ''} | ৳${p.price}${p.costPrice ? ` (কস্ট ৳${p.costPrice})` : ''} | স্টক ${p.stockCount} | অ্যালার্ট ${p.minStockAlert ?? 5}${variants ? ` | ${variants}` : ''}`
+      `${p.sku || '-'} | ${p.barcode || '-'} | ${p.name} | ${p.category}${p.subCategory ? '/' + p.subCategory : ''} | ৳${p.price}${p.costPrice ? ` (কস্ট ৳${p.costPrice})` : ''} | স্টক ${p.stockCount} | অ্যালার্ট ${p.minStockAlert ?? 5}${variants ? ` | ${variants}` : ''}`
     );
   }
 

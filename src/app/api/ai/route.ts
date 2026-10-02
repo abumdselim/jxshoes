@@ -268,7 +268,7 @@ function deterministicMatch(message: string, products: Product[]): AISaleMatch |
 
   // ১) SKU / বারকোড দিয়ে সরাসরি ম্যাচ
   const prod = products.find(p => {
-    const sku = p.sku.toUpperCase();
+    const sku = (p.sku || '').toUpperCase();
     const barcode = (p.barcode || '').toUpperCase();
     return (
       (sku && norm.includes(sku)) ||
@@ -280,7 +280,7 @@ function deterministicMatch(message: string, products: Product[]): AISaleMatch |
 
   // কোড অংশটা বাদ দিয়ে বাকি লেখায় সাইজ/কালার/পরিমাণ খোঁজা
   const rest = norm
-    .replace(prod.sku.toUpperCase(), ' ')
+    .replace((prod.sku || '§').toUpperCase(), ' ')
     .replace((prod.barcode || '§').toUpperCase(), ' ')
     .replace(/[x×]/g, ' ');
 
@@ -335,7 +335,7 @@ function buildCatalogContext(products: Product[]): string {
   return products
     .map(p => {
       const variants = (p.variants || []).map(v => `${v.size}/${v.color}`).join(', ');
-      return `${p.id} | ${p.sku} | ${p.barcode || '-'} | ${p.name} | ${p.category} | সাইজ: ${p.sizes.join(', ')} | কালার: ${p.colors.map(c => c.name).join(', ')} | স্টক: ${p.stockCount}${variants ? ` | ভ্যারিয়েন্ট: ${variants}` : ''}`;
+      return `${p.id} | ${p.sku || '-'} | ${p.barcode || '-'} | ${p.name} | ${p.category} | সাইজ: ${p.sizes.join(', ')} | কালার: ${p.colors.map(c => c.name).join(', ')} | স্টক: ${p.stockCount}${variants ? ` | ভ্যারিয়েন্ট: ${variants}` : ''}`;
     })
     .join('\n');
 }
