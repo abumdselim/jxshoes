@@ -48,6 +48,19 @@ Workers AI REST API (src/lib/ai.ts)
 
 ## ৩. API রেফারেন্স
 
+### 🎙️ ভয়েস (বাংলা ভয়েস কমান্ড — লাইভ)
+
+**পাইপলাইন:** মাইক (MediaRecorder, opus/webm) → `/api/ai {action:'voice-intent'}` →
+**Gemini 3.8 Flash** (অডিও inline_data → হুবহু ট্রান্সক্রিপ্ট, বাংলা/ইংরেজি) →
+বিদ্যমান parse-intent (সেল/রিস্টক/নতুন পণ্য) → কনফার্মেশন পপআপে
+"🎙️ যা শোনা হলো" দেখিয়ে নিশ্চিত করানো → অ্যাকশন।
+
+- **নির্ভুলতার গ্যারান্টি:** STT-র মান যা-ই হোক, চূড়ান্ত অ্যাকশনের আগে দোকানদার ট্রান্সক্রিপ্ট ও
+  পপআপ দেখে নিশ্চিত/সংশোধন করে — তাই কাজ শতভাগ নির্ভুল।
+- **খরচ:** Gemini ফ্রি টায়ার (AI Studio key) — ছোট ভয়েস কমান্ডে দৈনিক কোটা যথেষ্ট।
+- **ব্রাউজার:** Chrome/Edge/Android Chrome পূর্ণ সাপোর্ট (HTTPS দরকার — pages.dev ✓)।
+- `GEMINI_MODEL` (ডিফল্ট `gemini-3.8-flash`) ও `GEMINI_FALLBACK_MODEL` env দিয়ে পরিবর্তনযোগ্য।
+
 ### `GET /api/ai?action=daily-brief[&refresh=1]`
 আজকের AI ব্রিফ — **দিনে ১ বার** জেনারেট হয়ে KV কি `jx_ai_daily_brief`-তে ক্যাশ হয়। `refresh=1` দিলে জোর করে নতুন বানায়।
 ```jsonc
@@ -74,6 +87,7 @@ Workers AI REST API (src/lib/ai.ts)
 | `product-content` | `{ name, category, subCategory, colors, sizes, price }` | `{ description }` | প্রোডাক্ট ফর্ম |
 | `banner-copy` | `{ storeName, tagline }` | `{ badgeText, titlePart1, titleHighlight, subtitle, ctaText }` | মার্কেটিং পেজ |
 | `parse-sale` | `{ message }` | `{ match: AISaleMatch, product: Product \| null }` | AI FAB কুইক সেল |
+| `voice-intent` | `{ audioBase64, mimeType }` | `{ transcript, intent, … }` | AI FAB মাইক বাটন (বাংলা ভয়েস) |
 | `parse-intent` | `{ message }` | `{ intent: 'sale'\|'restock'\|'new-product'\|'other', … }` | AI FAB — মেসেজ থেকে রিস্টক/নতুন পণ্য |
 | `generate-report` | `{ reportType: 'weekly'\|'monthly' }` | `{ report: StoredReport }` | রিপোর্ট পেজ |
 | `email-report` | `{ reportId, to? }` | `{ success, to }` | রিপোর্ট পেজ ইমেইল বাটন |
