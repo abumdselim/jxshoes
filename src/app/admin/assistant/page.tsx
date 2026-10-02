@@ -20,7 +20,27 @@ import {
   AlertTriangle,
   Banknote,
   Trash2,
+  Mic,
+  Square,
+  CheckCircle,
 } from 'lucide-react';
+
+/** চ্যাট মেসেজে ইনলাইন অ্যাকশন (ভয়েস কমান্ড কনফার্ম করার জন্য) */
+interface AssistantMsg extends ChatMsg {
+  restockAction?: { productId: string; productName: string; quantity: number };
+  done?: boolean;
+}
+
+const blobToBase64 = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const str = String(r.result);
+      resolve(str.slice(str.indexOf(',') + 1));
+    };
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
 
 const QUICK_QUESTIONS = [
   { label: 'আজকের সেলস কেমন?', icon: TrendingUp },
@@ -30,12 +50,17 @@ const QUICK_QUESTIONS = [
 ];
 
 export default function AdminAssistantPage() {
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [messages, setMessages] = useState<AssistantMsg[]>([]);
   const [input, setInput] = useState('');
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recording, setRecording] = useState(false);
+  const [voiceBusy, setVoiceBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const voiceChunksRef = useRef<Blob[]>([]);
+  const messagesRef = useRef<AssistantMsg[]>([]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -43,13 +68,178 @@ export default function AdminAssistantPage() {
     }
   }, [messages]);
 
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  const toggleRecording = async () => {
+    if (recording) {
+      mediaRecorderRef.current?.stop();
+      setRecording(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+        ? 'audio/webm'
+        : 'audio/mp4';
+      const mr = new MediaRecorder(stream, { mimeType: mime });
+      voiceChunksRef.current = [];
+      mr.ondataavailable = e => {
+        if (e.data.size > 0) voiceChunksRef.current.push(e.data);
+      };
+      mr.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(voiceChunksRef.current, { type: mime });
+        if (blob.size < 1000) {
+          setError('খুব ছোট রেকর্ডিং — আবার চেষ্টা করুন');
+          return;
+        }
+        await handleVoiceBlob(blob, mime);
+      };
+      mr.start();
+      mediaRecorderRef.current = mr;
+      setRecording(true);
+    } catch {
+      setError('মাইক্রোফোন অ্যাক্সেস পাওয়া যায়নি — ব্রাউজারের অনুমতি দিন');
+    }
+  };
+
+  const confirmRestock = async (msgIndex: number) => {
+    const msg = messagesRef.current[msgIndex];
+    const act = msg?.restockAction;
+    if (!act || msg.done) return;
+    setMessages(prev => {
+      const updated = [...prev];
+      updated[msgIndex] = { ...updated[msgIndex], done: true };
+      return updated;
+    });
+    try {
+      const res = await fetch('/api/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'restock',
+          productId: act.productId,
+          quantity: act.quantity,
+          note: 'AI ভয়েস রিস্টক (অ্যাসিস্ট্যান্ট)',
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: res.ok && data?.success
+            ? `অসাধারণ! ${act.productName} এর স্টক +${act.quantity} হয়েছে — এখন ${data.product?.stockCount ?? '?'} টি`
+            : `দুঃখিত — ${data?.error || 'রিস্টক করা যায়নি'}`,
+        },
+      ]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'সার্ভারে সংযোগ করা যায়নি' }]);
+    }
+  };
+
+  const handleVoiceBlob = async (blob: Blob, mime: string) => {
+    setVoiceBusy(true);
+    setError(null);
+    try {
+      const audioB64 = await blobToBase64(blob);
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'voice-intent', audioBase64: audioB64, mimeType: mime }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!data) throw new Error('সার্ভার থেকে সাড়া পাওয়া যায়নি');
+      if (data.configured === false) throw new Error(data.error);
+
+      const transcript = (data.transcript as string) || '';
+      if (!transcript) throw new Error(data.error || 'কথা শোনা যায়নি — আবার চেষ্টা করুন');
+
+      // চ্যাটে দেখাও AI কী শুনলো
+      setMessages(prev => [...prev, { role: 'user', content: '🎙️ "' + transcript + '"' }]);
+
+      // ১) অটো-এক্সিকিউটেড (হুবহু SKU ম্যাচ restock)
+      if (data.autoExecuted) {
+        const a = data.autoExecuted;
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: 'স্বয়ংক্রিয়ভাবে সম্পন্ন: ' + a.productName + ' এর স্টক +' + a.quantity + ' — এখন ' + a.newStock + ' টি। (ভুল হলে ইনভেন্টরি পেজ থেকে অ্যাডজাস্ট করুন)',
+          },
+        ]);
+        return;
+      }
+
+      // ২) রিস্টক ইনটেন্ট — চ্যাটেই এক-ক্লিক কনফার্ম
+      if (data.intent === 'restock' && data.product) {
+        const qty = Number(data.quantity) || 1;
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: 'বুঝেছি — ' + data.product.name + ' এর স্টক ' + qty + ' পিস বাড়াতে হবে। নিশ্চিত?',
+            restockAction: { productId: data.product.id, productName: data.product.name, quantity: qty },
+          },
+        ]);
+        return;
+      }
+
+      // ৩) সেল/নতুন পণ্য — কনফার্মেশন পপআপ ভাসমান বাটনে (পেমেন্ট/ফর্ম দরকার)
+      if (data.intent === 'sale' && data.match && data.match.matched) {
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: 'বুঝেছি — বিক্রি: ' + (data.product ? data.product.name : '') + ' (' + (data.match.quantity || 1) + 'টি)। এই কাজটি সম্পন্ন করতে নিচে-ডানের ভাসমান "আপনার এআই সহকারী" বাটনে একই কথা বলুন বা লিখুন — সেখানে পেমেন্ট-বাকি সহ কনফার্মেশন পপআপ আসবে।',
+          },
+        ]);
+        return;
+      }
+      if (data.intent === 'new-product' && data.draft) {
+        const d = data.draft;
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: 'বুঝেছি — নতুন পণ্য: ' + d.name + ' (৳' + d.price + ')। এই কাজটি সম্পন্ন করতে ভাসমান বাটনে একই কথা বলুন — সেখানে প্রি-ফিল করা ফর্ম আসবে।',
+          },
+        ]);
+        return;
+      }
+
+      // ৪) সাধারণ প্রশ্ন — AI চ্যাটে উত্তর
+      const withUser: AssistantMsg[] = [...messagesRef.current, { role: 'user', content: transcript }];
+      setMessages([...withUser, { role: 'assistant', content: '' }]);
+      setStreaming(true);
+      await streamChat(withUser, delta => {
+        setMessages(prev => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last && last.role === 'assistant') {
+            updated[updated.length - 1] = { ...last, content: last.content + delta };
+          }
+          return updated;
+        });
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'ভয়েস প্রসেসিং ব্যর্থ');
+    } finally {
+      setVoiceBusy(false);
+    }
+  };
+
   const send = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || streaming) return;
     setError(null);
     setInput('');
 
-    const withUser: ChatMsg[] = [...messages, { role: 'user', content: trimmed }];
+    const withUser: AssistantMsg[] = [...messages, { role: 'user', content: trimmed }];
     setMessages([...withUser, { role: 'assistant', content: '' }]);
     setStreaming(true);
 
@@ -147,7 +337,7 @@ export default function AdminAssistantPage() {
           )}
 
           {messages.map((m, i) => (
-            <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={i} className={`flex flex-wrap gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {m.role === 'assistant' && (
                 <div className="w-8 h-8 rounded-md bg-orange-600 flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-white" />
@@ -171,6 +361,20 @@ export default function AdminAssistantPage() {
                     '…'
                   ))}
               </div>
+              {m.restockAction && (
+                <button
+                  onClick={() => confirmRestock(i)}
+                  disabled={m.done}
+                  className={'ml-11 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md text-xs font-bold transition-colors ' + (
+                    m.done
+                      ? 'bg-slate-100 text-slate-400 border border-slate-200'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  )}
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  {m.done ? 'সম্পন্ন হয়েছে' : 'রিস্টক নিশ্চিত করুন (' + m.restockAction.quantity + ' পিস)'}
+                </button>
+              )}
             </div>
           ))}
 
@@ -190,14 +394,33 @@ export default function AdminAssistantPage() {
 
         {/* ইনপুট */}
         <div className="p-4 border-t border-slate-100 bg-white flex items-center gap-2.5 flex-shrink-0">
+          <button
+            onClick={toggleRecording}
+            disabled={streaming || voiceBusy}
+            title={recording ? 'রেকর্ডিং শেষ করুন' : 'মুখে বলুন — বাংলা ভয়েস কমান্ড'}
+            aria-label="ভয়েস কমান্ড"
+            className={'p-3 rounded-md transition-colors flex-shrink-0 ' + (
+              recording
+                ? 'bg-red-600 text-white animate-pulse'
+                : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+            ) + ' disabled:opacity-50'}
+          >
+            {voiceBusy ? (
+              <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin block" />
+            ) : recording ? (
+              <Square className="w-4 h-4" />
+            ) : (
+              <Mic className="w-4 h-4" />
+            )}
+          </button>
           <input
             ref={inputRef}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send(input)}
-            placeholder="প্রশ্ন লিখুন বা প্রোডাক্ট কোড পাঠান…"
+            placeholder={recording ? 'শুনছি… কথা বলুন' : 'প্রশ্ন লিখুন বা প্রোডাক্ট কোড পাঠান…'}
             className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-            disabled={streaming}
+            disabled={streaming || recording}
           />
           <button
             onClick={() => send(input)}

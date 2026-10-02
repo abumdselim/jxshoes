@@ -10,7 +10,6 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
 import { Product } from '@/types';
 import { ChatMsg, streamChat } from '@/lib/chatClient';
 import {
@@ -86,7 +85,6 @@ function colorHex(name: string): string {
 }
 
 export default function AdminAiFab() {
-  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState('');
@@ -512,10 +510,6 @@ export default function AdminAiFab() {
     v => v.size === saleDraft.size && v.color === saleDraft.color
   );
   const draftStock = draftVariant ? draftVariant.stock : saleDraft?.product.stockCount;
-
-  // অ্যাসিস্ট্যান্ট পেজে ফুল চ্যাট আছে, FAB দরকার নেই
-  // (hooks-এর নিয়ম: সব hook-এর পরে return — নাহলে পেজ বদলালে ক্র্যাশ করে)
-  if (pathname.startsWith('/admin/assistant')) return null;
 
   return (
     <>
