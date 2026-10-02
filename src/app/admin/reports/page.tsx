@@ -165,9 +165,9 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-20">
       {/* হেডার — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">AI বিজনেস রিপোর্ট</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">AI বিজনেস রিপোর্ট</h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             নিখুঁত সংখ্যা (কোড থেকে) + AI বিশ্লেষণ — সাপ্তাহিক ও মাসিক পূর্ণাঙ্গ রিপোর্ট।
           </p>
@@ -176,7 +176,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
           <button
             onClick={() => generate('weekly')}
             disabled={generating !== null}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-colors disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors disabled:opacity-60"
           >
             {generating === 'weekly' ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -188,7 +188,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
           <button
             onClick={() => generate('monthly')}
             disabled={generating !== null}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-lg shadow-orange-600/30 transition-all disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all disabled:opacity-60"
           >
             {generating === 'monthly' ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -201,21 +201,21 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
       </div>
 
       {generating && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center gap-3 text-sm text-slate-600">
+        <div className="bg-white rounded-md border border-slate-200 p-5 flex items-center gap-3 text-sm text-slate-600">
           <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
           AI আপনার পুরো হিসাব মিলিয়ে রিপোর্ট লিখছে… প্রায় ২০-৩০ সেকেন্ড লাগতে পারে।
         </div>
       )}
 
       {genError && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800 font-bold">
+        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-xs text-amber-800 font-bold">
           ⚠️ {genError}
         </div>
       )}
 
       {emailMsg && (
         <div
-          className={`rounded-2xl p-4 text-xs font-bold border ${
+          className={`rounded-md p-4 text-xs font-bold border ${
             emailMsg.error
               ? 'bg-amber-50 border-amber-200 text-amber-800'
               : 'bg-emerald-50 border-emerald-200 text-emerald-700'
@@ -227,22 +227,22 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* হিস্ট্রি */}
-        <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 space-y-2 max-h-[70vh] overflow-y-auto">
-          <h2 className="text-[11px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+        <div className="bg-white rounded-md border border-slate-200/80 p-5 space-y-2 max-h-[70vh] overflow-y-auto">
+          <h2 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
             <History className="w-3.5 h-3.5" /> রিপোর্ট হিস্ট্রি
           </h2>
           {reports.map(r => (
             <button
               key={r.id}
               onClick={() => setSelected(r)}
-              className={`w-full text-left px-4 py-3 rounded-2xl border transition-all ${
+              className={`w-full text-left px-4 py-3 rounded-md border transition-all ${
                 selected?.id === r.id
                   ? 'border-orange-400 bg-orange-50'
                   : 'border-slate-100 bg-slate-50 hover:border-orange-200'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-black text-slate-800">
+                <span className="text-xs font-bold text-slate-800">
                   {r.type === 'weekly' ? 'সাপ্তাহিক' : 'মাসিক'} রিপোর্ট
                 </span>
                 {r.emailedTo && (
@@ -265,7 +265,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
         {/* রিপোর্ট ভিউয়ার */}
         <div className="lg:col-span-2">
           {selected ? (
-            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden print:shadow-none">
+            <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden print:">
               {/* টুলবার */}
               <div className="bg-slate-900 text-white px-6 py-3.5 flex items-center justify-between no-print">
                 <div className="flex items-center gap-2 text-xs font-bold">
@@ -275,7 +275,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
                 <div className="flex items-center gap-2">
                   <button
                     onClick={printReport}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-[11px] font-bold"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-[11px] font-bold"
                   >
                     <Printer className="w-3.5 h-3.5" /> প্রিন্ট
                   </button>
@@ -285,7 +285,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
               <div className="p-6 sm:p-8 space-y-6">
                 {/* হেড */}
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">{selected.headline}</h2>
+                  <h2 className="text-xl font-bold text-slate-900">{selected.headline}</h2>
                   <p className="text-[11px] text-slate-400 mt-1">
                     {new Date(selected.periodStart).toLocaleDateString('en-CA')} →{' '}
                     {new Date(selected.periodEnd).toLocaleDateString('en-CA')}
@@ -296,9 +296,9 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
                 {/* স্কোরকার্ড */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {selected.scorecard.map(s => (
-                    <div key={s.label} className="bg-slate-50 border border-slate-100 rounded-2xl p-3.5 text-center">
+                    <div key={s.label} className="bg-slate-50 border border-slate-100 rounded-md p-3.5 text-center">
                       <div className="text-[10px] font-bold text-slate-500">{s.label}</div>
-                      <div className="text-sm font-black text-slate-900 mt-1">{s.value}</div>
+                      <div className="text-sm font-bold text-slate-900 mt-1">{s.value}</div>
                     </div>
                   ))}
                 </div>
@@ -306,7 +306,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
                 {/* সেকশন */}
                 {selected.sections.map((sec, i) => (
                   <div key={i}>
-                    <h3 className="font-black text-sm text-orange-700">{sec.title}</h3>
+                    <h3 className="font-bold text-sm text-orange-700">{sec.title}</h3>
                     <p className="text-sm text-slate-600 leading-relaxed mt-1.5 whitespace-pre-wrap">{sec.body}</p>
                     {(sec.highlights || []).length > 0 && (
                       <ul className="mt-2.5 space-y-1.5">
@@ -323,8 +323,8 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
 
                 {/* পরামর্শ */}
                 {selected.recommendations.length > 0 && (
-                  <div className="bg-slate-900 rounded-2xl p-5">
-                    <h3 className="text-[11px] font-black text-orange-300 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                  <div className="bg-slate-900 rounded-md p-5">
+                    <h3 className="text-[11px] font-bold text-orange-300 uppercase tracking-wider flex items-center gap-1.5 mb-3">
                       <Lightbulb className="w-4 h-4" /> AI-এর পরামর্শ — পরের সময়ের জন্য
                     </h3>
                     <ul className="space-y-2">
@@ -340,7 +340,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
 
                 {/* ইমেইল */}
                 <div className="border-t border-slate-100 pt-5 no-print">
-                  <h3 className="text-[11px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+                  <h3 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
                     <Send className="w-3.5 h-3.5" /> এই রিপোর্ট ইমেইলে পাঠান
                   </h3>
                   <div className="flex flex-col sm:flex-row gap-2">
@@ -348,12 +348,12 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
                       value={emailTo}
                       onChange={e => setEmailTo(e.target.value)}
                       placeholder="prapok@example.com (সেটিংস থেকে ডিফল্ট)"
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
                     <button
                       onClick={sendEmail}
                       disabled={emailing || !selected}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md disabled:opacity-50"
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-50"
                     >
                       {emailing ? (
                         <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -372,15 +372,15 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-12 text-center">
+            <div className="bg-white rounded-md border border-slate-200/80 p-12 text-center">
               <FileText className="w-12 h-12 mx-auto text-slate-200 mb-4" />
-              <h3 className="font-black text-slate-700">কোনো রিপোর্ট সিলেক্ট করা নেই</h3>
+              <h3 className="font-bold text-slate-700">কোনো রিপোর্ট সিলেক্ট করা নেই</h3>
               <p className="text-xs text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed">
                 উপরের বাটন দিয়ে সাপ্তাহিক বা মাসিক রিপোর্ট বানান — দোকানের আসল হিসাব থেকে
                 AI বিশ্লেষণ লিখে দেবে। Cron Worker সেটআপ করলে প্রতি সপ্তাহ/মাসে অটোমেটিক
                 তৈরি হয়ে ইমেইলেও যাবে (docs/ROADMAP.md দেখুন)।
               </p>
-              <div className="mt-4 inline-flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+              <div className="mt-4 inline-flex items-center gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
                 <AlertTriangle className="w-3.5 h-3.5" />
                 রিপোর্ট ইমেইল করতে Cloudflare Email Service সেটআপ লাগবে
               </div>

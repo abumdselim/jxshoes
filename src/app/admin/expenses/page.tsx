@@ -90,33 +90,33 @@ export default function AdminExpensesPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-20">
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 ">
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">খরচের খাতা</h1>
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 ">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">খরচের খাতা</h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">
           ভাড়া, বিল, বেতন — প্রতিটা খরচ এখানে রাখুন। AI হিসাবে নেট প্রফিট বের করার সময় এগুলো অটো বাদ যাবে।
         </p>
       </div>
 
       {feedback && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-2xl text-xs sm:text-sm font-bold">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-md text-xs sm:text-sm font-bold">
           {feedback}
         </div>
       )}
 
       {/* KPI */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div className="bg-white p-5 rounded-md border border-slate-200/80">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">এই মাসের খরচ</span>
-          <div className="mt-2 text-2xl font-black text-red-600">{formatPrice(thisMonth)}</div>
+          <div className="mt-2 text-2xl font-bold text-red-600">{formatPrice(thisMonth)}</div>
         </div>
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div className="bg-white p-5 rounded-md border border-slate-200/80">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">সর্বমোট খরচ</span>
-          <div className="mt-2 text-2xl font-black text-slate-900">{formatPrice(total)}</div>
+          <div className="mt-2 text-2xl font-bold text-slate-900">{formatPrice(total)}</div>
         </div>
       </div>
 
       {/* যোগ করার ফর্ম */}
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+      <div className="bg-white p-6 rounded-md border border-slate-200/80 space-y-4">
         <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
           <Plus className="w-4 h-4 text-orange-600" /> নতুন খরচ যোগ করুন
         </h3>
@@ -126,7 +126,7 @@ export default function AdminExpensesPage() {
             <select
               value={form.category}
               onChange={e => setForm({ ...form, category: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               {EXPENSE_CATEGORIES.map(c => (
                 <option key={c} value={c}>{c}</option>
@@ -138,7 +138,7 @@ export default function AdminExpensesPage() {
                 value={form.customCategory}
                 onChange={e => setForm({ ...form, customCategory: e.target.value })}
                 placeholder="খাতার নাম লিখুন"
-                className="w-full mt-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none"
+                className="w-full mt-2 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none"
               />
             )}
           </div>
@@ -148,7 +148,7 @@ export default function AdminExpensesPage() {
               type="number"
               value={form.amount}
               onChange={e => setForm({ ...form, amount: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
           <div className="sm:col-span-2">
@@ -157,14 +157,14 @@ export default function AdminExpensesPage() {
               value={form.note}
               onChange={e => setForm({ ...form, note: e.target.value })}
               placeholder="যেমন: সেপ্টেম্বর মাসের বিল"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none"
+              className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none"
             />
           </div>
         </div>
         <button
           onClick={submit}
           disabled={submitting}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold disabled:opacity-50"
         >
           {submitting ? (
             <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -176,7 +176,7 @@ export default function AdminExpensesPage() {
       </div>
 
       {/* তালিকা */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-bold border-b border-slate-100">
@@ -193,16 +193,16 @@ export default function AdminExpensesPage() {
                 <tr key={e.id} className="hover:bg-slate-50/60 transition-colors">
                   <td className="py-4 px-6 text-xs font-semibold text-slate-500">{formatDate(e.createdAt)}</td>
                   <td className="py-4 px-6">
-                    <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 font-bold text-xs">
+                    <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-bold text-xs">
                       {e.category}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-xs text-slate-500 italic">{e.note || '—'}</td>
-                  <td className="py-4 px-6 font-black text-red-600">- {formatPrice(e.amount)}</td>
+                  <td className="py-4 px-6 font-bold text-red-600">- {formatPrice(e.amount)}</td>
                   <td className="py-4 px-6 text-right">
                     <button
                       onClick={() => remove(e.id)}
-                      className="p-2 rounded-xl text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-2 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                       aria-label="মুছুন"
                     >
                       <Trash2 className="w-4 h-4" />

@@ -269,7 +269,7 @@ export default function AdminInventoryPage() {
       {/* Toast Feedback */}
       {feedbackMsg && (
         <div
-          className={`fixed top-20 right-6 z-50 px-5 py-3 rounded-2xl shadow-xl border flex items-center gap-2.5 text-sm font-bold animate-in fade-in slide-in-from-top-4 duration-300 ${
+          className={`fixed top-20 right-6 z-50 px-5 py-3 rounded-md border flex items-center gap-2.5 text-sm font-bold animate-in fade-in slide-in-from-top-4 duration-300 ${
             feedbackMsg.type === 'success'
               ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
               : 'bg-red-50 text-red-800 border-red-300'
@@ -285,13 +285,13 @@ export default function AdminInventoryPage() {
       )}
 
       {/* Header — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-orange-100 text-orange-700">
+            <span className="p-2 rounded-md bg-orange-100 text-orange-700">
               <Boxes className="w-6 h-6" />
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               শপ ইনভেন্টরি ও স্টক ম্যানেজমেন্ট (ERP)
             </h1>
           </div>
@@ -303,7 +303,7 @@ export default function AdminInventoryPage() {
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             onClick={() => openRestockModal()}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-orange-600/25 transition-all transform hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-bold transition-all transform hover:-translate-y-0.5"
           >
             <Plus className="w-4 h-4" />
             <span>নতুন চালান স্টক ইন</span>
@@ -311,7 +311,7 @@ export default function AdminInventoryPage() {
 
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-md bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold transition-all"
             title="ইনভেন্টরি শিট প্রিন্ট করুন"
           >
             <Printer className="w-4 h-4 text-slate-500" />
@@ -321,7 +321,7 @@ export default function AdminInventoryPage() {
           <button
             onClick={loadInventory}
             disabled={loading}
-            className="p-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 transition-all shadow-sm"
+            className="p-2.5 rounded-md bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 transition-all"
             title="রিফ্রেশ করুন"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-orange-600' : ''}`} />
@@ -332,15 +332,15 @@ export default function AdminInventoryPage() {
       {/* KPI Cards (Financial & Operational Summary) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
         {/* Total Stock Units */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-4 sm:p-5 rounded-md border border-slate-200/90 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">মোট মজুদ পণ্য</span>
-            <span className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <span className="w-9 h-9 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
               <Package className="w-5 h-5" />
             </span>
           </div>
           <div className="mt-3">
-            <span className="text-2xl sm:text-3xl font-black text-slate-900">{summary.totalUnits}</span>
+            <span className="text-2xl sm:text-3xl font-bold text-slate-900">{summary.totalUnits}</span>
             <span className="text-xs text-slate-500 ml-1.5 font-semibold">পিস</span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1">
@@ -349,15 +349,15 @@ export default function AdminInventoryPage() {
         </div>
 
         {/* Total Cost Value (ক্রয়মূল্য ভ্যালুয়েশন) */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-4 sm:p-5 rounded-md border border-slate-200/90 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">ইনভেন্টরি ক্রয়মূল্য</span>
-            <span className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <span className="w-9 h-9 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center">
               <DollarSign className="w-5 h-5" />
             </span>
           </div>
           <div className="mt-3">
-            <span className="text-xl sm:text-2xl font-black text-slate-900">{formatPrice(summary.totalCostValue)}</span>
+            <span className="text-xl sm:text-2xl font-bold text-slate-900">{formatPrice(summary.totalCostValue)}</span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1">
             মোট পাইকারি খরচ মূল্য
@@ -365,15 +365,15 @@ export default function AdminInventoryPage() {
         </div>
 
         {/* Total Retail Value & Profit */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-4 sm:p-5 rounded-md border border-slate-200/90 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">সম্ভাব্য বিক্রয়মূল্য</span>
-            <span className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <span className="w-9 h-9 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <TrendingUp className="w-5 h-5" />
             </span>
           </div>
           <div className="mt-3">
-            <span className="text-xl sm:text-2xl font-black text-emerald-600">{formatPrice(summary.totalRetailValue)}</span>
+            <span className="text-xl sm:text-2xl font-bold text-emerald-600">{formatPrice(summary.totalRetailValue)}</span>
           </div>
           <p className="text-[11px] text-emerald-700 font-semibold mt-1">
             সম্ভাব্য লাভ: {formatPrice(summary.potentialProfit)} ({summary.profitMarginPercent}%)
@@ -381,15 +381,15 @@ export default function AdminInventoryPage() {
         </div>
 
         {/* Low Stock & Out of Stock Alerts */}
-        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/90 shadow-sm relative overflow-hidden group">
+        <div className="bg-white p-4 sm:p-5 rounded-md border border-slate-200/90 relative overflow-hidden group">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">লো-স্টক অ্যালার্ট</span>
-            <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${summary.lowStockCount > 0 ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
+            <span className={`w-9 h-9 rounded-md flex items-center justify-center ${summary.lowStockCount > 0 ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'}`}>
               <AlertTriangle className="w-5 h-5" />
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className={`text-2xl sm:text-3xl font-black ${summary.lowStockCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>
+            <span className={`text-2xl sm:text-3xl font-bold ${summary.lowStockCount > 0 ? 'text-red-600' : 'text-slate-900'}`}>
               {summary.lowStockCount}
             </span>
             <span className="text-xs text-slate-500 font-medium">টি রি-অর্ডার প্রয়োজন</span>
@@ -401,12 +401,12 @@ export default function AdminInventoryPage() {
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="bg-white rounded-2xl p-1.5 border border-slate-200/90 shadow-sm flex items-center gap-1 overflow-x-auto">
+      <div className="bg-white rounded-md p-1.5 border border-slate-200/90 flex items-center gap-1 overflow-x-auto">
         <button
           onClick={() => setActiveTab('inventory')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
             activeTab === 'inventory'
-              ? 'bg-slate-900 text-white shadow-md'
+              ? 'bg-slate-900 text-white'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -416,9 +416,9 @@ export default function AdminInventoryPage() {
 
         <button
           onClick={() => setActiveTab('movements')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
             activeTab === 'movements'
-              ? 'bg-slate-900 text-white shadow-md'
+              ? 'bg-slate-900 text-white'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -428,9 +428,9 @@ export default function AdminInventoryPage() {
 
         <button
           onClick={() => setActiveTab('lowstock')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
             activeTab === 'lowstock'
-              ? 'bg-red-600 text-white shadow-md'
+              ? 'bg-red-600 text-white'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -443,7 +443,7 @@ export default function AdminInventoryPage() {
       {activeTab === 'inventory' && (
         <div className="space-y-4">
           {/* Filter Bar */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="bg-white p-4 rounded-md border border-slate-200/90 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
             {/* Search */}
             <div className="relative flex-1">
               <input
@@ -451,7 +451,7 @@ export default function AdminInventoryPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="প্রোডাক্টের নাম, SKU কোড (যেমন: JX-SH-001), বারকোড বা সাপ্লায়ার খুঁজুন..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
@@ -461,7 +461,7 @@ export default function AdminInventoryPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none"
+                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none"
               >
                 <option value="all">সকল ক্যাটাগরি</option>
                 <option value="shoes">জুতা (Shoes)</option>
@@ -471,7 +471,7 @@ export default function AdminInventoryPage() {
               <select
                 value={stockStatusFilter}
                 onChange={(e) => setStockStatusFilter(e.target.value as any)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none"
+                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none"
               >
                 <option value="all">সকল স্টক অবস্থা</option>
                 <option value="instock">পর্যাপ্ত স্টক (&gt;5)</option>
@@ -482,7 +482,7 @@ export default function AdminInventoryPage() {
           </div>
 
           {/* Inventory Table */}
-          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-md border border-slate-200/90 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-bold border-b border-slate-100">
@@ -514,7 +514,7 @@ export default function AdminInventoryPage() {
                         <tr key={p.id} className="hover:bg-slate-50/70 transition-colors">
                           {/* SKU & Barcode */}
                           <td className="py-4 px-6 align-top">
-                            <div className="font-mono font-black text-xs text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg inline-block border border-slate-200">
+                            <div className="font-mono font-bold text-xs text-slate-900 bg-slate-100 px-2.5 py-1 rounded-md inline-block border border-slate-200">
                               {p.sku}
                             </div>
                             {p.barcode && (
@@ -534,7 +534,7 @@ export default function AdminInventoryPage() {
                               <img
                                 src={p.images[0]}
                                 alt={p.name}
-                                className="w-12 h-12 rounded-xl object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
+                                className="w-12 h-12 rounded-md object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
                               />
                               <div>
                                 <a
@@ -592,7 +592,7 @@ export default function AdminInventoryPage() {
                               </div>
                               <div>
                                 <span className="text-slate-400">বিক্রয়:</span>{' '}
-                                <span className="font-black text-slate-900">{formatPrice(p.price)}</span>
+                                <span className="font-bold text-slate-900">{formatPrice(p.price)}</span>
                               </div>
                               <div className="text-[10px] text-emerald-600 font-bold">
                                 লাভ: +{formatPrice(profitPerUnit)}
@@ -602,20 +602,20 @@ export default function AdminInventoryPage() {
 
                           {/* Stock Count with Inline Controls */}
                           <td className="py-4 px-6 align-top text-center">
-                            <div className="inline-flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <div className="inline-flex items-center gap-1.5 bg-slate-100 p-1 rounded-md border border-slate-200">
                               <button
                                 onClick={() => handleQuickInlineStock(p, -1)}
-                                className="w-6 h-6 rounded-lg bg-white text-slate-700 font-bold hover:bg-red-50 hover:text-red-600 text-xs flex items-center justify-center shadow-xs"
+                                className="w-6 h-6 rounded-md bg-white text-slate-700 font-bold hover:bg-red-50 hover:text-red-600 text-xs flex items-center justify-center"
                                 title="১ পিস কমান"
                               >
                                 -
                               </button>
-                              <span className="w-10 text-center font-black text-sm text-slate-900">
+                              <span className="w-10 text-center font-bold text-sm text-slate-900">
                                 {p.stockCount}
                               </span>
                               <button
                                 onClick={() => handleQuickInlineStock(p, 1)}
-                                className="w-6 h-6 rounded-lg bg-white text-slate-700 font-bold hover:bg-emerald-50 hover:text-emerald-600 text-xs flex items-center justify-center shadow-xs"
+                                className="w-6 h-6 rounded-md bg-white text-slate-700 font-bold hover:bg-emerald-50 hover:text-emerald-600 text-xs flex items-center justify-center"
                                 title="১ পিস বাড়ান"
                               >
                                 +
@@ -629,15 +629,15 @@ export default function AdminInventoryPage() {
                           {/* Stock Status Badge */}
                           <td className="py-4 px-6 align-top">
                             {isOutOfStock ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-red-100 text-red-800">
                                 <X className="w-3 h-3" /> শেষ
                               </span>
                             ) : isLowStock ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-100 text-amber-800">
                                 <AlertTriangle className="w-3 h-3" /> লো স্টক ({p.stockCount})
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800">
                                 <Check className="w-3 h-3" /> মজুদ আছে
                               </span>
                             )}
@@ -647,14 +647,14 @@ export default function AdminInventoryPage() {
                           <td className="py-4 px-6 align-top text-right space-x-1.5 whitespace-nowrap">
                             <button
                               onClick={() => openRestockModal(p)}
-                              className="px-2.5 py-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 text-xs font-bold transition-colors"
+                              className="px-2.5 py-1.5 rounded-md bg-orange-50 hover:bg-orange-100 text-orange-600 text-xs font-bold transition-colors"
                               title="নতুন চালান যুক্ত করুন"
                             >
                               + চালান
                             </button>
                             <button
                               onClick={() => openAdjustModal(p)}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                              className="px-2.5 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
                               title="স্টক অডিট বা ড্যামেজ অ্যাডজাস্ট"
                             >
                               অ্যাডজাস্ট
@@ -673,13 +673,13 @@ export default function AdminInventoryPage() {
 
       {/* TAB 2: INVENTORY MOVEMENTS AUDIT LOG */}
       {activeTab === 'movements' && (
-        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-md border border-slate-200/90 overflow-hidden">
           <div className="p-5 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-slate-900">স্টক মুভমেন্ট ও চালান ট্র্যাকিং লগ</h3>
               <p className="text-xs text-slate-400 mt-0.5">নতুন চালান, বিক্রয়, রিটার্ন ও অডিট অ্যাডজাস্টমেন্টের সম্পূর্ণ হিস্ট্রি।</p>
             </div>
-            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-xl">
+            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-md">
               মোট {movements.length} টি রেকর্ড
             </span>
           </div>
@@ -713,27 +713,27 @@ export default function AdminInventoryPage() {
                       </td>
                       <td className="py-3.5 px-6">
                         {m.type === 'RESTOCK' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800">
                             <ArrowDownLeft className="w-3 h-3" /> চালান ইন
                           </span>
                         )}
                         {m.type === 'SALE' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-800">
                             <ArrowUpRight className="w-3 h-3" /> বিক্রয়
                           </span>
                         )}
                         {m.type === 'DAMAGE' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-red-100 text-red-800">
                             <X className="w-3 h-3" /> ড্যামেজ
                           </span>
                         )}
                         {m.type === 'RETURN' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-purple-100 text-purple-800">
                             <RotateCcw className="w-3 h-3" /> রিটার্ন
                           </span>
                         )}
                         {m.type === 'ADJUSTMENT' && (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-800">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-200 text-slate-800">
                             অ্যাডজাস্টমেন্ট
                           </span>
                         )}
@@ -747,7 +747,7 @@ export default function AdminInventoryPage() {
                       </td>
                       <td className="py-3.5 px-6 text-center">
                         <span
-                          className={`font-black text-xs ${
+                          className={`font-bold text-xs ${
                             m.quantity > 0 ? 'text-emerald-600' : 'text-red-600'
                           }`}
                         >
@@ -777,7 +777,7 @@ export default function AdminInventoryPage() {
       {/* TAB 3: LOW STOCK REORDER SHEET */}
       {activeTab === 'lowstock' && (
         <div className="space-y-4">
-          <div className="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between">
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0" />
               <div>
@@ -791,7 +791,7 @@ export default function AdminInventoryPage() {
               <button
                 onClick={loadRestockPlan}
                 disabled={aiPlanLoading}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm disabled:opacity-60 inline-flex items-center gap-1.5"
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md text-xs font-bold disabled:opacity-60 inline-flex items-center gap-1.5"
               >
                 {aiPlanLoading ? (
                   <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -802,7 +802,7 @@ export default function AdminInventoryPage() {
               </button>
               <button
                 onClick={() => window.print()}
-                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm"
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-md text-xs font-bold"
               >
                 প্রিন্ট রি-অর্ডার স্লিপ
               </button>
@@ -811,16 +811,16 @@ export default function AdminInventoryPage() {
 
           {/* AI রিস্টক প্ল্যান */}
           {aiPlanLoading && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 flex items-center gap-3 text-sm text-slate-600">
+            <div className="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-3 text-sm text-slate-600">
               <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
               AI প্রতিটা প্রোডাক্টের বিক্রির গতি আর স্টক মিলিয়ে হিসাব করছে…
             </div>
           )}
 
           {aiPlan && !aiPlanLoading && (
-            <div className="bg-white border-2 border-slate-900 rounded-2xl overflow-hidden">
+            <div className="bg-white border-2 border-slate-900 rounded-md overflow-hidden">
               <div className="bg-slate-900 text-white px-5 py-3.5">
-                <div className="text-xs font-black flex items-center gap-2">
+                <div className="text-xs font-bold flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-emerald-400" /> AI রিস্টক প্ল্যান
                 </div>
                 {aiPlan.summary && <p className="text-[11px] text-slate-300 mt-1 leading-relaxed">{aiPlan.summary}</p>}
@@ -831,14 +831,14 @@ export default function AdminInventoryPage() {
                   return (
                     <div key={item.productId} className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3.5">
                       {prod?.images[0] && (
-                        <img src={prod.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover border" />
+                        <img src={prod.images[0]} alt="" className="w-10 h-10 rounded-md object-cover border" />
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-black text-slate-900">{item.productName}</div>
+                        <div className="text-xs font-bold text-slate-900">{item.productName}</div>
                         <div className="text-[11px] text-slate-500">{item.reason}</div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-black text-emerald-700 whitespace-nowrap">
+                        <span className="text-sm font-bold text-emerald-700 whitespace-nowrap">
                           +{item.recommendedQuantity} টি
                         </span>
                         <button
@@ -849,7 +849,7 @@ export default function AdminInventoryPage() {
                               setRestockQty(item.recommendedQuantity);
                             }
                           }}
-                          className="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-bold shadow-sm"
+                          className="px-3 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-bold"
                         >
                           চালান দিন
                         </button>
@@ -870,14 +870,14 @@ export default function AdminInventoryPage() {
             {lowStockList.map((p) => (
               <div
                 key={p.id}
-                className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col justify-between"
+                className="bg-white rounded-md p-4 border border-slate-200 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-mono text-xs font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-700">
                       {p.sku}
                     </span>
-                    <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                    <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-200">
                       অবশিষ্ট: {p.stockCount} টি
                     </span>
                   </div>
@@ -885,7 +885,7 @@ export default function AdminInventoryPage() {
                     <img
                       src={p.images[0]}
                       alt={p.name}
-                      className="w-14 h-14 rounded-xl object-cover border bg-slate-50"
+                      className="w-14 h-14 rounded-md object-cover border bg-slate-50"
                     />
                     <div>
                       <h4 className="font-bold text-slate-900 text-sm line-clamp-1">{p.name}</h4>
@@ -901,7 +901,7 @@ export default function AdminInventoryPage() {
                   <span className="text-[11px] text-slate-400">মিনিমাম লেভেল: {p.minStockAlert || 5}</span>
                   <button
                     onClick={() => openRestockModal(p)}
-                    className="px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-sm"
+                    className="px-3 py-1.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold"
                   >
                     চালান যোগ করুন
                   </button>
@@ -915,10 +915,10 @@ export default function AdminInventoryPage() {
       {/* MODAL 1: RESTOCK SHIPMENT MODAL */}
       {isRestockModalOpen && selectedProductForRestock && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-8">
+          <div className="bg-white rounded-md max-w-lg w-full p-6 sm:p-8 border border-slate-200 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
               <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                <span className="w-8 h-8 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
                   <ArrowDownLeft className="w-5 h-5" />
                 </span>
                 <div>
@@ -928,7 +928,7 @@ export default function AdminInventoryPage() {
               </div>
               <button
                 onClick={() => setIsRestockModalOpen(false)}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400"
+                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -949,7 +949,7 @@ export default function AdminInventoryPage() {
                       setRestockCost(String(found.costPrice || ''));
                     }
                   }}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -972,7 +972,7 @@ export default function AdminInventoryPage() {
                     value={restockQty}
                     onChange={(e) => setRestockQty(Number(e.target.value))}
                     placeholder="যেমন: 20"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 
@@ -985,7 +985,7 @@ export default function AdminInventoryPage() {
                     value={restockCost}
                     onChange={(e) => setRestockCost(e.target.value)}
                     placeholder="যেমন: 2450"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -1000,7 +1000,7 @@ export default function AdminInventoryPage() {
                   value={restockInvoice}
                   onChange={(e) => setRestockInvoice(e.target.value)}
                   placeholder="যেমন: চালান #CH-2026-99, হাজারীবাগ লেদার"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -1014,12 +1014,12 @@ export default function AdminInventoryPage() {
                   value={restockNote}
                   onChange={(e) => setRestockNote(e.target.value)}
                   placeholder="যেমন: শীতকালীন নতুন সাইজের লট"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none"
                 />
               </div>
 
               {/* Calculation Preview */}
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1.5">
+              <div className="p-3.5 bg-slate-50 rounded-md border border-slate-200 text-xs space-y-1.5">
                 <div className="flex justify-between text-slate-600">
                   <span>বর্তমান স্টক:</span>
                   <span className="font-bold text-slate-900">{selectedProductForRestock.stockCount} টি</span>
@@ -1028,7 +1028,7 @@ export default function AdminInventoryPage() {
                   <span>যোগ হচ্ছে:</span>
                   <span>+{restockQty} টি</span>
                 </div>
-                <div className="flex justify-between text-slate-900 font-black border-t border-slate-200 pt-1.5">
+                <div className="flex justify-between text-slate-900 font-bold border-t border-slate-200 pt-1.5">
                   <span>আপডেট পরবর্তী মোট স্টক:</span>
                   <span>{selectedProductForRestock.stockCount + restockQty} টি</span>
                 </div>
@@ -1039,14 +1039,14 @@ export default function AdminInventoryPage() {
                 <button
                   type="button"
                   onClick={() => setIsRestockModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-md border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
                   disabled={restockSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-lg shadow-orange-600/30 transition-all disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all disabled:opacity-50"
                 >
                   {restockSubmitting ? 'সংরক্ষণ হচ্ছে...' : 'স্টক ইন নিশ্চিত করুন'}
                 </button>
@@ -1059,10 +1059,10 @@ export default function AdminInventoryPage() {
       {/* MODAL 2: STOCK ADJUSTMENT MODAL */}
       {isAdjustModalOpen && selectedProductForAdjust && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-8">
+          <div className="bg-white rounded-md max-w-lg w-full p-6 sm:p-8 border border-slate-200 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
               <div className="flex items-center gap-2">
-                <span className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
+                <span className="w-8 h-8 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
                   <RotateCcw className="w-5 h-5" />
                 </span>
                 <div>
@@ -1072,14 +1072,14 @@ export default function AdminInventoryPage() {
               </div>
               <button
                 onClick={() => setIsAdjustModalOpen(false)}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-400"
+                className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleAdjustSubmit} className="space-y-4">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="p-3 bg-slate-50 rounded-md border border-slate-200">
                 <div className="font-mono text-xs text-orange-600 font-bold">{selectedProductForAdjust.sku}</div>
                 <div className="font-bold text-sm text-slate-900 mt-0.5">{selectedProductForAdjust.name}</div>
                 <div className="text-xs text-slate-500 mt-1">
@@ -1098,7 +1098,7 @@ export default function AdminInventoryPage() {
                   min={0}
                   value={adjustTargetStock}
                   onChange={(e) => setAdjustTargetStock(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-base font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -1110,7 +1110,7 @@ export default function AdminInventoryPage() {
                 <select
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none"
                 >
                   <option value="ADJUSTMENT">ফিজিক্যাল স্টক অডিট (গণনায় কম/বেশি পাওয়া গেছে)</option>
                   <option value="DAMAGE">ড্যামেজ / নষ্ট পণ্য (স্টক থেকে বাদ)</option>
@@ -1128,7 +1128,7 @@ export default function AdminInventoryPage() {
                   value={adjustNote}
                   onChange={(e) => setAdjustNote(e.target.value)}
                   placeholder="যেমন: স্যাম্পল ডিসপ্লেতে ১ পিস রাখা হয়েছে"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:outline-none font-sans"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none font-sans"
                 />
               </div>
 
@@ -1137,14 +1137,14 @@ export default function AdminInventoryPage() {
                 <button
                   type="button"
                   onClick={() => setIsAdjustModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-md border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
                   disabled={adjustSubmitting}
-                  className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all disabled:opacity-50"
                 >
                   {adjustSubmitting ? 'আপডেট হচ্ছে...' : 'স্টক আপডেট করুন'}
                 </button>

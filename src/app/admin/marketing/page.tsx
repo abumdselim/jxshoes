@@ -145,8 +145,8 @@ export default function AdminMarketingPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 ">
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 ">
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
           মার্কেটিং, ব্যানার ও কুপন কন্ট্রোল
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -155,7 +155,7 @@ export default function AdminMarketingPage() {
       </div>
 
       {saveSuccess && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-xs sm:text-sm font-bold flex items-center gap-2">
           <Check className="w-5 h-5 text-emerald-600" />
           <span>ব্যানার ও অফারের তথ্য সফলভাবে সেভ হয়েছে! লাইভ স্টোরে পরিবর্তন দেখতে পারেন।</span>
         </div>
@@ -163,7 +163,7 @@ export default function AdminMarketingPage() {
 
       {/* Hero Banner Controller */}
       <form onSubmit={handleSaveMarketing} className="space-y-8">
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-6">
+        <div className="bg-white p-6 sm:p-8 rounded-md border border-slate-200/90 space-y-6">
           <div className="flex items-center justify-between border-b pb-4">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-orange-600" />
@@ -174,7 +174,7 @@ export default function AdminMarketingPage() {
                 type="button"
                 onClick={generateBannerCopy}
                 disabled={aiBannerLoading}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all disabled:opacity-60"
               >
                 {aiBannerLoading ? (
                   <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -185,7 +185,7 @@ export default function AdminMarketingPage() {
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md transition-all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all"
               >
                 <Save className="w-4 h-4" />
                 <span>পরিবর্তন সেভ করুন</span>
@@ -202,7 +202,7 @@ export default function AdminMarketingPage() {
                 type="text"
                 value={heroBanner.badgeText}
                 onChange={(e) => setHeroBanner({ ...heroBanner, badgeText: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
               />
             </div>
 
@@ -214,7 +214,7 @@ export default function AdminMarketingPage() {
                 type="text"
                 value={heroBanner.ctaText}
                 onChange={(e) => setHeroBanner({ ...heroBanner, ctaText: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
               />
             </div>
 
@@ -226,7 +226,7 @@ export default function AdminMarketingPage() {
                 type="text"
                 value={heroBanner.titlePart1}
                 onChange={(e) => setHeroBanner({ ...heroBanner, titlePart1: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
               />
             </div>
 
@@ -238,7 +238,7 @@ export default function AdminMarketingPage() {
                 type="text"
                 value={heroBanner.titleHighlight}
                 onChange={(e) => setHeroBanner({ ...heroBanner, titleHighlight: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold text-orange-600"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold text-orange-600"
               />
             </div>
 
@@ -250,14 +250,14 @@ export default function AdminMarketingPage() {
                 rows={2}
                 value={heroBanner.subtitle}
                 onChange={(e) => setHeroBanner({ ...heroBanner, subtitle: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
           </div>
         </div>
 
         {/* Flash Deal Settings */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-6">
+        <div className="bg-white p-6 sm:p-8 rounded-md border border-slate-200/90 space-y-6">
           <div className="flex items-center justify-between border-b pb-4">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Flame className="w-5 h-5 text-amber-500" />
@@ -286,7 +286,7 @@ export default function AdminMarketingPage() {
                 type="text"
                 value={flashDeal.badgeText}
                 onChange={(e) => setFlashDeal({ ...flashDeal, badgeText: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
             </div>
 
@@ -297,7 +297,7 @@ export default function AdminMarketingPage() {
               <select
                 value={flashDeal.targetProductId}
                 onChange={(e) => setFlashDeal({ ...flashDeal, targetProductId: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs sm:text-sm focus:outline-none font-medium"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs sm:text-sm focus:outline-none font-medium"
               >
                 {products.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -315,7 +315,7 @@ export default function AdminMarketingPage() {
                 type="number"
                 value={flashDeal.countdownHours}
                 onChange={(e) => setFlashDeal({ ...flashDeal, countdownHours: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none font-mono"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none font-mono"
               />
             </div>
           </div>
@@ -323,14 +323,14 @@ export default function AdminMarketingPage() {
       </form>
 
       {/* Coupons & Promo Codes */}
-      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-6">
+      <div className="bg-white p-6 sm:p-8 rounded-md border border-slate-200/90 space-y-6">
         <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b pb-4">
           <Ticket className="w-5 h-5 text-purple-600" />
           <span>৩. কুপন ও প্রমো কোড ম্যানেজমেন্ট (Promo Codes)</span>
         </h2>
 
         {/* Create Coupon Form */}
-        <form onSubmit={handleCreateCoupon} className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-4">
+        <form onSubmit={handleCreateCoupon} className="p-4 bg-slate-50 rounded-md border border-slate-200/80 space-y-4">
           <span className="text-xs font-bold text-slate-700 uppercase">নতুন কুপন কোড তৈরি করুন:</span>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <div>
@@ -340,7 +340,7 @@ export default function AdminMarketingPage() {
                 placeholder="কুপন কোড (যেমন: EID20)"
                 value={newCoupon.code}
                 onChange={(e) => setNewCoupon({ ...newCoupon, code: e.target.value.toUpperCase() })}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -348,7 +348,7 @@ export default function AdminMarketingPage() {
               <select
                 value={newCoupon.discountType}
                 onChange={(e) => setNewCoupon({ ...newCoupon, discountType: e.target.value as any })}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-semibold focus:outline-none"
               >
                 <option value="fixed">ফিক্সড টাকা ছাড় (Fixed ৳)</option>
                 <option value="percentage">শতকরা ছাড় (Percentage %)</option>
@@ -362,7 +362,7 @@ export default function AdminMarketingPage() {
                 placeholder="ছাড়ের পরিমাণ (যেমন: 150 বা 10%)"
                 value={newCoupon.value}
                 onChange={(e) => setNewCoupon({ ...newCoupon, value: e.target.value })}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-bold focus:outline-none"
               />
             </div>
 
@@ -372,14 +372,14 @@ export default function AdminMarketingPage() {
                 placeholder="ন্যূনতম অর্ডার (৳)"
                 value={newCoupon.minOrder}
                 onChange={(e) => setNewCoupon({ ...newCoupon, minOrder: e.target.value })}
-                className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none"
+                className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs focus:outline-none"
               />
             </div>
           </div>
 
           <button
             type="submit"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold"
           >
             <Plus className="w-4 h-4" />
             <span>কুপন যোগ করুন</span>
@@ -412,7 +412,7 @@ export default function AdminMarketingPage() {
                   <td className="py-3 px-4 text-right">
                     <button
                       onClick={() => handleDeleteCoupon(c.id)}
-                      className="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50"
+                      className="p-1.5 text-slate-400 hover:text-red-600 rounded-md hover:bg-red-50"
                       title="মুছে ফেলুন"
                     >
                       <Trash2 className="w-4 h-4" />

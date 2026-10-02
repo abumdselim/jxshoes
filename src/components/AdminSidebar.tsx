@@ -109,7 +109,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         {/* Brand Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-orange-600 flex items-center justify-center font-black text-xl text-white shadow-md">
+            <div className="w-9 h-9 rounded-md bg-orange-600 flex items-center justify-center font-bold text-xl text-white">
               JX
             </div>
             <div>
@@ -124,7 +124,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           {onCloseMobile && (
             <button
               onClick={onCloseMobile}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 md:hidden"
+              className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 md:hidden"
             >
               <X className="w-5 h-5" />
             </button>
@@ -140,9 +140,9 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                 key={item.href}
                 href={item.href}
                 onClick={onCloseMobile}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-md text-xs sm:text-sm font-semibold transition-all ${
                   item.active
-                    ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/30'
+                    ? 'bg-orange-600 text-white'
                     : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
               >
@@ -160,7 +160,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors"
+          className="flex items-center justify-between w-full px-4 py-3 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors"
         >
           <span className="flex items-center gap-2">
             <ExternalLink className="w-4 h-4 text-orange-400" />

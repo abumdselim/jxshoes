@@ -290,9 +290,9 @@ export default function AdminProductsPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             প্রোডাক্ট ম্যানেজমেন্ট
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -302,7 +302,7 @@ export default function AdminProductsPage() {
 
         <button
           onClick={openAddModal}
-          className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-orange-600/30 transition-all transform hover:-translate-y-0.5"
+          className="inline-flex items-center gap-2 px-5 py-3 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-bold transition-all transform hover:-translate-y-0.5"
         >
           <Plus className="w-4 h-4" />
           <span>নতুন প্রোডাক্ট আপলোড</span>
@@ -310,14 +310,14 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-md border border-slate-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="প্রোডাক্টের নাম দিয়ে খুঁজুন..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+            className="w-full bg-slate-50 border border-slate-200 rounded-md pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
         </div>
@@ -327,7 +327,7 @@ export default function AdminProductsPage() {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none"
+            className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-semibold text-slate-700 focus:outline-none"
           >
             <option value="all">সকল পণ্য ({products.length})</option>
             <option value="shoes">জুতা (Shoes)</option>
@@ -337,7 +337,7 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Product Table */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 font-bold border-b border-slate-100">
@@ -358,7 +358,7 @@ export default function AdminProductsPage() {
                       <img
                         src={p.images[0]}
                         alt={p.name}
-                        className="w-14 h-14 rounded-xl object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
+                        className="w-14 h-14 rounded-md object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
                       />
                       <div>
                         <a
@@ -413,7 +413,7 @@ export default function AdminProductsPage() {
                           type="number"
                           value={inlinePrice}
                           onChange={(e) => setInlinePrice(e.target.value)}
-                          className="w-24 px-2 py-1 text-xs border border-orange-500 rounded-lg focus:outline-none"
+                          className="w-24 px-2 py-1 text-xs border border-orange-500 rounded-md focus:outline-none"
                           autoFocus
                         />
                         <button
@@ -438,7 +438,7 @@ export default function AdminProductsPage() {
                         className="cursor-pointer group flex items-center gap-2"
                         title="ক্লিক করে সরাসরি মূল্য পরিবর্তন করুন"
                       >
-                        <div className="font-black text-slate-900 group-hover:text-orange-600">
+                        <div className="font-bold text-slate-900 group-hover:text-orange-600">
                           {formatPrice(p.price)}
                         </div>
                         {p.originalPrice && (
@@ -454,12 +454,12 @@ export default function AdminProductsPage() {
                   {/* Stock Status */}
                   <td className="py-4 px-6">
                     {p.inStock ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         ইন স্টক ({p.stockCount} টি)
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md bg-red-50 text-red-700 border border-red-200">
                         স্টক আউট
                       </span>
                     )}
@@ -470,14 +470,14 @@ export default function AdminProductsPage() {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEditModal(p)}
-                        className="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-md transition-colors"
                         title="সম্পূর্ণ এডিট করুন"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(p.id)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
                         title="মুছে ফেলুন"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -494,7 +494,7 @@ export default function AdminProductsPage() {
       {/* Add / Edit Product Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 my-8">
+          <div className="bg-white rounded-md max-w-2xl w-full p-6 sm:p-8 border border-slate-200 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
               <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                 <Tag className="w-5 h-5 text-orange-600" />
@@ -502,7 +502,7 @@ export default function AdminProductsPage() {
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -519,7 +519,7 @@ export default function AdminProductsPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="যেমন: Classic Oxford Leather Shoes"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                 />
               </div>
 
@@ -547,7 +547,7 @@ export default function AdminProductsPage() {
                     value={formData.sku}
                     onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
                     placeholder="যেমন: JX-SH-001"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs font-mono font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 uppercase"
                   />
                 </div>
 
@@ -560,7 +560,7 @@ export default function AdminProductsPage() {
                     value={formData.barcode}
                     onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
                     placeholder="যেমন: 8901002001"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -573,7 +573,7 @@ export default function AdminProductsPage() {
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold"
                   >
                     <option value="shoes">জুতা (Shoes)</option>
                     <option value="bags">ব্যাগ (Bags)</option>
@@ -589,7 +589,7 @@ export default function AdminProductsPage() {
                     value={formData.subCategory}
                     onChange={(e) => setFormData({ ...formData, subCategory: e.target.value })}
                     placeholder="যেমন: Sneakers, Formal, Loafers"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -606,7 +606,7 @@ export default function AdminProductsPage() {
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                     placeholder="যেমন: 3500"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-bold"
                   />
                 </div>
 
@@ -619,7 +619,7 @@ export default function AdminProductsPage() {
                     value={formData.costPrice}
                     onChange={(e) => setFormData({ ...formData, costPrice: e.target.value })}
                     placeholder="যেমন: 2200"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-medium"
                   />
                 </div>
 
@@ -632,7 +632,7 @@ export default function AdminProductsPage() {
                     value={formData.originalPrice}
                     onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
                     placeholder="যেমন: 4200"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -648,7 +648,7 @@ export default function AdminProductsPage() {
                     value={formData.supplier}
                     onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
                     placeholder="যেমন: হাজারীবাগ লেদার ক্রাফট"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 
@@ -661,7 +661,7 @@ export default function AdminProductsPage() {
                     value={formData.minStockAlert}
                     onChange={(e) => setFormData({ ...formData, minStockAlert: e.target.value })}
                     placeholder="যেমন: 5"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -676,7 +676,7 @@ export default function AdminProductsPage() {
                     value={formData.sizes}
                     onChange={(e) => setFormData({ ...formData, sizes: e.target.value })}
                     placeholder="যেমন: 39, 40, 41, 42, 43"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 
@@ -689,7 +689,7 @@ export default function AdminProductsPage() {
                     value={formData.colors}
                     onChange={(e) => setFormData({ ...formData, colors: e.target.value })}
                     placeholder="যেমন: Black, Brown, Tan"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -700,7 +700,7 @@ export default function AdminProductsPage() {
                 </label>
 
                 {/* Direct File Picker */}
-                <div className="p-4 border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-2xl bg-slate-50/70 text-center transition-colors">
+                <div className="p-4 border-2 border-dashed border-slate-300 hover:border-orange-500 rounded-md bg-slate-50/70 text-center transition-colors">
                   <input
                     type="file"
                     id="fileUploadInput"
@@ -712,7 +712,7 @@ export default function AdminProductsPage() {
                     htmlFor="fileUploadInput"
                     className="cursor-pointer flex flex-col items-center justify-center gap-1.5"
                   >
-                    <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-md bg-orange-100 text-orange-600 flex items-center justify-center">
                       <Upload className="w-5 h-5" />
                     </div>
                     <span className="text-xs font-bold text-slate-800">
@@ -735,17 +735,17 @@ export default function AdminProductsPage() {
                     value={formData.imageUrl}
                     onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                     placeholder="https://... অথবা /uploads/..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
                   />
                 </div>
 
                 {/* Image Preview */}
                 {formData.imageUrl && (
-                  <div className="mt-2 flex items-center gap-3 p-2 bg-slate-100 rounded-xl border border-slate-200">
+                  <div className="mt-2 flex items-center gap-3 p-2 bg-slate-100 rounded-md border border-slate-200">
                     <img
                       src={formData.imageUrl}
                       alt="Preview"
-                      className="w-14 h-14 rounded-lg object-cover border bg-white"
+                      className="w-14 h-14 rounded-md object-cover border bg-white"
                     />
                     <div>
                       <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
@@ -768,7 +768,7 @@ export default function AdminProductsPage() {
                     type="button"
                     onClick={generateDescription}
                     disabled={aiDescLoading}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-600 text-white text-[10px] font-black shadow-md shadow-orange-600/25 hover:opacity-90 disabled:opacity-60 transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-orange-600 text-white text-[10px] font-bold hover:opacity-90 disabled:opacity-60 transition-all"
                   >
                     {aiDescLoading ? (
                       <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -783,7 +783,7 @@ export default function AdminProductsPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="পণ্যের বৈশিষ্ট্য, ম্যাটেরিয়াল ইত্যাদি লিখুন... অথবা AI বাটন চেপে নিজে থেকেই লিখে নিন"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -796,7 +796,7 @@ export default function AdminProductsPage() {
                     type="number"
                     value={formData.stockCount}
                     onChange={(e) => setFormData({ ...formData, stockCount: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none"
                   />
                 </div>
 
@@ -831,13 +831,13 @@ export default function AdminProductsPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50"
+                  className="px-5 py-2.5 rounded-md border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md"
+                  className="px-6 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold"
                 >
                   {editingProduct ? 'আপডেট সংরক্ষণ করুন' : 'প্রোডাক্ট সেভ করুন'}
                 </button>

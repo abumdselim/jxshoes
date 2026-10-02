@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* AI গ্রিটিং + ডেইলি ব্রিফ */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 sm:p-8 shadow-xl">
+      <div className="relative overflow-hidden rounded-md bg-slate-900 text-white p-6 sm:p-8">
         <div className="relative">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div>
@@ -159,7 +159,7 @@ export default function AdminDashboardPage() {
                 <Bot className="w-4 h-4" />
                 <span>আপনার AI ম্যানেজার</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black mt-2 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-bold mt-2 tracking-tight">
                 {getGreeting()}{ownerName ? `, ${ownerName}` : ''}! 👋
               </h1>
               <p className="text-xs text-slate-300 mt-1">
@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
             <button
               onClick={() => loadBrief(true)}
               disabled={briefRefreshing || briefState === 'loading'}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-bold transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${briefRefreshing ? 'animate-spin' : ''}`} />
               <span>নতুন ব্রিফিং</span>
@@ -190,7 +190,7 @@ export default function AdminDashboardPage() {
           )}
 
           {briefState === 'unconfigured' && (
-            <div className="mt-5 rounded-2xl bg-white/5 border border-white/10 p-4 text-xs text-slate-300 leading-relaxed">
+            <div className="mt-5 rounded-md bg-white/5 border border-white/10 p-4 text-xs text-slate-300 leading-relaxed">
               💡 দিনের শুরুতে AI ব্রিফিং পেতে Cloudflare API টোকেনে{' '}
               <span className="font-bold text-orange-300">&quot;Workers AI → Write&quot;</span>{' '}
               পারমিশন যোগ করুন। বিস্তারিত <code className="font-mono">docs/AI_SYSTEM.md</code> ফাইলে।
@@ -198,7 +198,7 @@ export default function AdminDashboardPage() {
           )}
 
           {briefState === 'error' && (
-            <div className="mt-5 rounded-2xl bg-white/5 border border-white/10 p-4 text-xs text-slate-300">
+            <div className="mt-5 rounded-md bg-white/5 border border-white/10 p-4 text-xs text-slate-300">
               এই মুহূর্তে ব্রিফিং আনা যায়নি। একটু পরে আবার চেষ্টা করুন।
             </div>
           )}
@@ -210,8 +210,8 @@ export default function AdminDashboardPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {brief.advice.length > 0 && (
-                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-                    <div className="flex items-center gap-1.5 text-[11px] font-black text-emerald-300 uppercase tracking-wider mb-2">
+                  <div className="rounded-md bg-white/5 border border-white/10 p-4">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-300 uppercase tracking-wider mb-2">
                       <Lightbulb className="w-3.5 h-3.5" /> আজকের পরামর্শ
                     </div>
                     <ul className="space-y-1.5">
@@ -226,8 +226,8 @@ export default function AdminDashboardPage() {
                 )}
 
                 {brief.alerts.length > 0 ? (
-                  <div className="rounded-2xl bg-amber-500/10 border border-amber-400/30 p-4">
-                    <div className="flex items-center gap-1.5 text-[11px] font-black text-amber-300 uppercase tracking-wider mb-2">
+                  <div className="rounded-md bg-amber-500/10 border border-amber-400/30 p-4">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-300 uppercase tracking-wider mb-2">
                       <AlertTriangle className="w-3.5 h-3.5" /> জরুরি সতর্কতা
                     </div>
                     <ul className="space-y-1.5">
@@ -240,7 +240,7 @@ export default function AdminDashboardPage() {
                     </ul>
                   </div>
                 ) : (
-                  <div className="rounded-2xl bg-emerald-500/10 border border-emerald-400/30 p-4 flex items-center gap-2 text-xs text-emerald-200">
+                  <div className="rounded-md bg-emerald-500/10 border border-emerald-400/30 p-4 flex items-center gap-2 text-xs text-emerald-200">
                     <CheckCircle className="w-4 h-4" /> কোনো জরুরি সমস্যা নেই — সব ঠিক আছে!
                   </div>
                 )}
@@ -251,9 +251,9 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Title & Actions — স্টিকি টুলবার */}
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             অ্যাডমিন ওভারভিউ ড্যাশবোর্ড
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -264,14 +264,14 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-2.5">
           <a
             href="/admin/products"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold shadow-md transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>নতুন প্রোডাক্ট আপলোড</span>
           </a>
           <a
             href="/admin/orders"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all shadow-sm"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-md bg-white border border-slate-300 hover:bg-slate-50 text-slate-800 text-xs font-bold transition-all"
           >
             <ShoppingBag className="w-4 h-4 text-orange-600" />
             <span>সকল অর্ডার</span>
@@ -281,54 +281,54 @@ export default function AdminDashboardPage() {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-5 sm:p-6 rounded-md border border-slate-200/80 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">মোট বিক্রয় (Revenue)</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl sm:text-2xl font-black text-slate-900">{formatPrice(totalSales)}</div>
+            <div className="text-xl sm:text-2xl font-bold text-slate-900">{formatPrice(totalSales)}</div>
             <span className="text-[10px] text-emerald-600 font-semibold mt-0.5 inline-block">লাইভ অর্ডার থেকে</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-5 sm:p-6 rounded-md border border-slate-200/80 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">মোট অর্ডার</span>
-            <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-md bg-orange-50 text-orange-600 flex items-center justify-center">
               <ShoppingBag className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl sm:text-2xl font-black text-slate-900">{orders.length} টি</div>
+            <div className="text-xl sm:text-2xl font-bold text-slate-900">{orders.length} টি</div>
             <span className="text-[10px] text-orange-600 font-semibold mt-0.5 inline-block">কাস্টমার প্লেসড</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-5 sm:p-6 rounded-md border border-slate-200/80 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">পেন্ডিং ডেলিভারি</span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center">
               <Clock className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl sm:text-2xl font-black text-amber-600">{pendingOrders.length} টি</div>
+            <div className="text-xl sm:text-2xl font-bold text-amber-600">{pendingOrders.length} টি</div>
             <span className="text-[10px] text-amber-700 font-semibold mt-0.5 inline-block">শিপিং প্রয়োজন</span>
           </div>
         </div>
 
-        <div className="bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-5 sm:p-6 rounded-md border border-slate-200/80 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">মোট পণ্য (Catalog)</span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center">
               <Package className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-xl sm:text-2xl font-black text-slate-900">{products.length} টি</div>
+            <div className="text-xl sm:text-2xl font-bold text-slate-900">{products.length} টি</div>
             <span className="text-[10px] text-blue-600 font-semibold mt-0.5 inline-block">
               {shoeCount} জুতা, {bagCount} ব্যাগ
             </span>
@@ -337,14 +337,14 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* 🔥 দ্রুততম বিক্রিত পণ্য (Fast Movers) */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/25">
+            <div className="w-10 h-10 rounded-md bg-red-500 flex items-center justify-center">
               <Flame className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-base font-black text-slate-900">দ্রুততম বিক্রিত পণ্য (Fast Movers)</h2>
+              <h2 className="text-base font-bold text-slate-900">দ্রুততম বিক্রিত পণ্য (Fast Movers)</h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 স্টক যুক্ত হওয়ার দিন থেকে গড়ে দিনে যতটা বিক্রি — ক্রেতাদের সবচেয়ে পছন্দের তালিকা
               </p>
@@ -366,15 +366,15 @@ export default function AdminDashboardPage() {
           <div className="divide-y divide-slate-100">
             {fastMovers.map((m, i) => {
               const rankStyles = [
-                'bg-amber-500 shadow-amber-500/40',
-                'bg-slate-400 shadow-slate-400/40',
-                'bg-orange-600 shadow-orange-500/40',
+                'bg-amber-500',
+                'bg-slate-400',
+                'bg-orange-600',
               ];
               return (
                 <div key={m.productId} className="flex items-center gap-3.5 px-5 sm:px-6 py-3.5 hover:bg-slate-50/60 transition-colors">
                   {/* র‍্যাংক */}
                   <div
-                    className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black text-white flex-shrink-0 ${
+                    className={`w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${
                       i < 3 ? rankStyles[i] : 'bg-slate-200 text-slate-600'
                     }`}
                   >
@@ -382,35 +382,35 @@ export default function AdminDashboardPage() {
                   </div>
 
                   {m.image ? (
-                    <img src={m.image} alt="" className="w-11 h-11 rounded-xl object-cover border border-slate-200 flex-shrink-0" />
+                    <img src={m.image} alt="" className="w-11 h-11 rounded-md object-cover border border-slate-200 flex-shrink-0" />
                   ) : (
-                    <div className="w-11 h-11 rounded-xl bg-slate-100 flex-shrink-0" />
+                    <div className="w-11 h-11 rounded-md bg-slate-100 flex-shrink-0" />
                   )}
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xs sm:text-sm font-bold text-slate-900 truncate">{m.name}</span>
                       {m.soldOut && (
-                        <span className="text-[9px] font-black px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 border border-red-200 whitespace-nowrap">
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-red-100 text-red-700 border border-red-200 whitespace-nowrap">
                           স্টক শেষ!
                         </span>
                       )}
                     </div>
                     <div className="text-[11px] text-slate-500 mt-0.5">
-                      মোট বিক্রি <span className="font-black text-slate-700">{m.totalSold}টি</span>
-                      {' • '}গড়ে দিনে <span className="font-black text-orange-600">~{m.velocity}টি</span>
+                      মোট বিক্রি <span className="font-bold text-slate-700">{m.totalSold}টি</span>
+                      {' • '}গড়ে দিনে <span className="font-bold text-orange-600">~{m.velocity}টি</span>
                       {' • '}{m.daysInStock} দিনে • আয় {formatPrice(m.revenue)}
                     </div>
                   </div>
 
                   <div className="text-right flex-shrink-0 hidden sm:block">
                     {m.soldOut ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-50 text-red-700 font-black text-[11px] border border-red-200">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 text-red-700 font-bold text-[11px] border border-red-200">
                         <AlertTriangle className="w-3 h-3" /> দ্রুত রিস্টক
                       </span>
                     ) : (
                       <span className="text-[11px] font-bold text-slate-500">
-                        স্টক বাকি: <span className={m.stockLeft <= 5 ? 'text-amber-600 font-black' : 'text-emerald-600 font-black'}>{m.stockLeft} টি</span>
+                        স্টক বাকি: <span className={m.stockLeft <= 5 ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold'}>{m.stockLeft} টি</span>
                       </span>
                     )}
                   </div>
@@ -422,14 +422,14 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* AI বিজনেস ইনসাইট */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-orange-600 flex items-center justify-center shadow-lg shadow-orange-600/25">
+            <div className="w-10 h-10 rounded-md bg-orange-600 flex items-center justify-center">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-base font-black text-slate-900">AI বিজনেস ইনসাইট</h2>
+              <h2 className="text-base font-bold text-slate-900">AI বিজনেস ইনসাইট</h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 এক ক্লিকে পুরো শপের বিশ্লেষণ — বেস্ট-সেলার, রিস্টক, প্রাইসিং পরামর্শ
               </p>
@@ -438,7 +438,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={runInsights}
             disabled={insightsLoading}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-colors disabled:opacity-60 self-start sm:self-auto"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors disabled:opacity-60 self-start sm:self-auto"
           >
             {insightsLoading ? (
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -450,7 +450,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {insightsError && (
-          <div className="mx-6 my-4 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-800 leading-relaxed">
+          <div className="mx-6 my-4 rounded-md bg-amber-50 border border-amber-200 p-4 text-xs text-amber-800 leading-relaxed">
             ⚠️ {insightsError}
           </div>
         )}
@@ -465,14 +465,14 @@ export default function AdminDashboardPage() {
         {insights && !insightsLoading && (
           <div className="p-6 space-y-6">
             <div>
-              <h3 className="text-lg font-black text-slate-900">{insights.headline}</h3>
+              <h3 className="text-lg font-bold text-slate-900">{insights.headline}</h3>
               <p className="text-sm text-slate-600 leading-relaxed mt-2">{insights.overview}</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {insights.bestSellers.length > 0 && (
-                <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
-                  <div className="text-[11px] font-black text-emerald-700 uppercase tracking-wider mb-2.5">
+                <div className="rounded-md border border-emerald-100 bg-emerald-50/50 p-4">
+                  <div className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider mb-2.5">
                     🏆 বেস্ট-সেলার
                   </div>
                   <ul className="space-y-2">
@@ -486,8 +486,8 @@ export default function AdminDashboardPage() {
               )}
 
               {insights.slowMovers.length > 0 && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="text-[11px] font-black text-slate-600 uppercase tracking-wider mb-2.5">
+                <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-2.5">
                     🐢 ধীরগতির পণ্য
                   </div>
                   <ul className="space-y-2">
@@ -501,8 +501,8 @@ export default function AdminDashboardPage() {
               )}
 
               {insights.restockNeeds.length > 0 && (
-                <div className="rounded-2xl border border-amber-100 bg-amber-50/50 p-4">
-                  <div className="text-[11px] font-black text-amber-700 uppercase tracking-wider mb-2.5">
+                <div className="rounded-md border border-amber-100 bg-amber-50/50 p-4">
+                  <div className="text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-2.5">
                     📦 রিস্টক প্রয়োজন
                   </div>
                   <ul className="space-y-2">
@@ -516,8 +516,8 @@ export default function AdminDashboardPage() {
               )}
 
               {insights.pricingAdvice.length > 0 && (
-                <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-                  <div className="text-[11px] font-black text-blue-700 uppercase tracking-wider mb-2.5">
+                <div className="rounded-md border border-blue-100 bg-blue-50/50 p-4">
+                  <div className="text-[11px] font-bold text-blue-700 uppercase tracking-wider mb-2.5">
                     💰 প্রাইসিং পরামর্শ
                   </div>
                   <ul className="space-y-2">
@@ -532,8 +532,8 @@ export default function AdminDashboardPage() {
             </div>
 
             {insights.recommendations.length > 0 && (
-              <div className="rounded-2xl bg-slate-900 text-white p-5">
-                <div className="text-[11px] font-black text-orange-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <div className="rounded-md bg-slate-900 text-white p-5">
+                <div className="text-[11px] font-bold text-orange-300 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                   <Lightbulb className="w-4 h-4" /> AI-এর সামগ্রিক পরামর্শ
                 </div>
                 <ul className="space-y-2">
@@ -557,7 +557,7 @@ export default function AdminDashboardPage() {
       {/* Low Stock Alert and Category Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Category Split */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="bg-white p-6 rounded-md border border-slate-200/80 space-y-4">
           <h3 className="font-bold text-sm text-slate-900">ক্যাটাগরি ভিত্তিক স্টক অনুপাত</h3>
           <div className="space-y-3">
             <div>
@@ -565,9 +565,9 @@ export default function AdminDashboardPage() {
                 <span className="inline-flex items-center gap-1.5"><Footprints className="w-3.5 h-3.5 text-orange-600" /> জুতা (Shoes)</span>
                 <span>{shoeCount} মডেল ({Math.round((shoeCount / products.length) * 100)}%)</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-slate-100 rounded-md h-2.5 overflow-hidden">
                 <div
-                  className="bg-orange-600 h-2.5 rounded-full"
+                  className="bg-orange-600 h-2.5 rounded-md"
                   style={{ width: `${(shoeCount / products.length) * 100}%` }}
                 />
               </div>
@@ -578,9 +578,9 @@ export default function AdminDashboardPage() {
                 <span className="inline-flex items-center gap-1.5"><ShoppingBag className="w-3.5 h-3.5 text-amber-500" /> ব্যাগ (Bags)</span>
                 <span>{bagCount} মডেল ({Math.round((bagCount / products.length) * 100)}%)</span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-slate-100 rounded-md h-2.5 overflow-hidden">
                 <div
-                  className="bg-amber-500 h-2.5 rounded-full"
+                  className="bg-amber-500 h-2.5 rounded-md"
                   style={{ width: `${(bagCount / products.length) * 100}%` }}
                 />
               </div>
@@ -592,7 +592,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Low Stock Watch */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <div className="lg:col-span-2 bg-white p-6 rounded-md border border-slate-200/80 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
@@ -605,17 +605,17 @@ export default function AdminDashboardPage() {
             {lowStockProducts.slice(0, 4).map((p) => (
               <div
                 key={p.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 text-xs"
+                className="flex items-center justify-between p-3 rounded-md bg-slate-50 border border-slate-100 text-xs"
               >
                 <div className="flex items-center gap-2.5">
-                  <img src={p.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover bg-white border" />
+                  <img src={p.images[0]} alt="" className="w-10 h-10 rounded-md object-cover bg-white border" />
                   <div>
                     <h5 className="font-bold text-slate-900 truncate max-w-[130px]">{p.name}</h5>
                     <span className="text-orange-600 font-semibold">{formatPrice(p.price)}</span>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[10px]">
+                  <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">
                     বাকি: {p.stockCount} টি
                   </span>
                 </div>
@@ -626,7 +626,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent Orders Overview */}
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-slate-200/80 overflow-hidden">
         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h2 className="text-base font-bold text-slate-900">সাম্প্রতিক কাস্টমার অর্ডারসমূহ</h2>
@@ -672,11 +672,11 @@ export default function AdminDashboardPage() {
                       ))}
                     </div>
                   </td>
-                  <td className="py-4 px-6 font-black text-slate-900">
+                  <td className="py-4 px-6 font-bold text-slate-900">
                     {formatPrice(order.total)}
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
                       {order.paymentMethod}
                     </span>
                   </td>
@@ -684,7 +684,7 @@ export default function AdminDashboardPage() {
                     <select
                       value={order.status}
                       onChange={(e) => handleQuickStatusChange(order.id, e.target.value as any)}
-                      className={`text-xs font-bold rounded-lg px-2.5 py-1.5 border focus:outline-none transition-colors ${
+                      className={`text-xs font-bold rounded-md px-2.5 py-1.5 border focus:outline-none transition-colors ${
                         order.status === 'Pending'
                           ? 'bg-amber-50 text-amber-800 border-amber-200'
                           : order.status === 'Processing'

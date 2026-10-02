@@ -88,11 +88,11 @@ export default function AdminAssistantPage() {
       {/* হেডার */}
       <div className="flex items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-orange-600 flex items-center justify-center shadow-lg shadow-orange-600/30">
+          <div className="w-11 h-11 rounded-md bg-orange-600 flex items-center justify-center">
             <Bot className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               AI অ্যাসিস্ট্যান্ট
             </h1>
             <p className="text-xs text-slate-500">
@@ -103,7 +103,7 @@ export default function AdminAssistantPage() {
         {messages.length > 0 && (
           <button
             onClick={clearChat}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md border border-slate-300 bg-white text-slate-600 text-xs font-bold hover:bg-slate-50"
           >
             <Trash2 className="w-3.5 h-3.5" />
             চ্যাট মুছুন
@@ -112,16 +112,16 @@ export default function AdminAssistantPage() {
       </div>
 
       {/* চ্যাট বক্স */}
-      <div className="flex-1 min-h-[400px] flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="flex-1 min-h-[400px] flex flex-col bg-white rounded-md border border-slate-200 overflow-hidden">
         {/* মেসেজ এলাকা */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 bg-slate-50/60">
           {messages.length === 0 && (
             <div className="text-center space-y-5 py-12">
-              <div className="w-16 h-16 mx-auto rounded-3xl bg-orange-600 flex items-center justify-center shadow-xl shadow-orange-600/30">
+              <div className="w-16 h-16 mx-auto rounded-md bg-orange-600 flex items-center justify-center">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-black text-slate-900">আপনাকে স্বাগতম!</h2>
+                <h2 className="text-lg font-bold text-slate-900">আপনাকে স্বাগতম!</h2>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-md mx-auto">
                   আমি আপনার শপের AI সহকারী। বিক্রির হিসাব, স্টকের অবস্থা, বেস্ট-সেলার,
                   পরামর্শ — যা জানতে চাইলে লিখুন। দ্রুত বিক্রি এন্ট্রির জন্য প্রোডাক্ট কোডও
@@ -135,7 +135,7 @@ export default function AdminAssistantPage() {
                     <button
                       key={q.label}
                       onClick={() => send(q.label)}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white border border-slate-200 hover:border-orange-400 hover:bg-orange-50 text-xs font-bold text-slate-700 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-white border border-slate-200 hover:border-orange-400 hover:bg-orange-50 text-xs font-bold text-slate-700 transition-colors"
                     >
                       <Icon className="w-3.5 h-3.5 text-orange-600" />
                       {q.label}
@@ -149,15 +149,15 @@ export default function AdminAssistantPage() {
           {messages.map((m, i) => (
             <div key={i} className={`flex gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {m.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-xl bg-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                <div className="w-8 h-8 rounded-md bg-orange-600 flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               )}
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
+                className={`max-w-[80%] rounded-md px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap ${
                   m.role === 'user'
-                    ? 'bg-orange-600 text-white rounded-br-md shadow-md shadow-orange-600/20'
-                    : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md shadow-sm'
+                    ? 'bg-orange-600 text-white rounded-br-md'
+                    : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md'
                 }`}
               >
                 {m.content ||
@@ -175,7 +175,7 @@ export default function AdminAssistantPage() {
           ))}
 
           {error && (
-            <div className="flex gap-2 bg-red-50 border border-red-200 rounded-2xl p-4 text-xs text-red-700 max-w-lg mx-auto">
+            <div className="flex gap-2 bg-red-50 border border-red-200 rounded-md p-4 text-xs text-red-700 max-w-lg mx-auto">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               <div>
                 <p className="font-bold">{error}</p>
@@ -196,13 +196,13 @@ export default function AdminAssistantPage() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send(input)}
             placeholder="প্রশ্ন লিখুন বা প্রোডাক্ট কোড পাঠান…"
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
             disabled={streaming}
           />
           <button
             onClick={() => send(input)}
             disabled={streaming || !input.trim()}
-            className="p-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-600/30 transition-colors"
+            className="p-3 rounded-md bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             aria-label="পাঠান"
           >
             {streaming ? (

@@ -48,7 +48,7 @@ export default function AdminLayout({
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="p-2 rounded-xl text-slate-600 hover:bg-slate-100"
+              className="p-2 rounded-md text-slate-600 hover:bg-slate-100"
               aria-label="Open Admin Menu"
             >
               <Menu className="w-5 h-5" />
@@ -64,7 +64,7 @@ export default function AdminLayout({
             href="/"
             target="_blank"
             rel="noreferrer"
-            className="px-3 py-1.5 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold border border-orange-200 transition-colors text-xs"
+            className="px-3 py-1.5 rounded-md bg-orange-50 text-orange-600 hover:bg-orange-100 font-bold border border-orange-200 transition-colors text-xs"
           >
             স্টোর ভিউ ↗
           </a>

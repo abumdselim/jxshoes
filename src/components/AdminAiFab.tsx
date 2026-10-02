@@ -373,10 +373,10 @@ export default function AdminAiFab() {
       {/* ভাসমান AI বাটন */}
       <button
         onClick={() => setOpen(o => !o)}
-        className={`fixed bottom-6 right-5 sm:right-8 z-40 group flex items-center gap-2 rounded-full shadow-2xl transition-all ${
+        className={`fixed bottom-6 right-5 sm:right-8 z-40 group flex items-center gap-2 rounded-md transition-all ${
           open
             ? 'bg-slate-900 text-white px-5 py-3.5'
-            : 'bg-orange-600 text-white px-5 py-3.5 hover:scale-105 shadow-orange-600/40'
+            : 'bg-orange-600 text-white px-5 py-3.5'
         }`}
         aria-label="AI কে বলুন"
       >
@@ -385,20 +385,20 @@ export default function AdminAiFab() {
           <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white" />
         </span>
         <Bot className="w-5 h-5" />
-        <span className="text-sm font-black">AI কে বলুন</span>
+        <span className="text-sm font-bold">AI কে বলুন</span>
       </button>
 
       {/* কুইক শিট */}
       {open && (
-        <div className="fixed bottom-24 right-4 sm:right-8 z-40 w-[calc(100vw-2rem)] sm:w-96 max-w-md flex flex-col rounded-3xl bg-white border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4">
+        <div className="fixed bottom-24 right-4 sm:right-8 z-40 w-[calc(100vw-2rem)] sm:w-96 max-w-md flex flex-col rounded-md bg-white border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4">
           {/* হেডার */}
           <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-orange-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-md bg-orange-600 flex items-center justify-center">
                 <Bot className="w-4 h-4" />
               </div>
               <div>
-                <div className="text-sm font-black leading-none">AI অ্যাসিস্ট্যান্ট</div>
+                <div className="text-sm font-bold leading-none">AI অ্যাসিস্ট্যান্ট</div>
                 <div className="text-[10px] text-slate-400 mt-0.5">
                   কোড পাঠান বা প্রশ্ন করুন — দ্রুত কাজ হবে
                 </div>
@@ -407,14 +407,14 @@ export default function AdminAiFab() {
             <div className="flex items-center gap-1">
               <a
                 href="/admin/assistant"
-                className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800"
+                className="p-2 rounded-md text-slate-300 hover:text-white hover:bg-slate-800"
                 title="ফুল চ্যাট"
               >
                 <MessagesSquare className="w-4 h-4" />
               </a>
               <button
                 onClick={() => setOpen(false)}
-                className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800"
+                className="p-2 rounded-md text-slate-300 hover:text-white hover:bg-slate-800"
                 aria-label="বন্ধ করুন"
               >
                 <X className="w-4 h-4" />
@@ -426,7 +426,7 @@ export default function AdminAiFab() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[220px] max-h-[45vh] bg-slate-50">
             {messages.length === 0 && (
               <div className="text-center space-y-3 py-5">
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-orange-100 flex items-center justify-center">
+                <div className="w-12 h-12 mx-auto rounded-md bg-orange-100 flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-orange-600" />
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">
@@ -447,7 +447,7 @@ export default function AdminAiFab() {
                 className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-wrap ${
+                  className={`max-w-[85%] rounded-md px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-wrap ${
                     m.role === 'user'
                       ? 'bg-orange-600 text-white rounded-br-md'
                       : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md'
@@ -475,13 +475,13 @@ export default function AdminAiFab() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
               placeholder="যেমন: JX-SH-101 42 2টি"
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
               disabled={busy || streaming}
             />
             <button
               onClick={handleSend}
               disabled={busy || streaming || !input.trim()}
-              className="p-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2.5 rounded-md bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="পাঠান"
             >
               {busy ? (
@@ -497,19 +497,19 @@ export default function AdminAiFab() {
       {/* সেল কনফার্মেশন পপআপ */}
       {saleDraft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-md w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
             {/* হেডার */}
             <div className="bg-orange-600 text-white px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <ShoppingBag className="w-5 h-5" />
                 <div>
-                  <div className="text-sm font-black">বিক্রি নিশ্চিত করুন</div>
+                  <div className="text-sm font-bold">বিক্রি নিশ্চিত করুন</div>
                   <div className="text-[10px] opacity-90">AI আপনার মেসেজ থেকে প্রোডাক্ট খুঁজে পেয়েছে</div>
                 </div>
               </div>
               <button
                 onClick={() => setSaleDraft(null)}
-                className="p-1.5 rounded-lg hover:bg-white/20"
+                className="p-1.5 rounded-md hover:bg-white/20"
                 aria-label="বাতিল"
               >
                 <X className="w-4 h-4" />
@@ -518,7 +518,7 @@ export default function AdminAiFab() {
 
             <div className="p-6 space-y-4">
               {saleDraft.clarification && saleDraft.confidence !== 'high' && (
-                <div className="flex gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+                <div className="flex gap-2 bg-amber-50 border border-amber-200 rounded-md p-3 text-xs text-amber-800">
                   <AlertTriangle className="w-4 h-4 flex-shrink-0" />
                   <span>{saleDraft.clarification}</span>
                 </div>
@@ -530,17 +530,17 @@ export default function AdminAiFab() {
                   <img
                     src={saleDraft.product.images[0]}
                     alt={saleDraft.product.name}
-                    className="w-16 h-16 rounded-xl object-cover border border-slate-200"
+                    className="w-16 h-16 rounded-md object-cover border border-slate-200"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-xl bg-slate-100" />
+                  <div className="w-16 h-16 rounded-md bg-slate-100" />
                 )}
                 <div className="min-w-0">
                   <div className="text-sm font-bold text-slate-900 truncate">
                     {saleDraft.product.name}
                   </div>
                   <div className="text-[11px] text-slate-500 font-mono">{saleDraft.product.sku}</div>
-                  <div className="text-sm font-black text-orange-600 mt-0.5">
+                  <div className="text-sm font-bold text-orange-600 mt-0.5">
                     ৳{(saleDraft.product.variants?.find(v => v.size === saleDraft.size && v.color === saleDraft.color)?.price ?? saleDraft.product.price).toLocaleString('en-BD')}
                   </div>
                 </div>
@@ -557,7 +557,7 @@ export default function AdminAiFab() {
                     onChange={e =>
                       setSaleDraft({ ...saleDraft, size: e.target.value })
                     }
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     {saleDraft.product.sizes.map(s => (
                       <option key={s} value={s}>
@@ -575,7 +575,7 @@ export default function AdminAiFab() {
                     onChange={e =>
                       setSaleDraft({ ...saleDraft, color: e.target.value })
                     }
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
                   >
                     {saleDraft.product.colors.map(c => (
                       <option key={c.name} value={c.name}>
@@ -599,12 +599,12 @@ export default function AdminAiFab() {
                         quantity: Math.max(1, saleDraft.quantity - 1),
                       })
                     }
-                    className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    className="p-2.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700"
                     aria-label="কমান"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="text-lg font-black text-slate-900 w-10 text-center">
+                  <span className="text-lg font-bold text-slate-900 w-10 text-center">
                     {saleDraft.quantity}
                   </span>
                   <button
@@ -614,7 +614,7 @@ export default function AdminAiFab() {
                         quantity: Math.min(Math.max(draftStock ?? 99, 1), saleDraft.quantity + 1),
                       })
                     }
-                    className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    className="p-2.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700"
                     aria-label="বাড়ান"
                   >
                     <Plus className="w-4 h-4" />
@@ -630,9 +630,9 @@ export default function AdminAiFab() {
               </div>
 
               {/* মোট */}
-              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+              <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-md px-4 py-3">
                 <span className="text-xs font-bold text-slate-600">মোট মূল্য</span>
-                <span className="text-lg font-black text-slate-900">
+                <span className="text-lg font-bold text-slate-900">
                   ৳{draftTotal.toLocaleString('en-BD')}
                 </span>
               </div>
@@ -646,9 +646,9 @@ export default function AdminAiFab() {
                   <button
                     type="button"
                     onClick={() => setSaleDraft({ ...saleDraft, paymentMode: 'full' })}
-                    className={`px-3 py-2.5 rounded-xl text-[11px] font-black border transition-all ${
+                    className={`px-3 py-2.5 rounded-md text-[11px] font-bold border transition-all ${
                       saleDraft.paymentMode === 'full'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/25'
+                        ? 'bg-emerald-600 text-white border-emerald-600'
                         : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-400'
                     }`}
                   >
@@ -657,9 +657,9 @@ export default function AdminAiFab() {
                   <button
                     type="button"
                     onClick={() => setSaleDraft({ ...saleDraft, paymentMode: 'due' })}
-                    className={`px-3 py-2.5 rounded-xl text-[11px] font-black border transition-all ${
+                    className={`px-3 py-2.5 rounded-md text-[11px] font-bold border transition-all ${
                       saleDraft.paymentMode === 'due'
-                        ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-500/25'
+                        ? 'bg-red-500 text-white border-red-500'
                         : 'bg-white text-slate-600 border-slate-200 hover:border-red-400'
                     }`}
                   >
@@ -668,18 +668,18 @@ export default function AdminAiFab() {
                 </div>
 
                 {saleDraft.paymentMode === 'due' && (
-                  <div className="space-y-2 bg-red-50/60 border border-red-100 rounded-xl p-3">
+                  <div className="space-y-2 bg-red-50/60 border border-red-100 rounded-md p-3">
                     <input
                       value={saleDraft.customerPhone}
                       onChange={e => setSaleDraft({ ...saleDraft, customerPhone: e.target.value })}
                       placeholder="কাস্টমারের ফোন (বাধ্যতামূলক) — খাতা এই নম্বরে খুলবে"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
+                      className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
                     />
                     <input
                       value={saleDraft.customerName}
                       onChange={e => setSaleDraft({ ...saleDraft, customerName: e.target.value })}
                       placeholder="কাস্টমারের নাম"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
+                      className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
                     />
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-bold text-slate-600 whitespace-nowrap">আদায় ৳</span>
@@ -688,9 +688,9 @@ export default function AdminAiFab() {
                         value={saleDraft.paidAmount}
                         onChange={e => setSaleDraft({ ...saleDraft, paidAmount: e.target.value })}
                         placeholder="0"
-                        className="w-24 bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-red-400"
+                        className="w-24 bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-red-400"
                       />
-                      <span className="text-[11px] font-black text-red-600 ml-auto">
+                      <span className="text-[11px] font-bold text-red-600 ml-auto">
                         বাকি থাকবে: ৳{draftDue.toLocaleString('en-BD')}
                       </span>
                     </div>
@@ -702,7 +702,7 @@ export default function AdminAiFab() {
               <div className="flex gap-3 pt-1">
                 <button
                   onClick={() => setSaleDraft(null)}
-                  className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50"
+                  className="flex-1 px-4 py-3 rounded-md border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50"
                 >
                   বাতিল
                 </button>
@@ -713,7 +713,7 @@ export default function AdminAiFab() {
                     (draftStock ?? 0) < saleDraft.quantity ||
                     (saleDraft.paymentMode === 'due' && !saleDraft.customerPhone.trim())
                   }
-                  className="flex-1 px-4 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-black shadow-lg shadow-orange-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -737,16 +737,16 @@ export default function AdminAiFab() {
       {/* রিস্টক কনফার্মেশন পপআপ */}
       {restockDraft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-md w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
             <div className="bg-emerald-600 text-white px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Plus className="w-5 h-5" />
                 <div>
-                  <div className="text-sm font-black">স্টক বাড়ান (রিস্টক)</div>
+                  <div className="text-sm font-bold">স্টক বাড়ান (রিস্টক)</div>
                   <div className="text-[10px] opacity-90">AI আপনার মেসেজ থেকে চালান খুঁজে পেয়েছে</div>
                 </div>
               </div>
-              <button onClick={() => setRestockDraft(null)} className="p-1.5 rounded-lg hover:bg-white/20" aria-label="বাতিল">
+              <button onClick={() => setRestockDraft(null)} className="p-1.5 rounded-md hover:bg-white/20" aria-label="বাতিল">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -754,7 +754,7 @@ export default function AdminAiFab() {
             <div className="p-6 space-y-4">
               <div className="flex gap-3 items-center">
                 {restockDraft.product.images[0] && (
-                  <img src={restockDraft.product.images[0]} alt="" className="w-14 h-14 rounded-xl object-cover border border-slate-200" />
+                  <img src={restockDraft.product.images[0]} alt="" className="w-14 h-14 rounded-md object-cover border border-slate-200" />
                 )}
                 <div className="min-w-0">
                   <div className="text-sm font-bold text-slate-900 truncate">{restockDraft.product.name}</div>
@@ -766,14 +766,14 @@ export default function AdminAiFab() {
               <div>
                 <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">কতটা পিস এসেছে?</label>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setRestockDraft({ ...restockDraft, quantity: Math.max(1, restockDraft.quantity - 1) })} className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700" aria-label="কমান">
+                  <button onClick={() => setRestockDraft({ ...restockDraft, quantity: Math.max(1, restockDraft.quantity - 1) })} className="p-2.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700" aria-label="কমান">
                     <Minus className="w-4 h-4" />
                   </button>
-                  <span className="text-lg font-black text-slate-900 w-10 text-center">{restockDraft.quantity}</span>
-                  <button onClick={() => setRestockDraft({ ...restockDraft, quantity: restockDraft.quantity + 1 })} className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700" aria-label="বাড়ান">
+                  <span className="text-lg font-bold text-slate-900 w-10 text-center">{restockDraft.quantity}</span>
+                  <button onClick={() => setRestockDraft({ ...restockDraft, quantity: restockDraft.quantity + 1 })} className="p-2.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700" aria-label="বাড়ান">
                     <Plus className="w-4 h-4" />
                   </button>
-                  <span className="text-[11px] font-black text-emerald-600 ml-auto">
+                  <span className="text-[11px] font-bold text-emerald-600 ml-auto">
                     নতুন স্টক: {restockDraft.product.stockCount + restockDraft.quantity} টি
                   </span>
                 </div>
@@ -786,7 +786,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={restockDraft.unitCost}
                     onChange={e => setRestockDraft({ ...restockDraft, unitCost: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -795,19 +795,19 @@ export default function AdminAiFab() {
                     value={restockDraft.supplierOrInvoice}
                     onChange={e => setRestockDraft({ ...restockDraft, supplierOrInvoice: e.target.value })}
                     placeholder="যেমন: চালান #CH-100"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setRestockDraft(null)} className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+                <button onClick={() => setRestockDraft(null)} className="flex-1 px-4 py-3 rounded-md border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
                   বাতিল
                 </button>
                 <button
                   onClick={confirmRestock}
                   disabled={restockSubmitting || restockDraft.quantity < 1}
-                  className="flex-1 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-lg shadow-emerald-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {restockSubmitting ? (
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -825,16 +825,16 @@ export default function AdminAiFab() {
       {/* নতুন প্রোডাক্ট তৈরির পপআপ */}
       {newProductDraft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-md w-full max-w-md overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95">
             <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5" />
                 <div>
-                  <div className="text-sm font-black">নতুন প্রোডাক্ট যোগ করুন</div>
+                  <div className="text-sm font-bold">নতুন প্রোডাক্ট যোগ করুন</div>
                   <div className="text-[10px] opacity-90">AI আপনার মেসেজ থেকে তথ্যগুলো ভরে দিয়েছে — দেখে ঠিক করুন</div>
                 </div>
               </div>
-              <button onClick={() => setNewProductDraft(null)} className="p-1.5 rounded-lg hover:bg-white/20" aria-label="বাতিল">
+              <button onClick={() => setNewProductDraft(null)} className="p-1.5 rounded-md hover:bg-white/20" aria-label="বাতিল">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -845,7 +845,7 @@ export default function AdminAiFab() {
                 <input
                   value={newProductDraft.name}
                   onChange={e => setNewProductDraft({ ...newProductDraft, name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -855,7 +855,7 @@ export default function AdminAiFab() {
                   <select
                     value={newProductDraft.category}
                     onChange={e => setNewProductDraft({ ...newProductDraft, category: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="shoes">জুতা (Shoes)</option>
                     <option value="bags">ব্যাগ (Bags)</option>
@@ -868,7 +868,7 @@ export default function AdminAiFab() {
                     value={newProductDraft.subCategory}
                     onChange={e => setNewProductDraft({ ...newProductDraft, subCategory: e.target.value })}
                     placeholder="যেমন: Sneakers"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -880,7 +880,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={newProductDraft.price}
                     onChange={e => setNewProductDraft({ ...newProductDraft, price: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -889,7 +889,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={newProductDraft.costPrice}
                     onChange={e => setNewProductDraft({ ...newProductDraft, costPrice: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -900,7 +900,7 @@ export default function AdminAiFab() {
                   <input
                     value={newProductDraft.sizes}
                     onChange={e => setNewProductDraft({ ...newProductDraft, sizes: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -908,7 +908,7 @@ export default function AdminAiFab() {
                   <input
                     value={newProductDraft.colors}
                     onChange={e => setNewProductDraft({ ...newProductDraft, colors: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -920,7 +920,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={newProductDraft.stockCount}
                     onChange={e => setNewProductDraft({ ...newProductDraft, stockCount: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -928,19 +928,19 @@ export default function AdminAiFab() {
                   <input
                     value={newProductDraft.supplier}
                     onChange={e => setNewProductDraft({ ...newProductDraft, supplier: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
               <div className="flex gap-3 pt-1">
-                <button onClick={() => setNewProductDraft(null)} className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+                <button onClick={() => setNewProductDraft(null)} className="flex-1 px-4 py-3 rounded-md border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
                   বাতিল
                 </button>
                 <button
                   onClick={confirmNewProduct}
                   disabled={newProductSubmitting || !newProductDraft.name.trim() || !Number(newProductDraft.price)}
-                  className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-lg shadow-blue-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {newProductSubmitting ? (
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -958,7 +958,7 @@ export default function AdminAiFab() {
       {/* টোস্ট */}
       {toast && (
         <div
-          className={`fixed top-20 right-4 z-[70] max-w-sm rounded-2xl px-5 py-3.5 shadow-2xl text-xs font-bold animate-in fade-in slide-in-from-top-4 ${
+          className={`fixed top-20 right-4 z-[70] max-w-sm rounded-md px-5 py-3.5 text-xs font-bold animate-in fade-in slide-in-from-top-4 ${
             toast.error
               ? 'bg-red-600 text-white'
               : 'bg-emerald-600 text-white'

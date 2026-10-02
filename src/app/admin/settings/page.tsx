@@ -48,9 +48,9 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-2xl border border-slate-200/80 shadow-sm px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="sticky top-14 md:top-0 z-20 bg-slate-100/85 backdrop-blur-md rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
             স্টোর সেটিংস ও পলিসি কন্ট্রোল
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -60,7 +60,7 @@ export default function AdminSettingsPage() {
 
         <button
           onClick={handleSave}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-bold shadow-lg shadow-orange-600/30 transition-all"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-md bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-bold transition-all"
         >
           <Save className="w-4 h-4" />
           <span>সেটিংস সেভ করুন</span>
@@ -68,7 +68,7 @@ export default function AdminSettingsPage() {
       </div>
 
       {saved && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm font-bold flex items-center gap-2">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-xs sm:text-sm font-bold flex items-center gap-2">
           <Check className="w-5 h-5 text-emerald-600" />
           <span>সেটিংস সফলভাবে সংরক্ষিত হয়েছে! পুরো সাইটে এটি সাথে সাথে প্রতিফলিত হবে।</span>
         </div>
@@ -76,7 +76,7 @@ export default function AdminSettingsPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Basic Brand Info */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
+        <div className="bg-white p-6 sm:p-8 rounded-md border border-slate-200/90 space-y-4">
           <h3 className="font-bold text-base text-slate-900 flex items-center gap-2 border-b pb-3">
             <Settings className="w-5 h-5 text-orange-600" />
             <span>১. শপের পরিচিতি (Brand & Contact)</span>
@@ -91,7 +91,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.storeName}
                 onChange={(e) => setSettings({ ...settings, storeName: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -103,7 +103,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.tagline}
                 onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
             </div>
 
@@ -116,7 +116,7 @@ export default function AdminSettingsPage() {
                 value={settings.ownerName || ''}
                 onChange={(e) => setSettings({ ...settings, ownerName: e.target.value })}
                 placeholder="যেমন: রফিক ভাই"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
               <p className="text-[10px] text-slate-400 mt-1">
                 AI অ্যাসিস্ট্যান্ট প্রতিদিন দিনের শুরুতে এই নাম ধরে স্বাগতম জানাবে।
@@ -131,7 +131,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.hotline}
                 onChange={(e) => setSettings({ ...settings, hotline: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none"
               />
             </div>
 
@@ -143,7 +143,7 @@ export default function AdminSettingsPage() {
                 type="email"
                 value={settings.email}
                 onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
             </div>
 
@@ -155,14 +155,14 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.address}
                 onChange={(e) => setSettings({ ...settings, address: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Top Announcement Bar */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
+        <div className="bg-white p-6 sm:p-8 rounded-md border border-slate-200/90 space-y-4">
           <h3 className="font-bold text-base text-slate-900 flex items-center gap-2 border-b pb-3">
             <Bell className="w-5 h-5 text-orange-600" />
             <span>২. হেডারের টপ অ্যানাউন্সমেন্ট বার (Header Notice Ticker)</span>
@@ -177,7 +177,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.announcementText}
                 onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
             </div>
 
@@ -189,14 +189,14 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.announcementSecondary}
                 onChange={(e) => setSettings({ ...settings, announcementSecondary: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Shipping & Delivery Fees */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
+        <div className="bg-white p-6 sm:p-8 rounded-md border border-slate-200/90 space-y-4">
           <h3 className="font-bold text-base text-slate-900 flex items-center gap-2 border-b pb-3">
             <Truck className="w-5 h-5 text-orange-600" />
             <span>৩. ডেলিভারি চার্জ নির্ধারণ (Shipping Fees)</span>
@@ -211,7 +211,7 @@ export default function AdminSettingsPage() {
                 type="number"
                 value={settings.insideDhakaFee}
                 onChange={(e) => setSettings({ ...settings, insideDhakaFee: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-black focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none"
               />
             </div>
 
@@ -223,7 +223,7 @@ export default function AdminSettingsPage() {
                 type="number"
                 value={settings.outsideDhakaFee}
                 onChange={(e) => setSettings({ ...settings, outsideDhakaFee: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-black focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none"
               />
             </div>
 
@@ -235,14 +235,14 @@ export default function AdminSettingsPage() {
                 type="number"
                 value={settings.freeDeliveryAbove}
                 onChange={(e) => setSettings({ ...settings, freeDeliveryAbove: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Payment Account Details */}
-        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-sm space-y-4">
+        <div className="bg-white p-6 sm:p-8 rounded-md border border-slate-200/90 space-y-4">
           <h3 className="font-bold text-base text-slate-900 flex items-center gap-2 border-b pb-3">
             <DollarSign className="w-5 h-5 text-orange-600" />
             <span>৪. পেমেন্ট অ্যাকাউন্ট তথ্য (বিকাশ ও নগদ)</span>
@@ -257,7 +257,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.bkashNumber}
                 onChange={(e) => setSettings({ ...settings, bkashNumber: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-none"
               />
             </div>
 
@@ -269,7 +269,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.nagadNumber}
                 onChange={(e) => setSettings({ ...settings, nagadNumber: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-none"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-none"
               />
             </div>
           </div>
