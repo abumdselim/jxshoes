@@ -10,7 +10,6 @@ import {
   ShoppingCart,
   Settings,
   ExternalLink,
-  ShieldCheck,
   X,
   Bot,
   Users,
@@ -107,29 +106,25 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     <aside className="w-64 bg-slate-900 text-white h-full flex flex-col justify-between border-r border-slate-800 overflow-y-auto">
       <div>
         {/* Brand Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/shopkeeper-logo.png"
-                alt="Shopkeeper"
-                className="h-8 w-auto"
-                style={{ mixBlendMode: 'screen' }}
-              />
-              <ShieldCheck className="w-4 h-4 text-orange-400 flex-shrink-0" />
-            </div>
-            <div className="text-[10px] text-slate-400 mt-1">Full Control CMS</div>
+        <div className="p-5 border-b border-slate-800">
+          <div className="flex items-start justify-between gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/shopkeeper-logo.png"
+              alt="Shopkeeper"
+              className="w-full max-w-[200px] h-auto"
+              style={{ mixBlendMode: 'screen' }}
+            />
+            {onCloseMobile && (
+              <button
+                onClick={onCloseMobile}
+                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 md:hidden flex-shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            )}
           </div>
-
-          {onCloseMobile && (
-            <button
-              onClick={onCloseMobile}
-              className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 md:hidden"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+          <div className="text-[10px] text-slate-400 mt-1.5">Full Control CMS</div>
         </div>
 
         {/* Nav Items */}
