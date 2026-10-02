@@ -18,7 +18,7 @@
  * ব্রাউজারে পাঠানো যাবে না।
  */
 
-import { getOrders, getProducts, getStoreSettings } from './store';
+import { computeFinanceSummary, getCustomers, getOrders, getProducts, getStoreSettings } from './store';
 import { getCfEnv } from './cfEnv';
 
 export interface AIMessage {
@@ -84,18 +84,28 @@ function extractResponseText(result: unknown): string {
 
 async function callModel(model: string, messages: AIMessage[], opts: RunAIOptions): Promise<string> {
   const target = aiRun(model);
-  const res = await fetch(target.url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${target.token}`,
-      'Content-Type': 'application/json',
-    },
-    body: buildRequestBody(messages, opts, false),
-  });
 
-  const json = await res.json().catch(() => null);
-  if (!res.ok || !json || json.success !== true) {
-    const errText = Array.isArray(json?.errors) ? json.errors.join('; ') : `HTTP ${res.status}`;
+  // ট্রানজিয়েন্ট এরর (৪২৯/৫০০/৫০৩) হলে একবার ব্যাকঅফ দিয়ে রিট্রাই — তারপর ফেলব্যাক মডেলে যায়
+  let res: Response | null = null;
+  let lastStatus = 0;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, 900));
+    res = await fetch(target.url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${target.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: buildRequestBody(messages, opts, false),
+    });
+    lastStatus = res.status;
+    if (res.ok) break;
+    if (![429, 500, 502, 503].includes(res.status)) break;
+  }
+
+  const json = await res!.json().catch(() => null);
+  if (!res!.ok || !json || json.success !== true) {
+    const errText = Array.isArray(json?.errors) ? json.errors.join('; ') : `HTTP ${lastStatus}`;
     throw new Error(`Workers AI (${model}): ${errText}`);
   }
 
@@ -183,17 +193,33 @@ export function extractJson<T = unknown>(raw: string): T | null {
   }
 }
 
-/** JSON-মোডে AI রান — প্রম্পটে JSON চাওয়া হয় + রোবাস্ট পার্সিং */
+/** JSON-মোডে AI রান — প্রম্পটে JSON চাওয়া হয় + রোবাস্ট পার্সিং + ভাঙলে অটো-রিপেয়ার */
+const JSON_REPAIR_NUDGE: AIMessage = {
+  role: 'user',
+  content:
+    'আগের উত্তরটি বৈধ JSON ছিল না (ভাঙা ছিল বা অতিরিক্ত লেখা ছিল)। একই কাজ আবার করো — এবার শুধুমাত্র বৈধ JSON দাও: কোনো ব্যাখ্যা, মার্কডাউন ব্যাকটিক, শিরোনাম বা অতিরিক্ত লেখা ছাড়া। JSON-এর সব কি ও মান ঠিকভাবে কোট করা থাকবে।',
+};
+
 export async function runAIJson<T>(
   messages: AIMessage[],
   opts: RunAIOptions = {}
 ): Promise<T> {
-  const raw = await runAI(messages, { ...opts, temperature: opts.temperature ?? 0.3 });
-  const parsed = extractJson<T>(raw);
-  if (parsed === null) {
-    throw new Error('AI-এর উত্তর থেকে JSON পার্স করা যায়নি');
-  }
-  return parsed;
+  const baseTemp = opts.temperature ?? 0.3;
+
+  const first = extractJson<T>(await runAI(messages, { ...opts, temperature: baseTemp }));
+  if (first !== null) return first;
+
+  // রিপেয়ার পাস — কড়া নির্দেশ + ৪০% বেশি টোকেন + আরো নিম্ন তাপমাত্রা
+  const repaired = extractJson<T>(
+    await runAI([...messages, JSON_REPAIR_NUDGE], {
+      ...opts,
+      temperature: Math.min(baseTemp, 0.15),
+      maxTokens: Math.round((opts.maxTokens ?? 1024) * 1.4),
+    })
+  );
+  if (repaired !== null) return repaired;
+
+  throw new Error('AI-এর উত্তর থেকে JSON পার্স করা যায়নি (দুইবার চেষ্টার পরেও)');
 }
 
 /**
@@ -201,10 +227,12 @@ export async function runAIJson<T>(
  * (প্রোডাক্ট/স্টক/সেলস সামারি — আসল ডেটা, তাই AI সঠিক উত্তর দিতে পারে)
  */
 export async function buildStoreContext(orderLimit = 25): Promise<string> {
-  const [products, orders, settings] = await Promise.all([
+  const [products, orders, settings, customers, finance] = await Promise.all([
     getProducts(),
     getOrders(),
     getStoreSettings(),
+    getCustomers(),
+    computeFinanceSummary(),
   ]);
 
   const lines: string[] = [];
@@ -243,6 +271,18 @@ export async function buildStoreContext(orderLimit = 25): Promise<string> {
   lines.push(`- গত ৩০ দিনে: ৳${totalIn(monthAgo)} (${validOrders.filter(o => inRange(o, monthAgo)).length} অর্ডার)`);
   lines.push(`- সব মিলিয়ে: ৳${validOrders.reduce((s, o) => s + o.total, 0)} (${validOrders.length} অর্ডার)`);
   lines.push(`- পেন্ডিং/প্রসেসিং অর্ডার: ${orders.filter(o => o.status === 'Pending' || o.status === 'Processing').length}টি`);
+  lines.push(`- আজকের আদায় (বাকি পরিশোধ): ৳${finance.today.collected}`);
+
+  // আর্থিক হিসাব — লাভ/বাকি প্রশ্নের জন্য
+  lines.push('');
+  lines.push('আর্থিক হিসাব:');
+  lines.push(`- মোট বিক্রি: ৳${finance.revenue} | ক্রয়মূল্য: ৳${finance.cogs} | গ্রস প্রফিট: ৳${finance.grossProfit}`);
+  lines.push(`- দোকানের খরচ: ৳${finance.operatingExpenses} | নেট প্রফিট: ৳${finance.netProfit}`);
+  lines.push(`- মোট বাকি (receivable): ৳${finance.totalDues} (${finance.customerCount} জন কাস্টমারের খাতা) | সর্বমোট বাকি-আদায়: ৳${finance.totalCollected}`);
+  const dueCustomers = customers.filter(c => (c.dueAmount || 0) > 0).sort((a, b) => b.dueAmount - a.dueAmount).slice(0, 8);
+  if (dueCustomers.length > 0) {
+    lines.push(`- যাদের বাকি আছে: ${dueCustomers.map(c => `${c.name} (${c.phone}): ৳${c.dueAmount}`).join('; ')}`);
+  }
 
   // প্রোডাক্ট-ভিত্তিক বিক্রি
   const soldByProduct = new Map<string, { name: string; qty: number; revenue: number }>();

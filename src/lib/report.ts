@@ -197,7 +197,7 @@ ${dataForAI}`,
       },
       { role: 'user', content: `${type === 'weekly' ? 'সাপ্তাহিক' : 'মাসিক'} বিজনেস রিপোর্ট লিখে দাও।` },
     ],
-    { maxTokens: 2500 }
+    { maxTokens: 3600, temperature: 0.45 }
   );
 
   const now = new Date();

@@ -49,7 +49,8 @@ ${context}
 
   try {
     const parsed = await runAIJson<Omit<AIDailyBrief, 'date' | 'generatedAt'>>(messages, {
-      maxTokens: 1200,
+      maxTokens: 2000,
+      temperature: 0.5,
     });
     const brief: AIDailyBrief = {
       date: new Date().toISOString().slice(0, 10),
@@ -90,7 +91,7 @@ ${context}
   ];
 
   try {
-    const parsed = await runAIJson<Omit<AIInsights, 'generatedAt'>>(messages, { maxTokens: 2000 });
+    const parsed = await runAIJson<Omit<AIInsights, 'generatedAt'>>(messages, { maxTokens: 3200, temperature: 0.35 });
     const insights: AIInsights = {
       headline: parsed.headline || '',
       overview: parsed.overview || '',
@@ -142,7 +143,7 @@ ${context}`,
 
   if (body.stream) {
     try {
-      const stream = await runAIStream(messages, { maxTokens: 1500 });
+      const stream = await runAIStream(messages, { maxTokens: 2200, temperature: 0.5 });
       return new Response(stream, {
         headers: {
           'Content-Type': 'text/event-stream; charset=utf-8',
@@ -158,7 +159,7 @@ ${context}`,
   }
 
   try {
-    const reply = await runAI(messages, { maxTokens: 1500 });
+    const reply = await runAI(messages, { maxTokens: 2200, temperature: 0.5 });
     return NextResponse.json({ reply, configured: true });
   } catch (error) {
     return NextResponse.json(
@@ -203,7 +204,7 @@ async function generateProductContent(payload: {
   ];
 
   try {
-    const parsed = await runAIJson<{ description?: string }>(messages, { maxTokens: 900 });
+    const parsed = await runAIJson<{ description?: string }>(messages, { maxTokens: 1400, temperature: 0.7 });
     if (!parsed.description) throw new Error('বিবরণ তৈরি হয়নি');
     return NextResponse.json({ description: parsed.description, configured: true });
   } catch (error) {
@@ -237,7 +238,7 @@ async function generateBannerCopy(payload: { storeName?: string; tagline?: strin
       titleHighlight?: string;
       subtitle?: string;
       ctaText?: string;
-    }>(messages, { maxTokens: 500 });
+    }>(messages, { maxTokens: 800, temperature: 0.7 });
     return NextResponse.json(
       {
         badgeText: parsed.badgeText || '',
@@ -373,7 +374,7 @@ ${buildCatalogContext(products)}`,
   ];
 
   try {
-    const parsed = await runAIJson<AISaleMatch>(messages, { maxTokens: 700, temperature: 0.2 });
+    const parsed = await runAIJson<AISaleMatch>(messages, { maxTokens: 1200, temperature: 0.15 });
     const match: AISaleMatch = {
       matched: Boolean(parsed.matched && parsed.productId && products.some(p => p.id === parsed.productId)),
       productId: parsed.productId || undefined,
@@ -500,7 +501,7 @@ ${catalog}`,
     const parsed = await runAIJson<{
       summary?: string;
       plan?: { productId?: string; productName?: string; recommendedQuantity?: number; reason?: string }[];
-    }>(messages, { maxTokens: 1800 });
+    }>(messages, { maxTokens: 2600, temperature: 0.2 });
 
     const validIds = new Set(products.map(p => p.id));
     const plan = (Array.isArray(parsed.plan) ? parsed.plan : [])
@@ -608,7 +609,7 @@ ${buildCatalogContext(products)}`,
         supplier?: string | null;
         description?: string | null;
       } | null;
-    }>(messages, { maxTokens: 900, temperature: 0.2 });
+    }>(messages, { maxTokens: 1400, temperature: 0.2 });
 
     const intent = parsed.intent || 'other';
 
@@ -679,8 +680,47 @@ ${buildCatalogContext(products)}`,
 }
 
 // ================== ROUTE HANDLERS ==================
+// ================== HEALTH CHECK (AI সক্ষমতা যাচাই) ==================
+async function healthCheck(): Promise<NextResponse> {
+  if (!isAIConfigured()) return aiUnavailable();
+
+  const started = Date.now();
+  try {
+    const reply = await runAI(
+      [
+        {
+          role: 'system',
+          content:
+            'তুমি একটি সিস্টেম পরীক্ষক। শুধুমাত্র এই JSON দাও: {"status":"ok","bengali":"বাংলা ঠিকভাবে দেখাও"} — অন্য কিছু নয়।',
+        },
+        { role: 'user', content: 'স্বাস্থ্য পরীক্ষা' },
+      ],
+      { maxTokens: 300, temperature: 0 }
+    );
+    return NextResponse.json({
+      configured: true,
+      healthy: true,
+      latencyMs: Date.now() - started,
+      sample: reply.slice(0, 200),
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        configured: true,
+        healthy: false,
+        latencyMs: Date.now() - started,
+        error: error instanceof Error ? error.message : 'অজানা ত্রুটি',
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  if (searchParams.get('action') === 'health') {
+    return healthCheck();
+  }
   if (searchParams.get('action') === 'daily-brief') {
     const refresh = searchParams.get('refresh') === '1';
     return generateDailyBrief(refresh);
