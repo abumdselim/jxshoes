@@ -148,7 +148,38 @@ Authorization: Bearer <API_TOKEN>
   2. দরকার হলে `types/index.ts`-এ রেসপন্স টাইপ
   3. `docs/ROADMAP.md` + এই ফাইলের টেবিলে এন্ট্রি
 
-## ৭. ট্রাবলশুটিং
+## ৭. ডেপ্লয় ও env (২ অক্টোবর ২০২৬-এ লাইভ কনফিগার্ড)
+
+**env মেকানিজম:** `src/lib/generatedEnv.ts` (কমিটেড প্লেসহোল্ডার) — GitHub Actions বিল্ডের
+"Generate runtime env" স্টেপ রিপো সিক্রেট দিয়ে এটা ওভাররাইট করে; ভ্যালুগুলো এজ বান্ডেলে
+বেক হয় (শুধু সার্ভার-সাইড কোড, ব্রাউজারে যায় না)। লোকালে `.env` → `process.env` কাজ করে।
+`src/lib/cfEnv.ts → getCfEnv()` সব কনজিউমারের একমাত্র প্রবেশদ্বার — নতুন env লাগলে
+ওখানে ফিল্ড যোগ করো (workflow স্টেপেও)।
+
+**⚠️ @cloudflare/next-on-pages ইমপোর্ট করা যাবে না:** ওটার টাইপ ডিক্লারেশন
+workers-types গ্লোবালি লিক করে → পুরো অ্যাপে `Response.json()` unknown হয়ে যায়।
+
+**লাইভ স্টেটাস (ভেরিফায়েড):**
+- ✅ AI (daily brief, chat, parse-sale) প্রোডাকশনে চলছে
+- ✅ KV read/write প্রোডাকশনে কাজ করছে (SKU সেলফ-হিলিং মাইগ্রেশন চালু)
+- ✅ `/api/cron/report` সিক্রেটসহ কাজ করছে; Worker `jxshoes-report-cron` ডেপ্লয়েড
+  (সোমবার + ১ তারিখ, BD সকাল ৮টা)
+- ⬜ ইমেইল: ডোমেইন + `EMAIL_FROM_ADDRESS` বসালেই চালু (নিচের টেবিল দেখো)
+
+### 🔑 প্রয়োজনীয় সিক্রেট/সেটআপ
+
+| কোথায় | কী | অবস্থা |
+|---|---|---|
+| GitHub Secrets | `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_KV_ID`, `CRON_SECRET` | ✅ সেট |
+| Pages env | একইগুলো (generatedEnv-এর বিকল্প হিসেবেও বসানো) | ✅ সেট |
+| Worker `jxshoes-report-cron` | `CRON_SECRET` secret | ✅ সেট |
+| ইমেইলের জন্য | ডোমেইন + `wrangler email sending enable` + টোকেনে Email Sending পারমিশন + `EMAIL_FROM_ADDRESS` | ⬜ বাকি |
+
+### 💰 AI খরচ (লাইভ মাপা)
+- ছোট প্রম্পট ~৬ নিউরন, ২০০-টোকেন বাংলা উত্তর ~৩০ নিউরন, স্টোর-কনটেক্সট চ্যাট ~৬০ নিউরন —
+  ফ্রি ১০,০০০ নিউরন/দিনে দিনে শত শত কল করা যায়।
+
+## ৮. ট্রাবলশুটিং
 
 | সমস্যা | কারণ | সমাধান |
 |---|---|---|
