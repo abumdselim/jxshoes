@@ -69,7 +69,7 @@ export default function Footer() {
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-orange-600 flex items-center justify-center text-white font-black text-xl">
-                JX
+                SK
               </div>
               <span className="text-2xl font-black text-white">
                 {settings.storeName}<span className="text-orange-500">.</span>

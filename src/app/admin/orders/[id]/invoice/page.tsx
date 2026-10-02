@@ -139,7 +139,7 @@ export default function InvoicePage() {
               <div>
                 <div className="flex items-center gap-3 mb-1">
                   <div className="w-10 h-10 rounded-md bg-white/20 flex items-center justify-center font-bold text-lg text-white border border-white/30">
-                    JX
+                    SK
                   </div>
                   <div>
                     <div className="font-bold text-xl tracking-tight">Shopkeeper</div>

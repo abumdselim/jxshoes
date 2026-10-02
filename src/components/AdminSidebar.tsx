@@ -110,7 +110,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         <div className="p-5 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-md bg-orange-600 flex items-center justify-center font-bold text-xl text-white">
-              JX
+              SK
             </div>
             <div>
               <div className="font-extrabold text-sm tracking-tight flex items-center gap-1.5">

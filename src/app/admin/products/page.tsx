@@ -115,7 +115,7 @@ export default function AdminProductsPage() {
   const openAddModal = () => {
     setEditingProduct(null);
     setFormData({
-      sku: `JX-SH-${Math.floor(100 + Math.random() * 900)}`,
+      sku: `SK-SH-${Math.floor(100 + Math.random() * 900)}`,
       barcode: `890100${Date.now().toString().slice(-6)}`,
       name: '',
       category: 'shoes',
@@ -139,7 +139,7 @@ export default function AdminProductsPage() {
   const openEditModal = (product: Product) => {
     setEditingProduct(product);
     setFormData({
-      sku: product.sku || `JX-${product.category === 'bags' ? 'BG' : 'SH'}-${Math.floor(100 + Math.random() * 900)}`,
+      sku: product.sku || `SK-${product.category === 'bags' ? 'BG' : 'SH'}-${Math.floor(100 + Math.random() * 900)}`,
       barcode: product.barcode || '',
       name: product.name,
       category: product.category,
@@ -549,7 +549,7 @@ export default function AdminProductsPage() {
                       type="button"
                       onClick={() => {
                         const pfx = formData.category === 'bags' ? 'BG' : 'SH';
-                        setFormData({ ...formData, sku: `JX-${pfx}-${Math.floor(100 + Math.random() * 900)}` });
+                        setFormData({ ...formData, sku: `SK-${pfx}-${Math.floor(100 + Math.random() * 900)}` });
                       }}
                       className="text-[11px] text-orange-600 font-bold hover:underline"
                     >

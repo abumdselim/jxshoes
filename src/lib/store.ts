@@ -89,7 +89,7 @@ function migrateStoreData(data: FullStoreData): boolean {
     const num = (p.id.match(/(\d+)/) || [])[1];
     if (!p.sku) {
       const suffix = num ? num.padStart(3, '0') : String(Date.now()).slice(-4);
-      p.sku = `JX-${catCode(p.category)}-${suffix}`;
+      p.sku = `SK-${catCode(p.category)}-${suffix}`;
       changed = true;
     }
     if (!p.barcode) {
@@ -185,7 +185,7 @@ export async function saveProduct(product: Partial<Product> & { name: string; pr
   const defaultCategory = product.category || existingProd?.category || 'shoes';
   const prefix = defaultCategory === 'bags' ? 'BG' : 'SH';
   const randomCode = Math.floor(100 + Math.random() * 900);
-  const autoSku = `JX-${prefix}-${randomCode}`;
+  const autoSku = `SK-${prefix}-${randomCode}`;
   const autoBarcode = `890100${Date.now().toString().slice(-6)}`;
 
   const calculatedStock = product.variants && product.variants.length > 0
@@ -432,7 +432,7 @@ export async function getOrderById(id: string): Promise<Order | undefined> {
 export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'status'>): Promise<Order> {
   const data = await getStoreData();
   const id = `ord-${Date.now()}`;
-  const orderNumber = `JX-${Math.floor(1000 + Math.random() * 9000)}`;
+  const orderNumber = `SK-${Math.floor(1000 + Math.random() * 9000)}`;
 
   // লাভ-ক্ষতি নিখুঁত রাখতে বিক্রির সময়ের ক্রয়মূল্য স্ন্যাপশট নেওয়া হয়
   const itemsWithCost: OrderItem[] = orderData.items.map(it => {
@@ -749,7 +749,7 @@ export async function createPosSale(
 
   const newOrder: Order = {
     id: `ord-${Date.now()}`,
-    orderNumber: `JX-${Math.floor(1000 + Math.random() * 9000)}`,
+    orderNumber: `SK-${Math.floor(1000 + Math.random() * 9000)}`,
     source: 'in-store',
     customerName: options?.customerName?.trim() || 'দোকানে সরাসরি বিক্রি',
     phone: options?.customerPhone?.trim() || '',
