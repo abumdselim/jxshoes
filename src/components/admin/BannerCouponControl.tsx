@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { HeroBannerSettings, FlashDealSettings, Coupon, Product } from '@/types';
 import { Megaphone, Flame, Ticket, Check, Plus, Trash2, Save, Sparkles } from 'lucide-react';
 
-export default function AdminMarketingPage() {
+export default function BannerCouponControl() {
   const [heroBanner, setHeroBanner] = useState<HeroBannerSettings | null>(null);
   const [flashDeal, setFlashDeal] = useState<FlashDealSettings | null>(null);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -144,16 +144,7 @@ export default function AdminMarketingPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      <div className="sticky top-14 md:top-0 z-20 bg-slate-200 rounded-md border border-slate-200/80 px-4 sm:px-5 py-3.5 ">
-        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-          মার্কেটিং, ব্যানার ও কুপন কন্ট্রোল
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          হোমপেজের হিরো ব্যানার, ফ্ল্যাশ ডিল টাইমার এবং ডিসকাউন্ট কুপন সরাসরি এখান থেকে পরিচালনা করুন।
-        </p>
-      </div>
-
+    <div className="space-y-8">
       {saveSuccess && (
         <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-xs sm:text-sm font-bold flex items-center gap-2">
           <Check className="w-5 h-5 text-emerald-600" />

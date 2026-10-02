@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { StoreSettings } from '@/types';
-import { Settings, Save, Check, Phone, MapPin, Truck, DollarSign, Bell } from 'lucide-react';
+import BannerCouponControl from '@/components/admin/BannerCouponControl';
+import { Settings, Save, Check, Phone, MapPin, Truck, DollarSign, Bell, Megaphone } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<StoreSettings | null>(null);
@@ -275,6 +276,15 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </form>
+
+      {/* ব্যানার ও কুপন কন্ট্রোল — আগে আলাদা Marketing পেজে ছিল */}
+      <div className="pt-4 border-t border-slate-300/60">
+        <div className="flex items-center gap-2 mb-5">
+          <Megaphone className="w-5 h-5 text-orange-600" />
+          <h2 className="text-lg font-bold text-slate-900">ব্যানার ও কুপন কন্ট্রোল (Marketing)</h2>
+        </div>
+        <BannerCouponControl />
+      </div>
     </div>
   );
 }

@@ -8,7 +8,6 @@ import {
   Boxes,
   Layers,
   ShoppingCart,
-  Megaphone,
   Settings,
   ExternalLink,
   ShieldCheck,
@@ -17,7 +16,8 @@ import {
   Users,
   Receipt,
   Calculator,
-  FileText
+  FileText,
+  Images
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -90,10 +90,10 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       active: pathname.startsWith('/admin/reports'),
     },
     {
-      label: 'ব্যানার ও কুপন (Marketing)',
-      href: '/admin/marketing',
-      icon: Megaphone,
-      active: pathname.startsWith('/admin/marketing'),
+      label: 'মিডিয়া গ্যালারি',
+      href: '/admin/gallery',
+      icon: Images,
+      active: pathname.startsWith('/admin/gallery'),
     },
     {
       label: 'শপ সেটিংস ও ডেলিভারি ফি',
