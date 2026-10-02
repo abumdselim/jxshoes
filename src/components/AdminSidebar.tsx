@@ -108,17 +108,18 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       <div>
         {/* Brand Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-md bg-orange-600 flex items-center justify-center font-bold text-xl text-white">
-              SK
+          <div>
+            <div className="flex items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/shopkeeper-logo.png"
+                alt="Shopkeeper"
+                className="h-8 w-auto"
+                style={{ mixBlendMode: 'screen' }}
+              />
+              <ShieldCheck className="w-4 h-4 text-orange-400 flex-shrink-0" />
             </div>
-            <div>
-              <div className="font-extrabold text-sm tracking-tight flex items-center gap-1.5">
-                <span>Shopkeeper</span>
-                <ShieldCheck className="w-4 h-4 text-orange-400" />
-              </div>
-              <div className="text-[10px] text-white">Full Control CMS</div>
-            </div>
+            <div className="text-[10px] text-slate-400 mt-1">Full Control CMS</div>
           </div>
 
           {onCloseMobile && (
