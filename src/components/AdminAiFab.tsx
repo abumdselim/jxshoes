@@ -39,6 +39,49 @@ interface SaleDraft {
   customerPhone: string;
 }
 
+interface RestockDraft {
+  product: Product;
+  quantity: number;
+  unitCost: string;
+  supplierOrInvoice: string;
+}
+
+interface NewProductDraft {
+  name: string;
+  category: string;
+  subCategory: string;
+  price: string;
+  costPrice: string;
+  sizes: string;
+  colors: string;
+  stockCount: string;
+  supplier: string;
+  description: string;
+}
+
+/** বাংলা/ইংরেজি কালারের নাম থেকে hex */
+const COLOR_HEX: [RegExp, string][] = [
+  [/black|কালো/i, '#111827'],
+  [/white|সাদা|ক্রিম/i, '#f1f5f9'],
+  [/brown|বাদাম/i, '#78350f'],
+  [/tan/i, '#b45309'],
+  [/navy/i, '#1e3a8a'],
+  [/blue|নীল/i, '#2563eb'],
+  [/grey|gray|ধূসর/i, '#64748b'],
+  [/maroon|গাঢ়\s*লাল/i, '#7f1d1d'],
+  [/red|লাল/i, '#b91c1c'],
+  [/green|সবুজ/i, '#15803d'],
+  [/olive/i, '#3f6212'],
+  [/yellow|হলুদ/i, '#ca8a04'],
+  [/beige/i, '#e7d8b1'],
+  [/pink|গোলাপি/i, '#ec4899'],
+];
+
+function colorHex(name: string): string {
+  for (const [re, hex] of COLOR_HEX) if (re.test(name)) return hex;
+  return '#111827';
+}
+
 export default function AdminAiFab() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -47,6 +90,10 @@ export default function AdminAiFab() {
   const [busy, setBusy] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [saleDraft, setSaleDraft] = useState<SaleDraft | null>(null);
+  const [restockDraft, setRestockDraft] = useState<RestockDraft | null>(null);
+  const [restockSubmitting, setRestockSubmitting] = useState(false);
+  const [newProductDraft, setNewProductDraft] = useState<NewProductDraft | null>(null);
+  const [newProductSubmitting, setNewProductSubmitting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -78,11 +125,11 @@ export default function AdminAiFab() {
     setBusy(true);
 
     try {
-      // ১) আগে দেখি এটা কি সেল-কোড মেসেজ?
+      // ১) AI বুঝতে দাও — সেল? রিস্টক? নতুন প্রোডাক্ট? নাকি সাধারণ প্রশ্ন?
       const res = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'parse-sale', message: text }),
+        body: JSON.stringify({ action: 'parse-intent', message: text }),
       });
       const data = await res.json().catch(() => null);
 
@@ -91,7 +138,8 @@ export default function AdminAiFab() {
         return;
       }
 
-      if (res.ok && data?.match?.matched && data?.product) {
+      // — বিক্রি কনফার্মেশন
+      if (res.ok && data?.intent === 'sale' && data?.match?.matched && data?.product) {
         const p: Product = data.product;
         const m = data.match;
         setSaleDraft({
@@ -110,10 +158,41 @@ export default function AdminAiFab() {
         return;
       }
 
-      if (res.ok && data?.match && !data.match.matched && data.match.clarification) {
+      // — রিস্টক কনফার্মেশন
+      if (res.ok && data?.intent === 'restock' && data?.product) {
+        const p: Product = data.product;
+        setRestockDraft({
+          product: p,
+          quantity: data.quantity || 1,
+          unitCost: data.unitCost ? String(data.unitCost) : p.costPrice ? String(p.costPrice) : '',
+          supplierOrInvoice: data.supplierOrInvoice || '',
+        });
+        return;
+      }
+
+      // — নতুন প্রোডাক্ট তৈরির ফর্ম (AI প্রি-ফিল করে)
+      if (res.ok && data?.intent === 'new-product' && data?.draft) {
+        const d = data.draft;
+        setNewProductDraft({
+          name: d.name || '',
+          category: d.category || 'shoes',
+          subCategory: d.subCategory || '',
+          price: d.price ? String(d.price) : '',
+          costPrice: d.costPrice ? String(d.costPrice) : '',
+          sizes: Array.isArray(d.sizes) ? d.sizes.join(', ') : '',
+          colors: Array.isArray(d.colors) ? d.colors.join(', ') : '',
+          stockCount: d.stockCount ? String(d.stockCount) : '0',
+          supplier: d.supplier || '',
+          description: d.description || '',
+        });
+        return;
+      }
+
+      // — AI বুঝতে পারেনি কী চায়, প্রশ্ন করে
+      if (res.ok && data?.intent === 'other' && data?.clarification) {
         setMessages(prev => [
           ...prev,
-          { role: 'assistant', content: `🤔 ${data.match.clarification}` },
+          { role: 'assistant', content: `🤔 ${data.clarification}` },
         ]);
         return;
       }
@@ -198,6 +277,87 @@ export default function AdminAiFab() {
     }
   };
 
+  const confirmRestock = async () => {
+    if (!restockDraft || restockSubmitting) return;
+    setRestockSubmitting(true);
+    try {
+      const res = await fetch('/api/inventory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'restock',
+          productId: restockDraft.product.id,
+          quantity: restockDraft.quantity,
+          unitCost: Number(restockDraft.unitCost) || undefined,
+          supplierOrInvoice: restockDraft.supplierOrInvoice || undefined,
+          note: 'AI কুইক রিস্টক (মেসেজ থেকে)',
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
+        setToast({
+          text: `✅ ${restockDraft.product.name} এর স্টক +${restockDraft.quantity} — এখন ${data.product?.stockCount ?? '?'} টি`,
+        });
+        setRestockDraft(null);
+        setOpen(false);
+        setMessages([]);
+      } else {
+        setToast({ text: `❌ ${data?.error || 'রিস্টক করা যায়নি'}`, error: true });
+      }
+    } catch {
+      setToast({ text: '❌ সার্ভারে সংযোগ করা যায়নি', error: true });
+    } finally {
+      setRestockSubmitting(false);
+    }
+  };
+
+  const confirmNewProduct = async () => {
+    if (!newProductDraft || newProductSubmitting) return;
+    const sizesArr = newProductDraft.sizes.split(',').map(s => s.trim()).filter(Boolean);
+    const colorsArr = newProductDraft.colors.split(',').map(c => c.trim()).filter(Boolean)
+      .map(name => ({ name, hex: colorHex(name) }));
+    if (!newProductDraft.name.trim() || !Number(newProductDraft.price)) {
+      setToast({ text: '❌ নাম ও বিক্রয়মূল্য দিন', error: true });
+      return;
+    }
+    setNewProductSubmitting(true);
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newProductDraft.name.trim(),
+          category: newProductDraft.category,
+          subCategory: newProductDraft.subCategory.trim() || undefined,
+          price: Number(newProductDraft.price),
+          costPrice: Number(newProductDraft.costPrice) || undefined,
+          sizes: sizesArr.length > 0 ? sizesArr : ['Standard'],
+          colors: colorsArr.length > 0 ? colorsArr : [{ name: 'Black', hex: '#111827' }],
+          stockCount: Number(newProductDraft.stockCount) || 0,
+          minStockAlert: 5,
+          supplier: newProductDraft.supplier.trim() || undefined,
+          description: newProductDraft.description.trim() || '',
+          inStock: (Number(newProductDraft.stockCount) || 0) > 0,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.id) {
+        setToast({
+          text: `✅ ${data.name} ইনভেন্টরিতে যোগ হয়েছে — SKU: ${data.sku}`,
+        });
+        setNewProductDraft(null);
+        setOpen(false);
+        setMessages([]);
+      } else {
+        setToast({ text: `❌ ${data?.error || 'প্রোডাক্ট যোগ করা যায়নি'}`, error: true });
+      }
+    } catch {
+      setToast({ text: '❌ সার্ভারে সংযোগ করা যায়নি', error: true });
+    } finally {
+      setNewProductSubmitting(false);
+    }
+  };
+
   const draftVariant = saleDraft?.product.variants?.find(
     v => v.size === saleDraft.size && v.color === saleDraft.color
   );
@@ -264,13 +424,16 @@ export default function AdminAiFab() {
           {/* মেসেজ এলাকা */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[220px] max-h-[45vh] bg-slate-50">
             {messages.length === 0 && (
-              <div className="text-center space-y-3 py-6">
+              <div className="text-center space-y-3 py-5">
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-orange-100 flex items-center justify-center">
                   <Sparkles className="w-6 h-6 text-orange-600" />
                 </div>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  দ্রুত বিক্রির জন্য প্রোডাক্ট কোড পাঠান —<br />
-                  যেমন: <code className="bg-white border border-slate-200 rounded-md px-1.5 py-0.5 font-mono text-[11px]">JX-SH-101 42 2টি</code>
+                  বিক্রি: <code className="bg-white border border-slate-200 rounded-md px-1.5 py-0.5 font-mono text-[11px]">JX-SH-101 42 2টি</code>
+                  <br />
+                  রিস্টক: <span className="text-slate-600">&quot;JX-SH-101 এ ১০টা স্টক এসেছে&quot;</span>
+                  <br />
+                  নতুন পণ্য: <span className="text-slate-600">&quot;নতুন প্রোডাক্ট: Nike Air Max, দাম ৫৫০০, স্টক ২০&quot;</span>
                   <br />
                   অথবা শপ নিয়ে যেকোনো প্রশ্ন করুন।
                 </p>
@@ -565,6 +728,227 @@ export default function AdminAiFab() {
                   স্টকে যতটা আছে তার চেয়ে বেশি পরিমাণ দেওয়া হয়েছে
                 </p>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* রিস্টক কনফার্মেশন পপআপ */}
+      {restockDraft && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95">
+            <div className="bg-gradient-to-r from-emerald-600 to-teal-500 text-white px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Plus className="w-5 h-5" />
+                <div>
+                  <div className="text-sm font-black">স্টক বাড়ান (রিস্টক)</div>
+                  <div className="text-[10px] opacity-90">AI আপনার মেসেজ থেকে চালান খুঁজে পেয়েছে</div>
+                </div>
+              </div>
+              <button onClick={() => setRestockDraft(null)} className="p-1.5 rounded-lg hover:bg-white/20" aria-label="বাতিল">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="flex gap-3 items-center">
+                {restockDraft.product.images[0] && (
+                  <img src={restockDraft.product.images[0]} alt="" className="w-14 h-14 rounded-xl object-cover border border-slate-200" />
+                )}
+                <div className="min-w-0">
+                  <div className="text-sm font-bold text-slate-900 truncate">{restockDraft.product.name}</div>
+                  <div className="text-[11px] text-slate-500 font-mono">{restockDraft.product.sku}</div>
+                  <div className="text-[11px] font-bold text-slate-600">বর্তমান স্টক: {restockDraft.product.stockCount} টি</div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">কতটা পিস এসেছে?</label>
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setRestockDraft({ ...restockDraft, quantity: Math.max(1, restockDraft.quantity - 1) })} className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700" aria-label="কমান">
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="text-lg font-black text-slate-900 w-10 text-center">{restockDraft.quantity}</span>
+                  <button onClick={() => setRestockDraft({ ...restockDraft, quantity: restockDraft.quantity + 1 })} className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700" aria-label="বাড়ান">
+                    <Plus className="w-4 h-4" />
+                  </button>
+                  <span className="text-[11px] font-black text-emerald-600 ml-auto">
+                    নতুন স্টক: {restockDraft.product.stockCount + restockDraft.quantity} টি
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">প্রতি পিস ক্রয়মূল্য (৳)</label>
+                  <input
+                    type="number"
+                    value={restockDraft.unitCost}
+                    onChange={e => setRestockDraft({ ...restockDraft, unitCost: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">চালান / সাপ্লায়ার</label>
+                  <input
+                    value={restockDraft.supplierOrInvoice}
+                    onChange={e => setRestockDraft({ ...restockDraft, supplierOrInvoice: e.target.value })}
+                    placeholder="যেমন: চালান #CH-100"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button onClick={() => setRestockDraft(null)} className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+                  বাতিল
+                </button>
+                <button
+                  onClick={confirmRestock}
+                  disabled={restockSubmitting || restockDraft.quantity < 1}
+                  className="flex-1 px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-lg shadow-emerald-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {restockSubmitting ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  স্টক বাড়ান
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* নতুন প্রোডাক্ট তৈরির পপআপ */}
+      {newProductDraft && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-500 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-5 h-5" />
+                <div>
+                  <div className="text-sm font-black">নতুন প্রোডাক্ট যোগ করুন</div>
+                  <div className="text-[10px] opacity-90">AI আপনার মেসেজ থেকে তথ্যগুলো ভরে দিয়েছে — দেখে ঠিক করুন</div>
+                </div>
+              </div>
+              <button onClick={() => setNewProductDraft(null)} className="p-1.5 rounded-lg hover:bg-white/20" aria-label="বাতিল">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-3 overflow-y-auto">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">প্রোডাক্টের নাম *</label>
+                <input
+                  value={newProductDraft.name}
+                  onChange={e => setNewProductDraft({ ...newProductDraft, name: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">ক্যাটাগরি</label>
+                  <select
+                    value={newProductDraft.category}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, category: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="shoes">জুতা (Shoes)</option>
+                    <option value="bags">ব্যাগ (Bags)</option>
+                    <option value="accessories">এক্সেসরিজ</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">সাব-ক্যাটাগরি</label>
+                  <input
+                    value={newProductDraft.subCategory}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, subCategory: e.target.value })}
+                    placeholder="যেমন: Sneakers"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">বিক্রয়মূল্য (৳) *</label>
+                  <input
+                    type="number"
+                    value={newProductDraft.price}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, price: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">ক্রয়মূল্য (৳)</label>
+                  <input
+                    type="number"
+                    value={newProductDraft.costPrice}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, costPrice: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">সাইজ (কমা দিয়ে)</label>
+                  <input
+                    value={newProductDraft.sizes}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, sizes: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">কালার (কমা দিয়ে)</label>
+                  <input
+                    value={newProductDraft.colors}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, colors: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">প্রাথমিক স্টক</label>
+                  <input
+                    type="number"
+                    value={newProductDraft.stockCount}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, stockCount: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-600 uppercase mb-1">সাপ্লায়ার</label>
+                  <input
+                    value={newProductDraft.supplier}
+                    onChange={e => setNewProductDraft({ ...newProductDraft, supplier: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-1">
+                <button onClick={() => setNewProductDraft(null)} className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-50">
+                  বাতিল
+                </button>
+                <button
+                  onClick={confirmNewProduct}
+                  disabled={newProductSubmitting || !newProductDraft.name.trim() || !Number(newProductDraft.price)}
+                  className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black shadow-lg shadow-blue-600/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {newProductSubmitting ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <CheckCircle className="w-4 h-4" />
+                  )}
+                  ইনভেন্টরিতে যোগ করুন
+                </button>
+              </div>
             </div>
           </div>
         </div>

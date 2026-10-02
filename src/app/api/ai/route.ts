@@ -285,7 +285,7 @@ function deterministicMatch(message: string, products: Product[]): AISaleMatch |
     .replace(/[x×]/g, ' ');
 
   let quantity = 1;
-  const qtyMatch = rest.match(/(\d{1,3})\s*(?:টি|টা|PCS|PIECE)/);
+  const qtyMatch = rest.match(/(\d{1,3})\s*(?:টি|টা|পিস|PCS|PIECE)/);
   if (qtyMatch) {
     quantity = Math.max(1, parseInt(qtyMatch[1], 10));
   } else {
@@ -521,6 +521,162 @@ ${catalog}`,
   }
 }
 
+// ================== PARSE INTENT (সেল / রিস্টক / নতুন প্রোডাক্ট) ==================
+/** মেসেজে এই শব্দগুলো থাকলে বিক্রি নয়, স্টক-ইন (রিস্টক) বোঝায় */
+const RESTOCK_KEYWORDS =
+  /(স্টক|চালান|রিস্টক|বাড়া|যোগ\s*(কর|হলো|হয়েছে)|ঢুকেছে|এসেছে|পৌঁছে|লট|STOCK|RESTOCK|INVOICE|CHASE)/i;
+
+function extractUnitCost(message: string): number | undefined {
+  const norm = bnToEnDigits(message);
+  const m =
+    norm.match(/(?:কস্ট|ক্রয়মূল্য|দাম|cost|purchase)\s*[:]?\s*(?:৳|\$)?\s*(\d{3,7})/i) ||
+    norm.match(/(?:৳|\$)\s*(\d{3,7})\s*(?:কস্ট|ক্রয়|প্রতি)/i);
+  if (m) {
+    const v = Number(m[1]);
+    return v > 0 ? v : undefined;
+  }
+  return undefined;
+}
+
+async function parseIntent(payload: { message?: string }) {
+  if (!isAIConfigured()) return aiUnavailable();
+  const message = (payload.message || '').trim();
+  if (!message) {
+    return NextResponse.json({ error: 'মেসেজ খালি' }, { status: 400 });
+  }
+
+  const products = await getProducts();
+
+  // ১) দ্রুত নিশ্চিত ম্যাচ — SKU/বারকোড থাকলে (AI ছাড়াই, AI খরচ বাঁচে)
+  const direct = deterministicMatch(message, products);
+  if (direct?.matched && direct.productId) {
+    const product = products.find(p => p.id === direct.productId) || null;
+    if (RESTOCK_KEYWORDS.test(message)) {
+      return NextResponse.json({
+        intent: 'restock',
+        product,
+        quantity: direct.quantity || 1,
+        unitCost: extractUnitCost(message) || null,
+        configured: true,
+      });
+    }
+    return NextResponse.json({ intent: 'sale', match: direct, product, configured: true });
+  }
+
+  // ২) AI ক্লাসিফায়ার — বাকি সব ক্ষেত্রে
+  const messages: AIMessage[] = [
+    {
+      role: 'system',
+      content: `তুমি দোকানের ইনভেন্টরি সহকারী। দোকানদারের মেসেজ থেকে ইচ্ছা শনাক্ত করো:
+- "sale": পণ্য বিক্রি হয়েছে ("JX-SH-001 কালো ৪২ এর ২টা গেছে")
+- "restock": আগের পণ্যের স্টক বাড়ানো/চালান এসেছে ("JX-SH-002 এ ১৫টা স্টক, কস্ট ১৬৫০", "রিস্টক করো রেড স্নিকার্স ১০টা")
+- "new-product": সম্পূর্ণ নতুন পণ্য ইনভেন্টরিতে যোগ ("নতুন প্রোডাক্ট: Nike Air Max, দাম ৫৫০০, স্টক ২০")
+- "other": এসবের কোনোটাই না
+বাংলা সংখ্যা বুঝবে (২=2)। বাংলা কালারের নাম ইংরেজিতে অনুবাদ করবে (কালো=Black, লাল=Red, সাদা=White, নীল=Blue, বাদামি=Brown, ধূসর=Gray, সবুজ=Green)।
+শুধু JSON দাও:
+{"intent": "sale|restock|new-product|other", "productId": "তালিকার id বা null", "size": null, "color": null, "quantity": সংখ্যা-অথবা-null, "unitCost": সংখ্যা-অথবা-null, "supplierOrInvoice": "স্ট্রিং-অথবা-null",
+"newProduct": {"name": null, "category": "shoes|bags|accessories", "subCategory": null, "price": null, "costPrice": null, "sizes": [], "colors": [], "stockCount": null, "supplier": null, "description": null},
+"clarification": null}
+নিয়ম: productId অবশ্যই তালিকার id হতে হবে। restock/new-product-এ পরিমাণ/দাম না বলা থাকলে null দাও। নতুন পণ্যে নাম না থাকলে intent:"other" + clarification-এ বাংলায় কী জানতে চাইবেন লেখো। নতুন জুতার সাইজ না বলা থাকলে sizes:["39","40","41","42","43","44"], ব্যাগ হলে ["Standard"]।
+
+প্রোডাক্ট তালিকা (id | SKU | বারকোড | নাম | ক্যাটাগরি | সাইজ | কালার | স্টক):
+${buildCatalogContext(products)}`,
+    },
+    { role: 'user', content: message },
+  ];
+
+  try {
+    const parsed = await runAIJson<{
+      intent?: string;
+      productId?: string | null;
+      size?: string | null;
+      color?: string | null;
+      quantity?: number | null;
+      unitCost?: number | null;
+      supplierOrInvoice?: string | null;
+      clarification?: string | null;
+      newProduct?: {
+        name?: string | null;
+        category?: string | null;
+        subCategory?: string | null;
+        price?: number | null;
+        costPrice?: number | null;
+        sizes?: string[] | null;
+        colors?: string[] | null;
+        stockCount?: number | null;
+        supplier?: string | null;
+        description?: string | null;
+      } | null;
+    }>(messages, { maxTokens: 900, temperature: 0.2 });
+
+    const intent = parsed.intent || 'other';
+
+    if (intent === 'restock' && parsed.productId && products.some(p => p.id === parsed.productId)) {
+      const product = products.find(p => p.id === parsed.productId) || null;
+      return NextResponse.json({
+        intent: 'restock',
+        product,
+        quantity: Number(parsed.quantity) > 0 ? Number(parsed.quantity) : 1,
+        unitCost: Number(parsed.unitCost) > 0 ? Number(parsed.unitCost) : null,
+        supplierOrInvoice: parsed.supplierOrInvoice || null,
+        configured: true,
+      });
+    }
+
+    if (intent === 'sale' && parsed.productId && products.some(p => p.id === parsed.productId)) {
+      const product = products.find(p => p.id === parsed.productId) || null;
+      return NextResponse.json({
+        intent: 'sale',
+        match: {
+          matched: true,
+          productId: parsed.productId,
+          productName: product?.name,
+          size: parsed.size || undefined,
+          color: parsed.color || undefined,
+          quantity: Number(parsed.quantity) > 0 ? Number(parsed.quantity) : 1,
+          confidence: 'medium' as const,
+        },
+        product,
+        configured: true,
+      });
+    }
+
+    if (intent === 'new-product' && parsed.newProduct?.name && Number(parsed.newProduct.price) > 0) {
+      const np = parsed.newProduct;
+      const category = ['shoes', 'bags', 'accessories'].includes(np.category || '') ? np.category! : 'shoes';
+      const sizes = Array.isArray(np.sizes) && np.sizes.length > 0 ? np.sizes.map(String) : category === 'shoes' ? ['39', '40', '41', '42', '43', '44'] : ['Standard'];
+      const colors = Array.isArray(np.colors) && np.colors.length > 0 ? np.colors.map(String) : ['Black'];
+      return NextResponse.json({
+        intent: 'new-product',
+        draft: {
+          name: String(np.name),
+          category,
+          subCategory: np.subCategory || '',
+          price: Number(np.price),
+          costPrice: Number(np.costPrice) > 0 ? Number(np.costPrice) : null,
+          sizes,
+          colors,
+          stockCount: Number(np.stockCount) > 0 ? Math.round(Number(np.stockCount)) : 0,
+          supplier: np.supplier || '',
+          description: np.description || '',
+        },
+        configured: true,
+      });
+    }
+
+    return NextResponse.json({
+      intent: 'other',
+      clarification: parsed.clarification || null,
+      configured: true,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'মেসেজ বুঝতে পারা যায়নি', configured: true },
+      { status: 500 }
+    );
+  }
+}
+
 // ================== ROUTE HANDLERS ==================
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -552,6 +708,8 @@ export async function POST(request: Request) {
       return generateBannerCopy(body as { storeName?: string; tagline?: string });
     case 'parse-sale':
       return parseSaleMatch(body as { message?: string });
+    case 'parse-intent':
+      return parseIntent(body as { message?: string });
     case 'generate-report':
       return handleGenerateReport(body as { reportType?: string });
     case 'email-report':
