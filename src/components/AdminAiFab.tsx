@@ -103,12 +103,12 @@ export default function AdminAiFab() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const voiceChunksRef = useRef<Blob[]>([]);
   const messagesRef = useRef<ChatMsg[]>([]);
-  const [toast, setToast] = useState<{ text: string; error?: boolean } | null>(null);
+  const [toast, setToast] = useState<{ text: string; error?: boolean; undo?: { productId: string; quantity: number } } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4500);
+    const t = setTimeout(() => setToast(null), toast?.undo ? 30000 : 4500);
     return () => clearTimeout(t);
   }, [toast]);
 
@@ -125,6 +125,27 @@ export default function AdminAiFab() {
   const showAIError = (err: unknown) => {
     const text = err instanceof Error ? err.message : 'কিছু একটা সমস্যা হয়েছে';
     setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${text}` }]);
+  };
+
+  const undoAutoRestock = async () => {
+    if (!toast?.undo) return;
+    const { productId, quantity } = toast.undo;
+    setToast(null);
+    try {
+      const res = await fetch('/api/pos/undo-auto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, quantity }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
+        setToast({ text: `↩️ ফিরিয়ে আনা হয়েছে — স্টক এখন ${data.product?.stockCount ?? '?'} টি` });
+      } else {
+        setToast({ text: `❌ ${data?.error || 'আন্ডো করা যায়নি'}`, error: true });
+      }
+    } catch {
+      setToast({ text: '❌ সার্ভারে সংযোগ করা যায়নি', error: true });
+    }
   };
 
   const blobToBase64 = (blob: Blob): Promise<string> =>
@@ -231,6 +252,18 @@ export default function AdminAiFab() {
 
       // দেখাও AI কী শুনলো
       setMessages(prev => [...prev, { role: 'user', content: `🎙️ "${transcript}"` }]);
+
+      // অটো-এক্সিকিউশন: হুবহু SKU-ম্যাচ restock — পপআপ ছাড়াই সম্পন্ন + আন্ডো
+      if (data?.autoExecuted) {
+        const a = data.autoExecuted;
+        setToast({
+          text: `🤖 স্বয়ংক্রিয়ভাবে সম্পন্ন: ${a.productName} এর স্টক +${a.quantity} (এখন ${a.newStock} টি) — ভুল হলে ফিরিয়ে নিন`,
+          undo: { productId: a.productId, quantity: a.quantity },
+        });
+        setOpen(false);
+        setMessages([]);
+        return;
+      }
 
       const handled = applyIntentResponse(data, res.ok);
       if (!handled) {
@@ -1094,12 +1127,18 @@ export default function AdminAiFab() {
       {toast && (
         <div
           className={`fixed top-20 right-4 z-[70] max-w-sm rounded-md px-5 py-3.5 text-xs font-bold animate-in fade-in slide-in-from-top-4 ${
-            toast.error
-              ? 'bg-red-600 text-white'
-              : 'bg-emerald-600 text-white'
+            toast.error ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'
           }`}
         >
           {toast.text}
+          {toast.undo && (
+            <button
+              onClick={undoAutoRestock}
+              className="ml-3 px-2.5 py-1 rounded-md bg-white text-emerald-700 font-black text-[10px] hover:bg-emerald-50 transition-colors"
+            >
+              ↩ আন্ডো
+            </button>
+          )}
         </div>
       )}
     </>

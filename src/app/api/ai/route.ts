@@ -12,6 +12,7 @@ import { generateReport, renderReportEmailHtml } from '@/lib/report';
 import { isEmailConfigured, EMAIL_NOT_CONFIGURED_MSG, sendEmail } from '@/lib/email';
 import { getDailyBrief, getOrders, getProducts, getReports, getStoreSettings, saveDailyBrief, saveReport } from '@/lib/store';
 import { transcribeAudioGemini } from '@/lib/ai';
+import { adjustProductStock, restockProduct } from '@/lib/store';
 import { AIDailyBrief, AIInsights, AISaleMatch, Product } from '@/types';
 
 export const runtime = 'edge';
@@ -561,9 +562,71 @@ async function handleVoiceIntent(payload: { audioBase64?: string; mimeType?: str
     );
   }
 
-  const intentRes = await parseIntent({ message: transcript });
+  // ===== ASR-ভুল সংশোধন: ক্যাটালগ দেখিয়ে ট্রান্সক্রিপ্ট শুদ্ধ করা =====
+  let effectiveMessage = transcript;
+  try {
+    const products = await getProducts();
+    const fix = await runAIJson<{ corrected?: string }>(
+      [
+        {
+          role: 'system',
+          content: `নিচের টেক্সট একটি ভয়েস-রিকগনিশন ইঞ্জিনের ট্রান্সক্রিপ্ট — বাংলা শুনে লেখায় ভুল থাকতে পারে (প্রোডাক্ট কোড, নাম, সংখ্যা বিকৃত হতে পারে)। প্রোডাক্ট তালিকার সাথে মিলিয়ে কোড/নাম/সংখ্যা শুদ্ধ করো। শুনে বোঝা সংখ্যা সঠিক সংখ্যায় লেখো (আট=8)। বাকি সব না-ছোঁয়া রাখো। শুধু JSON দাও: {"corrected": "শুদ্ধ টেক্সট"}`,
+        },
+        {
+          role: 'user',
+          content: `ট্রান্সক্রিপ্ট: ${transcript}
+
+প্রোডাক্ট তালিকা:
+${buildCatalogContext(products)}`,
+        },
+      ],
+      { maxTokens: 700, temperature: 0.1 }
+    );
+    if (fix.corrected && fix.corrected.trim()) effectiveMessage = fix.corrected.trim();
+  } catch {
+    // সংশোধন ব্যর্থ হলে কাঁচা ট্রান্সক্রিপ্টেই এগোও
+  }
+
+  const intentRes = await parseIntent({ message: effectiveMessage });
   const intentData = await intentRes.json().catch(() => ({ intent: 'other' }));
-  return NextResponse.json({ transcript, ...intentData });
+
+  // ===== অটো-এক্সিকিউশন: হুবহু SKU-ম্যাচ restock (নিরাপদ + আন্ডোযোগ্য) =====
+  if (
+    intentData.intent === 'restock' &&
+    intentData.direct === true &&
+    intentData.product
+  ) {
+    const qty = Number(intentData.quantity) || 1;
+    if (qty > 0 && qty <= 1000) {
+      const p = intentData.product;
+      const unitCost = Number(intentData.unitCost) > 0 ? Number(intentData.unitCost) : undefined;
+      const updated = await restockProduct(
+        p.id,
+        qty,
+        unitCost,
+        (intentData.supplierOrInvoice as string) || undefined,
+        `AI ভয়েস অটো-রিস্টক — শুনেছে: "${transcript}"`
+      );
+      if (updated) {
+        return NextResponse.json({
+          transcript,
+          effectiveMessage,
+          intent: 'restock',
+          autoExecuted: {
+            type: 'restock',
+            productId: updated.id,
+            productName: updated.name,
+            quantity: qty,
+            previousStock: updated.stockCount - qty,
+            newStock: updated.stockCount,
+          },
+          configured: true,
+        });
+      }
+    }
+  }
+
+  return NextResponse.json({ transcript, effectiveMessage, ...intentData });
 }
 
 async function parseIntent(payload: { message?: string }) {
@@ -585,6 +648,7 @@ async function parseIntent(payload: { message?: string }) {
         product,
         quantity: direct.quantity || 1,
         unitCost: extractUnitCost(message) || null,
+        direct: true, // হুবহু SKU/বারকোড ম্যাচ — অটো-এক্সিকিউশনের শর্ত
         configured: true,
       });
     }
