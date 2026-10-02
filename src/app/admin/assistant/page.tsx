@@ -28,7 +28,42 @@ import {
 /** চ্যাট মেসেজে ইনলাইন অ্যাকশন (ভয়েস কমান্ড কনফার্ম করার জন্য) */
 interface AssistantMsg extends ChatMsg {
   restockAction?: { productId: string; productName: string; quantity: number };
+  saleAction?: { productId: string; productName: string; quantity: number; size?: string; color?: string };
+  newProductAction?: {
+    name: string;
+    category: string;
+    subCategory: string;
+    price: string;
+    costPrice: string;
+    sizes: string;
+    colors: string;
+    stockCount: string;
+    supplier: string;
+    description: string;
+  };
   done?: boolean;
+}
+
+const COLOR_HEX: [RegExp, string][] = [
+  [/black|কালো/i, '#111827'],
+  [/white|সাদা|ক্রিম/i, '#f1f5f9'],
+  [/brown|বাদাম/i, '#78350f'],
+  [/tan/i, '#b45309'],
+  [/navy/i, '#1e3a8a'],
+  [/blue|নীল/i, '#2563eb'],
+  [/grey|gray|ধূসর/i, '#64748b'],
+  [/maroon/i, '#7f1d1d'],
+  [/red|লাল/i, '#b91c1c'],
+  [/green|সবুজ/i, '#15803d'],
+  [/olive/i, '#3f6212'],
+  [/yellow|হলুদ/i, '#ca8a04'],
+  [/beige/i, '#e7d8b1'],
+  [/pink|গোলাপি/i, '#ec4899'],
+];
+
+function colorHex(name: string): string {
+  for (const [re, hex] of COLOR_HEX) if (re.test(name)) return hex;
+  return '#111827';
 }
 
 const blobToBase64 = (blob: Blob): Promise<string> =>
@@ -142,6 +177,88 @@ export default function AdminAssistantPage() {
     }
   };
 
+  const confirmSale = async (msgIndex: number) => {
+    const msg = messagesRef.current[msgIndex];
+    const act = msg && msg.saleAction;
+    if (!act || msg.done) return;
+    setMessages(prev => {
+      const updated = [...prev];
+      updated[msgIndex] = { ...updated[msgIndex], done: true };
+      return updated;
+    });
+    try {
+      const res = await fetch('/api/pos/sale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [
+            { productId: act.productId, quantity: act.quantity, size: act.size, color: act.color },
+          ],
+          note: 'AI ভয়েস বিক্রি (অ্যাসিস্ট্যান্ট)',
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      const ok = res.ok && data && data.success;
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: ok
+            ? 'বিক্রি সম্পন্ন! অর্ডার ' + data.order.orderNumber + ' — স্টক আপডেট হয়েছে' + (data.order.dueAmount > 0 ? ', বাকি ৳' + data.order.dueAmount : '')
+            : 'দুঃখিত — ' + (data && data.error ? data.error : 'বিক্রি করা যায়নি'),
+        },
+      ]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'সার্ভারে সংযোগ করা যায়নি' }]);
+    }
+  };
+
+  const confirmNewProduct = async (msgIndex: number) => {
+    const msg = messagesRef.current[msgIndex];
+    const act = msg && msg.newProductAction;
+    if (!act || msg.done) return;
+    setMessages(prev => {
+      const updated = [...prev];
+      updated[msgIndex] = { ...updated[msgIndex], done: true };
+      return updated;
+    });
+    try {
+      const sizesArr = act.sizes.split(',').map(x => x.trim()).filter(Boolean);
+      const colorsArr = act.colors.split(',').map(x => x.trim()).filter(Boolean).map(name => ({ name: name, hex: colorHex(name) }));
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: act.name,
+          category: act.category,
+          subCategory: act.subCategory || undefined,
+          price: Number(act.price),
+          costPrice: Number(act.costPrice) || undefined,
+          sizes: sizesArr.length > 0 ? sizesArr : ['Standard'],
+          colors: colorsArr.length > 0 ? colorsArr : [{ name: 'Black', hex: '#111827' }],
+          stockCount: Number(act.stockCount) || 0,
+          minStockAlert: 5,
+          supplier: act.supplier || undefined,
+          description: act.description || '',
+          inStock: (Number(act.stockCount) || 0) > 0,
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      const ok = res.ok && data && data.id;
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: ok
+            ? 'যোগ হয়েছে! ' + data.name + ' — SKU: ' + data.sku + ', স্টক ' + data.stockCount + ' টি'
+            : 'দুঃখিত — ' + (data && data.error ? data.error : 'যোগ করা যায়নি'),
+        },
+      ]);
+    } catch {
+      setMessages(prev => [...prev, { role: 'assistant', content: 'সার্ভারে সংযোগ করা যায়নি' }]);
+    }
+  };
+
   const handleVoiceBlob = async (blob: Blob, mime: string) => {
     setVoiceBusy(true);
     setError(null);
@@ -189,30 +306,50 @@ export default function AdminAssistantPage() {
         return;
       }
 
-      // ৩) সেল/নতুন পণ্য — কনফার্মেশন পপআপ ভাসমান বাটনে (পেমেন্ট/ফর্ম দরকার)
-      if (data.intent === 'sale' && data.match && data.match.matched) {
+      // 3) সেল — চ্যাটেই ক্যাশ-বিক্রি কনফার্ম (বাকি দরকার হলে ভাসমান বাটন, অন্য পেজে)
+      if (data.intent === 'sale' && data.match && data.match.matched && data.product) {
+        const m = data.match;
         setMessages(prev => [
           ...prev,
           {
             role: 'assistant',
-            content: 'বুঝেছি — বিক্রি: ' + (data.product ? data.product.name : '') + ' (' + (data.match.quantity || 1) + 'টি)। এই কাজটি সম্পন্ন করতে নিচে-ডানের ভাসমান "আপনার এআই সহকারী" বাটনে একই কথা বলুন বা লিখুন — সেখানে পেমেন্ট-বাকি সহ কনফার্মেশন পপআপ আসবে।',
+            content: 'বুঝেছি — বিক্রি: ' + data.product.name + ' (' + (m.quantity || 1) + 'টি)। পেমেন্ট কীভাবে নিবেন?',
+            saleAction: {
+              productId: data.product.id,
+              productName: data.product.name,
+              quantity: m.quantity || 1,
+              size: m.size || data.product.sizes[0] || 'Standard',
+              color: m.color || (data.product.colors[0] ? data.product.colors[0].name : 'Default'),
+            },
           },
         ]);
         return;
       }
+
+      // 4) নতুন পণ্য — চ্যাটেই প্রি-ফিল করা কনফার্ম
       if (data.intent === 'new-product' && data.draft) {
         const d = data.draft;
         setMessages(prev => [
           ...prev,
           {
             role: 'assistant',
-            content: 'বুঝেছি — নতুন পণ্য: ' + d.name + ' (৳' + d.price + ')। এই কাজটি সম্পন্ন করতে ভাসমান বাটনে একই কথা বলুন — সেখানে প্রি-ফিল করা ফর্ম আসবে।',
+            content: 'বুঝেছি — নতুন পণ্য: ' + d.name + ' (৳' + d.price + ', স্টক ' + (d.stockCount || 0) + ')। ইনভেন্টরিতে যোগ করব?',
+            newProductAction: {
+              name: d.name || '',
+              category: d.category || 'shoes',
+              subCategory: d.subCategory || '',
+              price: d.price ? String(d.price) : '',
+              costPrice: d.costPrice ? String(d.costPrice) : '',
+              sizes: Array.isArray(d.sizes) ? d.sizes.join(', ') : '',
+              colors: Array.isArray(d.colors) ? d.colors.join(', ') : '',
+              stockCount: d.stockCount ? String(d.stockCount) : '0',
+              supplier: d.supplier || '',
+              description: d.description || '',
+            },
           },
         ]);
         return;
-      }
-
-      // ৪) সাধারণ প্রশ্ন — AI চ্যাটে উত্তর
+      }      // ৪) সাধারণ প্রশ্ন — AI চ্যাটে উত্তর
       const withUser: AssistantMsg[] = [...messagesRef.current, { role: 'user', content: transcript }];
       setMessages([...withUser, { role: 'assistant', content: '' }]);
       setStreaming(true);
@@ -373,6 +510,24 @@ export default function AdminAssistantPage() {
                 >
                   <CheckCircle className="w-4 h-4" />
                   {m.done ? 'সম্পন্ন হয়েছে' : 'রিস্টক নিশ্চিত করুন (' + m.restockAction.quantity + ' পিস)'}
+                </button>
+              )}
+              {m.saleAction && !m.done && (
+                <button
+                  onClick={() => confirmSale(i)}
+                  className="ml-11 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md text-xs font-bold bg-orange-600 hover:bg-orange-700 text-white transition-colors"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  ক্যাশে বিক্রি নিশ্চিত করুন ({m.saleAction.quantity} পিস)
+                </button>
+              )}
+              {m.newProductAction && !m.done && (
+                <button
+                  onClick={() => confirmNewProduct(i)}
+                  className="ml-11 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-md text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  ইনভেন্টরিতে যোগ করুন
                 </button>
               )}
             </div>

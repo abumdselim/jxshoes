@@ -12,6 +12,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Product } from '@/types';
 import { ChatMsg, streamChat } from '@/lib/chatClient';
+import { usePathname } from 'next/navigation';
 import {
   Bot,
   Sparkles,
@@ -510,6 +511,11 @@ export default function AdminAiFab() {
     v => v.size === saleDraft.size && v.color === saleDraft.color
   );
   const draftStock = draftVariant ? draftVariant.stock : saleDraft?.product.stockCount;
+
+  // অ্যাসিস্ট্যান্ট পেজে ফুল চ্যাট + ইনলাইন কনফার্ম আছে — FAB সেখানে লুকাও
+  // (hooks-এর নিয়ম: সব hook-এর পরে return — নাহলে পেজ বদলালে ক্র্যাশ করে)
+  const pathname = usePathname();
+  if (pathname.startsWith('/admin/assistant')) return null;
 
   return (
     <>
