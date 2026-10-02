@@ -20,7 +20,7 @@ export default function AdminLayout({
      * - Sidebar একটি flex child — কখনো scroll হয় না
      * - Main content শুধু overflow-y-auto দিয়ে নিজেই scroll করে
      */
-    <div className="fixed inset-0 bg-slate-100 text-slate-900 flex overflow-hidden">
+    <div className="fixed inset-0 bg-slate-200 text-slate-900 flex overflow-hidden">
 
       {/* Desktop Sidebar — always visible, never scrolls */}
       <div className="hidden md:flex w-64 flex-shrink-0 h-full">
@@ -48,7 +48,7 @@ export default function AdminLayout({
             {/* Mobile Hamburger */}
             <button
               onClick={() => setMobileSidebarOpen(true)}
-              className="p-2 rounded-md text-slate-600 hover:bg-slate-100"
+              className="p-2 rounded-md text-slate-600 hover:bg-slate-200"
               aria-label="Open Admin Menu"
             >
               <Menu className="w-5 h-5" />

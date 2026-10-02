@@ -117,7 +117,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                 <span>Master Admin</span>
                 <ShieldCheck className="w-4 h-4 text-orange-400" />
               </div>
-              <div className="text-[10px] text-slate-400">Full Control CMS</div>
+              <div className="text-[10px] text-white">Full Control CMS</div>
             </div>
           </div>
 
@@ -143,7 +143,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-md text-xs sm:text-sm font-semibold transition-all ${
                   item.active
                     ? 'bg-orange-600 text-white'
-                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                    : 'text-white hover:bg-slate-800'
                 }`}
               >
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
@@ -160,7 +160,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
           href="/"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-between w-full px-4 py-3 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors"
+          className="flex items-center justify-between w-full px-4 py-3 rounded-md bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors"
         >
           <span className="flex items-center gap-2">
             <ExternalLink className="w-4 h-4 text-orange-400" />
