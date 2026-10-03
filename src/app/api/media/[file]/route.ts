@@ -17,13 +17,14 @@ const EXT_MIME: Record<string, string> = {
  * R2 মিডিয়া প্রক্সি — /api/upload R2-তে সেভ করে `/api/media/{filename}` URL দেয়;
  * এই রাউট সেই ফাইল Cloudflare REST API দিয়ে সার্ভ করে (আগে ৪০৪ হচ্ছিল)।
  */
-export async function GET(_request: Request, { params }: { params: { file: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ file: string }> }) {
+  const { file } = await params;
   const cf = getCfEnv();
   if (!(cf.accountId && cf.apiToken)) {
     return new NextResponse('Media storage not configured', { status: 503 });
   }
 
-  const key = decodeURIComponent(params.file);
+  const key = decodeURIComponent(file);
   // পাথ-ট্রাভার্সাল ঠেকাতে শুধু সেফ ফাইলনেম
   if (!/^[A-Za-z0-9._-]+$/.test(key)) {
     return new NextResponse('Invalid file name', { status: 400 });

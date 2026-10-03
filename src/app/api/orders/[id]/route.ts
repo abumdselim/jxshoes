@@ -11,11 +11,12 @@ export const runtime = 'edge';
  */
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   try {
     const token = new URL(request.url).searchParams.get('t') || '';
-    const order = await getOrderById(params.id);
+    const order = await getOrderById(id);
     if (!order || !order.publicToken || !token || !timingSafeEqualStr(token, order.publicToken)) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }
@@ -33,13 +34,14 @@ export async function GET(
 /** অ্যাডমিন — অর্ডারের status/adminNote বদল */
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const denied = await requireAdmin(request);
   if (denied) return denied;
   try {
     const { status } = await request.json();
-    const updated = await updateOrderStatus(params.id, status);
+    const updated = await updateOrderStatus(id, status);
     if (!updated) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
     }

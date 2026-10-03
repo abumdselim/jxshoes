@@ -6,11 +6,12 @@ export const runtime = 'edge';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const denied = await requireAdmin(request);
   if (denied) return denied;
-  const success = await deleteCategory(params.id);
+  const success = await deleteCategory(id);
   if (success) {
     return NextResponse.json({ message: 'Category deleted' });
   }

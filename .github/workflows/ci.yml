@@ -37,3 +37,9 @@ jobs:
 
       - name: Build (Next.js)
         run: npm run build
+
+      # প্রোডাকশন-ডেপ্লয় যে বিল্ডেই যায় (next-on-pages) — PR-এই যাচাই হয়,
+      # নাহলে next build পাস করেও ডেপ্লয় ভাঙার ঝুঁকি থেকে যায় (উইন্ডোজ লোকালে
+      # এই টুল চলে না — spawn npx ENOENT — তাই একমাত্র এখানেই যাচাই সম্ভব)
+      - name: Build (Cloudflare next-on-pages)
+        run: npx @cloudflare/next-on-pages

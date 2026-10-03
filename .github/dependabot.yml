@@ -1,0 +1,14 @@
+# Dependabot — নিরাপদ আপডেট অটো, ঝুঁকিপূর্ণটা হাতে
+# next প্যাকেজ হাতে পরিচালিত: এর আপডেট @cloudflare/next-on-pages-এর peer
+# রেঞ্জের (যেমন <=15.5.2) সাথে মিলতে হয়, নইলে ডেপ্লয় ভাঙে। তাই next-এর
+# প্রপোজ করা যেকোনো আপডেট dependabot বাদ দেবে — আপগ্রেড দরকার হলে হাতে
+# next-on-pages-এর রেঞ্জ মিলিয়ে করতে হবে।
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch"]
