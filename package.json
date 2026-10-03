@@ -14,7 +14,7 @@
   "dependencies": {
     "clsx": "^2.1.1",
     "lucide-react": "^1.49.0",
-    "next": "15.5.2",
+    "next": "15.5.27",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "tailwind-merge": "^3.7.0",
@@ -38,5 +38,15 @@
     "vite": "^8.3.2",
     "vitest": "^5.0.3",
     "wrangler": "^4.146.0"
+  },
+  "overrides": {
+    "@cloudflare/next-on-pages": {
+      "next": "15.5.27",
+      "cookie": "0.7.2"
+    },
+    "next": {
+      "postcss": "8.5.28",
+      "sharp": "0.35.5"
+    }
   }
 }
