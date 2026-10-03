@@ -28,6 +28,7 @@ import {
   loadReportsCache,
   loadBriefCache,
   loadMediaCache,
+  saveMediaCache,
   loadMeta,
   addLocalOrder,
 } from './snapshot';
@@ -529,6 +530,64 @@ export async function applyMutation(
       return { status: 200, payload: { success: true, product: prod }, label: `SKU/কোড আপডেট: ${prod.name}` };
     }
     return { status: 400, payload: { error: 'Invalid inventory action' }, label: 'ইনভেন্টরি' };
+  }
+
+  // ---------- POS UNDO (AI অটো-রিস্টক আন্ডো) ----------
+  if (m === 'POST /api/pos/undo-auto') {
+    const productId = String(body?.productId || '');
+    const quantity = Number(body?.quantity);
+    if (!productId || !Number.isFinite(quantity) || quantity <= 0) {
+      return { status: 400, payload: { error: 'প্রোডাক্ট ও সঠিক পরিমাণ দিন' }, label: 'আন্ডো' };
+    }
+    const prod = data.products.find(p => p.id === productId);
+    if (!prod) return { status: 404, payload: { error: 'প্রোডাক্ট পাওয়া যায়নি' }, label: 'আন্ডো' };
+    if (prod.stockCount < quantity) {
+      return { status: 400, payload: { error: `বর্তমান স্টক (${prod.stockCount}) কম থাকায় আন্ডো করা যাচ্ছে না` }, label: 'আন্ডো' };
+    }
+    const prevStock = prod.stockCount;
+    prod.stockCount = Math.max(0, prevStock - quantity);
+    prod.inStock = prod.stockCount > 0;
+    data.inventoryMovements.unshift({
+      id: localId('mov'),
+      productId: prod.id,
+      productName: prod.name,
+      sku: prod.sku,
+      type: 'ADJUSTMENT',
+      quantity: -quantity,
+      previousStock: prevStock,
+      newStock: prod.stockCount,
+      unitCost: prod.costPrice,
+      supplierOrInvoice: 'শপ ইনভেন্টরি অ্যাডজাস্টমেন্ট',
+      note: 'AI অটো-রিস্টক আন্ডো (দোকানদার ফিরিয়ে নিয়েছেন)',
+      createdAt: nowIso(),
+    });
+    return {
+      status: 200,
+      payload: { success: true, product: prod },
+      label: `আন্ডো: ${prod.name} −${quantity}`,
+    };
+  }
+
+  // ---------- MEDIA LIBRARY (গ্যালারি — মিররের বাইরে আলাদা ক্যাশ) ----------
+  if (m === 'POST /api/media-library') {
+    const urls = ((body?.urls as string[] | undefined) || []).filter(u => typeof u === 'string' && u.trim());
+    if (urls.length === 0) {
+      return { status: 400, payload: { error: 'URL পাওয়া যায়নি' }, label: 'গ্যালারি যোগ' };
+    }
+    const media = await loadMediaCache();
+    await saveMediaCache([...media, ...urls]);
+    return { status: 200, payload: { ok: true, count: urls.length }, label: `গ্যালারিতে ${urls.length}টি ছবি যোগ` };
+  }
+  if (m === 'DELETE /api/media-library') {
+    const remove = ((body?.urls as string[] | undefined) || []).filter(u => typeof u === 'string' && u);
+    const media = await loadMediaCache();
+    const remaining = media.filter(u => !remove.includes(u));
+    await saveMediaCache(remaining);
+    return {
+      status: 200,
+      payload: { ok: true, count: media.length - remaining.length },
+      label: `গ্যালারি থেকে ${media.length - remaining.length}টি ছবি মুছে ফেলা`,
+    };
   }
 
   // ---------- NOTIFICATIONS ----------
