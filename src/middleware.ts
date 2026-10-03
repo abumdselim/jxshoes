@@ -30,11 +30,15 @@ const PUBLIC_API_RULES: { prefix: string; methods: string[] }[] = [
 ];
 
 function isPublicApi(pathname: string, method: string): boolean {
-  return PUBLIC_API_RULES.some(
-    rule =>
-      (pathname === rule.prefix || pathname.startsWith(rule.prefix + '/')) &&
+  return PUBLIC_API_RULES.some(rule => {
+    // ডেটা-নিরাপত্তা: prefix-এ ট্রেলিং-স্ল্যাশ থাকলেও ম্যাচ করতে হবে
+    // (নইলে '/api/cron/' রুল '/api/cron//watch'-এর সাথে তুলনায় কখনো ম্যাচ করে না)
+    const prefix = rule.prefix.endsWith('/') ? rule.prefix.slice(0, -1) : rule.prefix;
+    return (
+      (pathname === prefix || pathname.startsWith(prefix + '/')) &&
       rule.methods.includes(method)
-  );
+    );
+  });
 }
 
 export async function middleware(request: NextRequest) {
