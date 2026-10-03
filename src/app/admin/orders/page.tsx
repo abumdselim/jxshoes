@@ -14,6 +14,7 @@ import {
   AlertCircle,
   AlertTriangle
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -23,7 +24,7 @@ export default function AdminOrdersPage() {
 
   const loadOrders = async () => {
     try {
-      const res = await fetch('/api/orders');
+      const res = await apiFetch('/api/orders');
       if (res.ok) {
         const data = await res.json();
         setOrders(data);
@@ -41,7 +42,7 @@ export default function AdminOrdersPage() {
 
   const handleStatusChange = async (orderId: string, newStatus: Order['status']) => {
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const res = await apiFetch(`/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),

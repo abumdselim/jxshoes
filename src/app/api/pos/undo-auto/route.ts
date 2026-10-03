@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import { adjustProductStock, getProducts } from '@/lib/store';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
 /**
- * AI অটো-রিস্টক আন্ডো — ভয়েস কমান্ডে স্বয়ংক্রিয়ভাবে করা রিস্টক ফিরিয়ে আনা
+ * AI অটো-রিস্টক আন্ডো (অ্যাডমিন) — ভয়েস কমান্ডে স্বয়ংক্রিয়ভাবে করা রিস্টক ফিরিয়ে আনা
  * Body: { productId, quantity }
  * স্টক প্রত্যাহার + ADJUSTMENT মুভমেন্ট লগ (হিসাব অক্ষত থাকে)
  */
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const productId = body?.productId;

@@ -33,6 +33,7 @@ import {
   Layers,
   Footprints
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 function HomePageContent() {
   const searchParams = useSearchParams();
@@ -77,10 +78,10 @@ function HomePageContent() {
     async function loadData() {
       try {
         const [prodRes, catRes, mktRes, setRes] = await Promise.all([
-          fetch('/api/products'),
-          fetch('/api/categories'),
-          fetch('/api/marketing'),
-          fetch('/api/settings'),
+          apiFetch('/api/products'),
+          apiFetch('/api/categories'),
+          apiFetch('/api/marketing'),
+          apiFetch('/api/settings'),
         ]);
 
         if (prodRes.ok) setProducts(await prodRes.json());

@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import { addNotification } from '@/lib/store';
+import { checkRateLimit, clientIp } from '@/lib/rateLimit';
 
 export const runtime = 'edge';
 
-/** লাইভ ওয়েবসাইট থেকে কাস্টমারের পরামর্শ/অভিযোগ জমা নেওয়া (পাবলিক) */
+/** লাইভ ওয়েবসাইট থেকে কাস্টমারের পরামর্শ/অভিযোগ জমা নেওয়া (পাবলিক, রেট-লিমিটেড) */
 export async function POST(request: Request) {
+  const rl = await checkRateLimit('feedback', clientIp(request), 10, 3600);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'অনেক বেশি অনুরোধ — কিছুক্ষণ পরে আবার চেষ্টা করুন' }, { status: 429 });
+  }
   try {
     const body = await request.json();
     const type = body?.type === 'complaint' ? 'complaint' : 'feedback';

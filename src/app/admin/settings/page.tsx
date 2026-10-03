@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { StoreSettings } from '@/types';
 import BannerCouponControl from '@/components/admin/BannerCouponControl';
 import { Settings, Save, Check, Phone, MapPin, Truck, DollarSign, Bell, Megaphone } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<StoreSettings | null>(null);
@@ -13,7 +14,7 @@ export default function AdminSettingsPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/settings');
+        const res = await apiFetch('/api/settings');
         if (res.ok) setSettings(await res.json());
       } catch (e) {
         console.error(e);
@@ -29,7 +30,7 @@ export default function AdminSettingsPage() {
     if (!settings) return;
 
     try {
-      const res = await fetch('/api/settings', {
+      const res = await apiFetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),

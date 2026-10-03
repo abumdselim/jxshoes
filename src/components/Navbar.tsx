@@ -6,6 +6,7 @@ import { Search, Menu, X, ArrowRight, PhoneCall, Home, Footprints, ShoppingBag, 
 import { useCart } from '@/context/CartContext';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function Navbar() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function Navbar() {
 
     async function loadSettings() {
       try {
-        const res = await fetch('/api/settings');
+        const res = await apiFetch('/api/settings');
         if (res.ok) setSettings(await res.json());
       } catch (e) {
         // fallback

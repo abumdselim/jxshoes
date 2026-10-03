@@ -7,7 +7,34 @@ on:
   workflow_dispatch:
 
 jobs:
+  # CI গেট (P2) — এই job ফেল করলে deploy job চলবেই না
+  gate:
+    runs-on: ubuntu-latest
+    name: tsc + lint + test
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install --legacy-peer-deps
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
   deploy:
+    needs: gate
     runs-on: ubuntu-latest
     name: Build & Deploy to Cloudflare Pages
     steps:
@@ -29,6 +56,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_KV_ID: ${{ secrets.CLOUDFLARE_KV_ID }}
+          D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID }}
+          SHADOW_WRITE_D1: ${{ vars.SHADOW_WRITE_D1 }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -39,6 +68,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: "${CLOUDFLARE_ACCOUNT_ID}",
             CLOUDFLARE_API_TOKEN: "${CLOUDFLARE_API_TOKEN}",
             CLOUDFLARE_KV_ID: "${CLOUDFLARE_KV_ID}",
+            D1_DATABASE_ID: "${D1_DATABASE_ID}",
+            SHADOW_WRITE_D1: "${SHADOW_WRITE_D1}",
             CRON_SECRET: "${CRON_SECRET}",
             GEMINI_API_KEY: "${GEMINI_API_KEY}",
           };

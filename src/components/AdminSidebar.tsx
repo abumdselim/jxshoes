@@ -17,8 +17,55 @@ import {
   Calculator,
   FileText,
   Images,
-  Bell
+  Bell,
+  CloudOff,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
+import { useSyncStatus } from '@/lib/offline/OfflineProvider';
+
+const BN_DIGITS = '০১২৩৪৫৬৭৮৯';
+const bn = (v: number | string) => String(v).replace(/\d/g, d => BN_DIGITS[Number(d)]);
+
+/** সাইডবার ফুটারের ছোট অফলাইন/সিঙ্ক স্ট্যাটাস */
+function SyncStatusBadge() {
+  const status = useSyncStatus();
+  if (!status) return null;
+  const { online, pending, failed, syncing, syncNow } = status;
+  if (online && pending === 0 && failed === 0 && !syncing) return null;
+
+  return (
+    <button
+      onClick={() => void syncNow()}
+      title="সিঙ্ক সেন্টার"
+      className={`w-full flex items-center gap-2 px-3 py-2 rounded-md text-[11px] font-bold mb-2 transition-colors ${
+        !online
+          ? 'bg-slate-800 text-slate-300'
+          : failed > 0
+            ? 'bg-red-900/60 text-red-200'
+            : 'bg-slate-800 text-slate-300'
+      }`}
+    >
+      {syncing ? (
+        <Loader2 className="w-3.5 h-3.5 flex-shrink-0 animate-spin text-orange-400" />
+      ) : !online ? (
+        <CloudOff className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+      ) : (
+        <RefreshCw className="w-3.5 h-3.5 flex-shrink-0 text-orange-400" />
+      )}
+      <span className="truncate text-left">
+        {!online
+          ? 'অফলাইন — স্বয়ংক্রিয় সিঙ্ক চালু'
+          : failed > 0
+            ? `${bn(failed)}টি সিঙ্ক ব্যর্থ`
+            : syncing
+              ? 'সিঙ্ক হচ্ছে…'
+              : `${bn(pending)}টি সিঙ্ক অপেক্ষায়`}
+      </span>
+    </button>
+  );
+}
 
 interface AdminSidebarProps {
   onCloseMobile?: () => void;
@@ -33,7 +80,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     let alive = true;
     const load = async () => {
       try {
-        const res = await fetch('/api/notifications?unreadCount=1');
+        const res = await apiFetch('/api/notifications?unreadCount=1');
         if (res.ok) {
           const d = await res.json();
           if (alive) setUnreadNotifications(d.count || 0);
@@ -198,6 +245,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
 
       {/* Bottom Storefront return — সবসময় নিচে ফিক্সড */}
       <div className="p-4 border-t border-slate-800 flex-shrink-0">
+        <SyncStatusBadge />
         <a
           href="/shop"
           target="_blank"

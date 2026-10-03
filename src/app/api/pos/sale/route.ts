@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server';
 import { createPosSale } from '@/lib/store';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
 /**
- * ইন-স্টোর POS দ্রুত বিক্রি — AI কুইক সেল পপআপ থেকে কনফার্ম করা হলে এখানে আসে
+ * ইন-স্টোর POS দ্রুত বিক্রি (অ্যাডমিন) — AI কুইক সেল পপআপ থেকে কনফার্ম করা হলে এখানে আসে
  * Body: { items: [{ productId, variantId?, quantity, size?, color? }], customerName?, note? }
  */
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     if (!Array.isArray(body.items) || body.items.length === 0) {

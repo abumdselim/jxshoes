@@ -7,38 +7,24 @@ import {
   saveProduct,
   getProductById
 } from '@/lib/store';
+import { computeInventorySummary } from '@/lib/compute';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
 export async function GET(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const [products, movements] = await Promise.all([
       getProducts(),
       getInventoryMovements(),
     ]);
 
-    const totalSkus = products.length;
-    const totalUnits = products.reduce((acc, p) => acc + (p.stockCount || 0), 0);
-    const totalCostValue = products.reduce((acc, p) => acc + ((p.costPrice || 0) * (p.stockCount || 0)), 0);
-    const totalRetailValue = products.reduce((acc, p) => acc + ((p.price || 0) * (p.stockCount || 0)), 0);
-    const potentialProfit = Math.max(0, totalRetailValue - totalCostValue);
-
-    const lowStockProducts = products.filter(
-      p => p.stockCount > 0 && p.stockCount <= (p.minStockAlert || 5)
-    );
-    const outOfStockProducts = products.filter(p => p.stockCount === 0);
+    const { summary, lowStockProducts, outOfStockProducts } = computeInventorySummary(products);
 
     return NextResponse.json({
-      summary: {
-        totalSkus,
-        totalUnits,
-        totalCostValue,
-        totalRetailValue,
-        potentialProfit,
-        profitMarginPercent: totalRetailValue > 0 ? Math.round((potentialProfit / totalRetailValue) * 100) : 0,
-        lowStockCount: lowStockProducts.length,
-        outOfStockCount: outOfStockProducts.length,
-      },
+      summary,
       products,
       movements,
       lowStockProducts,
@@ -51,6 +37,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const { action } = body;

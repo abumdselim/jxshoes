@@ -1,8 +1,9 @@
 /**
- * Shopkeeper রিপোর্ট Cron Worker
- * ----------------------------
- * প্রতি সোমবার ও মাসের ১ তারিখে (রাত ২টা UTC = বাংলাদেশ সময় সকাল ৮টা)
- * মূল অ্যাপের `/api/cron/report` এন্ডপয়েন্টে হিট করে।
+ * Shopkeeper রিপোর্ট + AI ওয়াচার Cron Worker
+ * --------------------------------------------
+ * - প্রতিদিন রাত ২টা UTC (বাংলাদেশ সময় সকাল ৮টা): /api/cron/watch — প্রোঅ্যাকটিভ AI
+ *   সতর্কতা (স্টক-শেষ, ঝুলন্ত অর্ডার, বাকি, বিক্রয়-শূন্যতা → নোটিফিকেশন সেন্টার)
+ * - প্রতি সোমবার / মাসের ১ তারিখে: /api/cron/report — AI সাপ্তাহিক/মাসিক রিপোর্ট + ইমেইল
  * রিপোর্ট তৈরি (AI) + KV সেভ + ইমেইল — সব মূল অ্যাপই করে; Worker শুধু ঘড়ি।
  *
  * ডেপ্লয়: workers/report-cron/README.md দেখুন।
@@ -15,18 +16,27 @@ export interface Env {
 
 export default {
   async scheduled(event: ScheduledController, env: Env, ctx: ExecutionContext): Promise<void> {
-    // cron অনুযায়ী রিপোর্ট টাইপ: মাসের ১ তারিখ = মাসিক, সোমবার = সাপ্তাহিক
-    const type = event.cron === '0 2 1 * *' ? 'monthly' : 'weekly';
+    // cron অনুযায়ী কাজ: প্রতিদিন = AI ওয়াচার; মাসের ১ তারিখ = মাসিক রিপোর্ট; সোমবার = সাপ্তাহিক
+    const kind =
+      event.cron === '0 2 * * *'
+        ? 'watch'
+        : event.cron === '0 2 1 * *'
+          ? 'monthly'
+          : 'weekly';
 
-    const url = `${env.SITE_URL.replace(/\/$/, '')}/api/cron/report?type=${type}`;
+    const url =
+      kind === 'watch'
+        ? `${env.SITE_URL.replace(/\/$/, '')}/api/cron/watch`
+        : `${env.SITE_URL.replace(/\/$/, '')}/api/cron/report?type=${kind}`;
+
     try {
       const res = await fetch(url, {
         headers: { 'x-cron-secret': env.CRON_SECRET },
       });
       const body = await res.text();
-      console.log(`[jxshoes-report-cron] ${type} → HTTP ${res.status}: ${body.slice(0, 500)}`);
+      console.log(`[jxshoes-report-cron] ${kind} → HTTP ${res.status}: ${body.slice(0, 500)}`);
     } catch (err) {
-      console.error(`[jxshoes-report-cron] ${type} ব্যর্থ:`, err);
+      console.error(`[jxshoes-report-cron] ${kind} ব্যর্থ:`, err);
     }
   },
 };

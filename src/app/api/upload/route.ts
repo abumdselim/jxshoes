@@ -1,9 +1,20 @@
 import { NextResponse } from 'next/server';
 import { getCfEnv } from '@/lib/cfEnv';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
+// আপলোড সীমা (P1) — শুধু অ্যাডমিন, নির্দিষ্ট ছবি-ফরম্যাট, সাইজ লিমিট, অনুমান-অযোগ্য ফাইলনেম
+const ALLOWED_MIME: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5MB
+
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   const cf = getCfEnv();
   try {
     const data = await request.formData();
@@ -13,8 +24,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const filename = `${Date.now()}-${cleanName}`;
+    const ext = ALLOWED_MIME[file.type];
+    if (!ext) {
+      return NextResponse.json({ error: 'শুধু JPEG, PNG বা WebP ছবি আপলোড করা যায়' }, { status: 400 });
+    }
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json({ error: 'ছবিটি খুব বড় — সর্বোচ্চ 5MB' }, { status: 400 });
+    }
+
+    // ক্লায়েন্ট-পাঠানো নাম নয় — অনুমান-অযোগ্য র‍্যান্ডম ফাইলনেম
+    const filename = `${crypto.randomUUID()}.${ext}`;
     const bytes = await file.arrayBuffer();
 
     // 1. If running with Cloudflare R2 configured

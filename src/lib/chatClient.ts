@@ -9,9 +9,17 @@ export interface ChatMsg {
   content: string;
 }
 
+/** এজেন্ট চ্যাটের বিশেষ ইভেন্ট হ্যান্ডলার — টুল চিপ, কনফার্ম কার্ড, কাজ-সম্পন্ন চিপ */
+export interface ChatStreamHandlers {
+  onTool?: (tool: { name: string; label: string }) => void;
+  onConfirm?: (confirm: { type: 'sale' | 'due-payment' | 'new-product'; message: string; payload: Record<string, unknown> }) => void;
+  onDone?: (done: { message: string; undoAvailable?: boolean; undoPayload?: Record<string, unknown> }[]) => void;
+}
+
 export async function streamChat(
   messages: ChatMsg[],
-  onDelta: (text: string) => void
+  onDelta: (text: string) => void,
+  handlers?: ChatStreamHandlers
 ): Promise<void> {
   const res = await fetch('/api/ai', {
     method: 'POST',
@@ -43,6 +51,19 @@ export async function streamChat(
       if (!payload || payload === '[DONE]') continue;
       try {
         const json = JSON.parse(payload);
+        // এজেন্ট ইভেন্ট: টুল চিপ / কনফার্মেশন কার্ড / কাজ-সম্পন্ন
+        if (json.tool && typeof json.tool === 'object') {
+          handlers?.onTool?.(json.tool);
+          continue;
+        }
+        if (json.confirm && typeof json.confirm === 'object') {
+          handlers?.onConfirm?.(json.confirm);
+          continue;
+        }
+        if (Array.isArray(json.done)) {
+          handlers?.onDone?.(json.done);
+          continue;
+        }
         // সার্ভার AI স্ট্রিমিং: OpenAI-স্টাইল delta.content (llama + gemma দুটোই);
         // legacy "response" ফিল্ডও ফলব্যাক হিসেবে রাখা। Gemma-র reasoning_content
         // চাংকগুলো delta.content খালি রাখে — অটোমেটিক স্কিপ হয়ে যায়।

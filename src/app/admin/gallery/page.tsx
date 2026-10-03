@@ -12,6 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Product } from '@/types';
 import ImageEditor from '@/components/admin/ImageEditor';
 import { Images, Search, Pencil, Package, Loader2, AlertTriangle, CheckCircle2, Upload, Trash2 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function AdminGalleryPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,9 +33,9 @@ export default function AdminGalleryPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/products');
+        const res = await apiFetch('/api/products');
         if (res.ok) setProducts(await res.json());
-        const libRes = await fetch('/api/media-library');
+        const libRes = await apiFetch('/api/media-library');
         if (libRes.ok) setLibrary(await libRes.json());
       } finally {
         setLoading(false);
@@ -66,13 +67,13 @@ export default function AdminGalleryPage() {
       // লাইব্রেরির ছবি এডিট — পুরনো URL-এর বদলে নতুনটা সেভ হয়
       setSaving(true);
       try {
-        const addRes = await fetch('/api/media-library', {
+        const addRes = await apiFetch('/api/media-library', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ urls: [dataUrl] }),
         });
         if (!addRes.ok) throw new Error('save failed');
-        await fetch('/api/media-library', {
+        await apiFetch('/api/media-library', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ urls: [editing.url] }),
@@ -91,7 +92,7 @@ export default function AdminGalleryPage() {
     setSaving(true);
     try {
       const updatedImages = (product.images || []).map((x, i) => (i === editing.imageIndex ? dataUrl : x));
-      const res = await fetch(`/api/products/${product.id}`, {
+      const res = await apiFetch(`/api/products/${product.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...product, images: updatedImages }),
@@ -119,7 +120,7 @@ export default function AdminGalleryPage() {
     setSaving(true);
     try {
       const updatedImages = [...(product.images || []), ...urls];
-      const res = await fetch(`/api/products/${product.id}`, {
+      const res = await apiFetch(`/api/products/${product.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...product, images: updatedImages }),
@@ -147,7 +148,7 @@ export default function AdminGalleryPage() {
       for (const file of files) {
         const fd = new FormData();
         fd.append('file', file);
-        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const res = await apiFetch('/api/upload', { method: 'POST', body: fd });
         if (res.ok) {
           const data = await res.json();
           if (data?.url) newUrls.push(data.url);
@@ -161,7 +162,7 @@ export default function AdminGalleryPage() {
         await addImagesToProduct(uploadTargetId, newUrls);
       } else {
         // ডিফল্ট: নতুন ছবি লাইব্রেরিতে জমা হয় — পরে যেকোনো প্রোডাক্টে যুক্ত করা যায়
-        const res = await fetch('/api/media-library', {
+        const res = await apiFetch('/api/media-library', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ urls: newUrls }),
@@ -186,7 +187,7 @@ export default function AdminGalleryPage() {
       const ok = await addImagesToProduct(uploadTargetId, [u]);
       if (ok) setPendingUrl('');
     } else {
-      const res = await fetch('/api/media-library', {
+      const res = await apiFetch('/api/media-library', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ urls: [u] }),
@@ -205,7 +206,7 @@ export default function AdminGalleryPage() {
   const attachLibraryImage = async (url: string, productId: string) => {
     const ok = await addImagesToProduct(productId, [url]);
     if (!ok) return;
-    await fetch('/api/media-library', {
+    await apiFetch('/api/media-library', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ urls: [url] }),
@@ -214,7 +215,7 @@ export default function AdminGalleryPage() {
   };
 
   const deleteLibraryImage = async (url: string) => {
-    const res = await fetch('/api/media-library', {
+    const res = await apiFetch('/api/media-library', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ urls: [url] }),

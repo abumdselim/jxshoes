@@ -83,6 +83,7 @@ export interface Order {
   dueAmount?: number; // total - paidAmount; বাকির খাতায় যায়
   status: 'Pending' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
   createdAt: string;
+  publicToken?: string; // অনুমান-অযোগ্য টোকেন — order-success পেজ এটা দিয়েই নিজের অর্ডার দেখে (P1 নিরাপত্তা)
 }
 
 export interface Customer {
@@ -118,7 +119,7 @@ export interface DuePayment {
 
 export interface NotificationItem {
   id: string;
-  type: 'order' | 'complaint' | 'feedback';
+  type: 'order' | 'complaint' | 'feedback' | 'ai';
   title: string;
   message: string;
   read: boolean;

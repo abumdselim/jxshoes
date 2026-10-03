@@ -17,6 +17,7 @@ import {
   X,
   SlidersHorizontal,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 /** Material Design Icons (Apache 2.0) — ইনলাইন SVG, কোনো এক্সটার্নাল রিকোয়েস্ট নেই */
 function MdiIcon({ body, className }: { body: string; className?: string }) {
@@ -78,7 +79,7 @@ export default function AdminCategoriesPage() {
 
   const loadCategories = async () => {
     try {
-      const res = await fetch('/api/categories');
+      const res = await apiFetch('/api/categories');
       if (res.ok) {
         setCategories(await res.json());
       }
@@ -96,7 +97,7 @@ export default function AdminCategoriesPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/categories', {
+      const res = await apiFetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, image: formData.image.trim() }),
@@ -119,7 +120,7 @@ export default function AdminCategoriesPage() {
   const handleDelete = async (id: string) => {
     if (confirm('এই ক্যাটাগরিটি মুছে ফেলতে চান?')) {
       try {
-        const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+        const res = await apiFetch(`/api/categories/${id}`, { method: 'DELETE' });
         if (res.ok) {
           loadCategories();
         }

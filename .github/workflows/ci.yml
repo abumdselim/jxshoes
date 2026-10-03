@@ -1,0 +1,39 @@
+# CI গেট (P2) — PR ও main-push-এ tsc/lint/test/build; ফেল করলে deploy.yml-এর
+# deploy job (needs: gate) চলবেই না। ডিপ্লয় শুধু এসব পাস করলে।
+name: CI Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    name: tsc + lint + test + build
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install --legacy-peer-deps
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build (Next.js)
+        run: npm run build

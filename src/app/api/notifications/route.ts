@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getNotifications, markNotificationsRead, deleteNotifications, listNotificationIds } from '@/lib/store';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
 /** অ্যাডমিন নোটিফিকেশন তালিকা; ?unreadCount=1 দিলে শুধু অপঠিত সংখ্যা */
 export async function GET(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const list = await getNotifications();
     const url = new URL(request.url);
@@ -17,8 +20,10 @@ export async function GET(request: Request) {
   }
 }
 
-/** পড়া হিসেবে চিহ্নিত করা — { id } অথবা { all: true } */
+/** পড়া হিসেবে চিহ্নিত করা (অ্যাডমিন) — { id } অথবা { all: true } */
 export async function PUT(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const ids = body?.all
@@ -33,8 +38,10 @@ export async function PUT(request: Request) {
   }
 }
 
-/** মুছে ফেলা — { id } অথবা { all: true } */
+/** মুছে ফেলা (অ্যাডমিন) — { id } অথবা { all: true } */
 export async function DELETE(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const ids = body?.all

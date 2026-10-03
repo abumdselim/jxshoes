@@ -33,6 +33,7 @@ import {
   CalendarDays,
   Ban,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 /* ── সময়কাল ── */
 const PERIODS: { key: string; label: string; days: number }[] = [
@@ -59,10 +60,10 @@ export default function AdminFinancePage() {
     (async () => {
       try {
         const [finRes, ordRes, expRes, prodRes] = await Promise.allSettled([
-          fetch('/api/finance'),
-          fetch('/api/orders'),
-          fetch('/api/expenses'),
-          fetch('/api/products'),
+          apiFetch('/api/finance'),
+          apiFetch('/api/orders'),
+          apiFetch('/api/expenses'),
+          apiFetch('/api/products'),
         ]);
         if (finRes.status === 'fulfilled' && finRes.value.ok) setSummary(await finRes.value.json());
         if (ordRes.status === 'fulfilled' && ordRes.value.ok) setOrders(await ordRes.value.json());

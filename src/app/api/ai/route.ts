@@ -10,15 +10,23 @@ import {
 } from '@/lib/ai';
 import { generateReport, renderReportEmailHtml } from '@/lib/report';
 import { isEmailConfigured, EMAIL_NOT_CONFIGURED_MSG, sendEmail } from '@/lib/email';
-import { getDailyBrief, getOrders, getProducts, getReports, getStoreSettings, saveDailyBrief, saveReport } from '@/lib/store';
+import { getDailyBrief, getOrders, getProducts, getReports, getStoreSettings, saveDailyBrief, saveReport, getInsights, saveInsight } from '@/lib/store';
 import { transcribeAudioGemini } from '@/lib/ai';
-import { adjustProductStock, restockProduct } from '@/lib/store';
+import { restockProduct } from '@/lib/store';
 import { AIDailyBrief, AIInsights, AISaleMatch, Product } from '@/types';
+import { isAdminRequest } from '@/lib/adminAuth';
+import { bnToEnDigits, deterministicMatch } from '@/lib/saleMatch';
+import { TOOL_MAP, buildToolManual } from '@/lib/aiTools';
+import { runDailyWatchers, mirrorBriefAlerts } from '@/lib/watchers';
 
 export const runtime = 'edge';
 
 function aiUnavailable() {
   return NextResponse.json({ error: AI_NOT_CONFIGURED_MSG, configured: false }, { status: 503 });
+}
+
+function unauthorized() {
+  return NextResponse.json({ error: 'অনুমতি নেই — অ্যাডমিন হিসেবে লগইন করুন' }, { status: 401 });
 }
 
 function nowDhaka(): string {
@@ -63,6 +71,13 @@ ${context}
       generatedAt: new Date().toISOString(),
     };
     await saveDailyBrief(brief);
+    // প্রোঅ্যাকটিভ AI: ওয়াচার + ব্রিফের সতর্কতা নোটিফিকেশন সেন্টারে মিরর (ডিডুপসহ; ব্যর্থ হলেও ব্রিফ আটকাবে না)
+    try {
+      await runDailyWatchers();
+      await mirrorBriefAlerts(brief);
+    } catch (err) {
+      console.warn('AI watcher warning:', err);
+    }
     return NextResponse.json({ brief, cached: false, configured: true });
   } catch (error) {
     return NextResponse.json(
@@ -104,6 +119,8 @@ ${context}
       recommendations: Array.isArray(parsed.recommendations) ? parsed.recommendations : [],
       generatedAt: new Date().toISOString(),
     };
+    // ইনসাইট সংরক্ষণ — হিস্ট্রি (শেষ ২৪) থাকলে ড্যাশবোর্ডে আবার খুললেই দেখা যায়
+    await saveInsight(insights);
     return NextResponse.json({ insights, configured: true });
   } catch (error) {
     return NextResponse.json(
@@ -113,7 +130,37 @@ ${context}
   }
 }
 
-// ================== CHAT (স্টোর ডেটা সহ) ==================
+// ================== CHAT (এজেন্ট লুপ — টুল দিয়ে সংগ্রহ/সংরক্ষণ) ==================
+interface AgentConfirmation {
+  type: 'sale' | 'due-payment' | 'new-product';
+  message: string;
+  payload: Record<string, unknown>;
+}
+interface AgentAutoExec {
+  message: string;
+  undoAvailable?: boolean;
+  undoPayload?: Record<string, unknown>;
+}
+
+function chatSystemPrompt(context: string, withToolNote: boolean): AIMessage {
+  return {
+    role: 'system',
+    content: `তুমি "Shopkeeper" দোকানের নিজস্ব AI অ্যাসিস্ট্যান্ট — দোকানের মালিকের বিশ্বস্ত ব্যবসায়িক সহকারী। সব উত্তর অবশ্যই সহজ কিন্তু ভদ্র ও পেশাদার বাংলায়।
+
+নিয়ম:
+- ভাষা মার্জিত ও কর্পোরেট মানের রাখবে; 'মালিক সাহেব', 'সাহেব', 'ভাই' জাতীয় কোনো সম্বোধন করবে না — শুধু 'আপনি' ব্যবহার করবে।
+- শুধু আসল ডেটা ও TOOL_RESULT থেকে উত্তর দাও; ডেটায় যা নেই সেটা ধরে না-ও বলবে না — বরং সৎভাবে বলবে তথ্যটা পাওয়া যায়নি।
+- সংখ্যা (সেলস, স্টক, দাম) হুবহু ডেটা থেকে দিবে।
+- প্রশ্নের সাথে সম্পর্কিত তথ্যই শুধু ব্যবহার করবে — অপ্রাসঙ্গিক ডেটার তালিকা গুনে দেখাবে না।
+- প্রশ্ন অস্পষ্ট হলে এক লাইনে স্পষ্টীকরণ চাইবে; জেনেরিক উত্তর দেবে না।
+- উত্তর সংক্ষিপ্ত ও কাজের হতে হবে; দরকার হলে ছোট বুলেট ব্যবহার করবে।
+${withToolNote ? '- টুলের মাধ্যমে কাজ হয়ে গেলে উত্তরে স্পষ্ট নিশ্চিত করবে (যেমন "স্টোরফ্রন্টে দেখা যাচ্ছে"); কনফার্মেশনের অপেক্ষায় থাকলে বুঝিয়ে বলবে।' : ''}
+
+দোকানের আসল ডেটা:
+${context}`,
+  };
+}
+
 async function handleChat(body: { messages?: { role: string; content: string }[]; stream?: boolean }) {
   if (!isAIConfigured()) return aiUnavailable();
 
@@ -127,33 +174,110 @@ async function handleChat(body: { messages?: { role: string; content: string }[]
   }
 
   const context = await buildStoreContext(15);
-  const system: AIMessage = {
+
+  // ---------- এজেন্ট সিদ্ধান্ত-লুপ: টুল কল শনাক্ত ও চালানো (সর্বোচ্চ ৩ রাউন্ড) ----------
+  const decideSystem: AIMessage = {
     role: 'system',
-    content: `তুমি "Shopkeeper" দোকানের নিজস্ব AI অ্যাসিস্ট্যান্ট — দোকানের মালিকের বিশ্বস্ত ব্যবসায়িক সহকারী। সব উত্তর অবশ্যই সহজ কিন্তু ভদ্র ও পেশাদার বাংলায়।
+    content: `তুমি দোকানের AI এজেন্টের সিদ্ধান্ত-মডিউল। ব্যবহারকারীর সর্বশেষ বার্তা দেখে ঠিক করো কী করতে হবে। শুধুমাত্র এই JSON আকারে উত্তর দাও:
+
+টুল লাগলে: {"tool": "<tool_name>", "args": {...}}
+টুল ছাড়াই চূড়ান্ত উত্তর সম্ভব হলে (সাধারণ কথা, ব্যাখ্যা, অস্পষ্টতার প্রশ্ন): {"reply": "পূর্ণ বাংলা উত্তর"}
+
+টুল ম্যানুয়াল:
+${buildToolManual()}
 
 নিয়ম:
-- ভাষা মার্জিত ও কর্পোরেট মানের রাখবে; 'মালিক সাহেব', 'সাহেব', 'ভাই' জাতীয় কোনো সম্বোধন করবে না — শুধু 'আপনি' ব্যবহার করবে।
-- শুধু নিচের আসল ডেটা থেকে উত্তর দাও; ডেটায় যা নেই সেটা ধরে না-ও বলবে না — বরং সৎভাবে বলবে তথ্যটা পাওয়া যায়নি।
-- সংখ্যা (সেলস, স্টক, দাম) হুবহু ডেটা থেকে দিবে।
-- প্রশ্নের সাথে সম্পর্কিত তথ্যই শুধু ব্যবহার করবে — অপ্রাসঙ্গিক ডেটার তালিকা গুনে দেখাবে না।
-- প্রশ্ন অস্পষ্ট হলে এক লাইনে স্পষ্টীকরণ চাইবে; জেনেরিক উত্তর দেবে না।
-- উত্তর সংক্ষিপ্ত ও কাজের হতে হবে; দরকার হলে ছোট বুলেট ব্যবহার করবে।
-
-দোকানের আসল ডেটা:
-${context}`,
+- ব্যবসার সংখ্যা (বিক্রয়, স্টক, বাকি, খরচ, অর্ডার, মুভমেন্ট, রিস্টক) সম্পর্কে যেকোনো প্রশ্নে **অবশ্যই** সংশ্লিষ্ট টুল ব্যবহার করবে — কখনোই reply দিয়ে সংখ্যা আন্দাজ করবে না।
+- ইতিমধ্যে TOOL_RESULT থাকলে সেটাই প্রমাণ — একই টুল আবার চালাবে না; উত্তর দাও।
+- আর্গুমেন্ট অসম্পূর্ণ (যেমন SKU/ফোন নেই) হলে টুল না দিয়ে reply-তে এক লাইনে জিজ্ঞেস করবে।
+- বিক্রি বা বাকি-আদায় চাইলে propose_sale/propose_due_payment — এগুলো নিজে থেকে কখনো সম্পন্ন হয় না।
+- সাধারণ অভিবাদন, ব্যাখ্যা বা অস্পষ্টতার প্রশ্নে reply দাও।`,
   };
 
-  const messages: AIMessage[] = [system, ...history];
+  const toolEvents: { name: string; label: string }[] = [];
+  const confirmations: AgentConfirmation[] = [];
+  const autoExecuted: AgentAutoExec[] = [];
+  const workingMessages: AIMessage[] = [...history];
+  let decideReply: string | null = null;
 
-  if (body.stream) {
+  for (let round = 0; round < 3; round++) {
+    let decision: { tool?: string; args?: Record<string, unknown>; reply?: string } | null = null;
     try {
-      const stream = await runAIStream(messages, { maxTokens: 1800, temperature: 0.35 });
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'text/event-stream; charset=utf-8',
-          'Cache-Control': 'no-cache',
-        },
-      });
+      decision = await runAIJson<{ tool?: string; args?: Record<string, unknown>; reply?: string }>(
+        [decideSystem, ...workingMessages],
+        { maxTokens: 700, temperature: 0.15 }
+      );
+    } catch {
+      break; // পার্স/নেটওয়ার্ক ব্যর্থ — সাধারণ স্ট্রিমে ফিরে যাবে
+    }
+    const tool = decision?.tool ? TOOL_MAP.get(decision.tool) : undefined;
+    if (!tool || !decision) {
+      if (decision?.reply) decideReply = decision.reply;
+      break;
+    }
+    const decisionArgs = decision.args || {};
+    // টুল চালানো
+    toolEvents.push({ name: tool.name, label: tool.label });
+    let result;
+    try {
+      result = await tool.run(decisionArgs);
+    } catch (err) {
+      result = { ok: false, data: `টুল ব্যর্থ: ${err instanceof Error ? err.message : 'অজানা'}` };
+    }
+    workingMessages.push({ role: 'assistant', content: JSON.stringify({ tool: tool.name, args: decisionArgs }) });
+    workingMessages.push({ role: 'user', content: `TOOL_RESULT (${tool.name}): ${result.data}` });
+    if (result.needsConfirmation) confirmations.push(result.needsConfirmation);
+    if (result.autoExecuted) autoExecuted.push(result.autoExecuted);
+    // পরের রাউন্ড — ফলাফলসহ আবার সিদ্ধান্ত
+  }
+
+  const encoder = new TextEncoder();
+  const headers = {
+    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Cache-Control': 'no-cache',
+  };
+
+  /** কাস্টম এজেন্ট-ইভেন্টগুলো (টুল চিপ/কনফার্ম কার্ড) স্ট্রিমের শুরুতে বসায় */
+  const prependAgentEvents = (upstreamStream: ReadableStream<Uint8Array> | null, replyText: string | null) => {
+    const agentStream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        for (const ev of toolEvents) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ tool: ev })}\n\n`));
+        for (const c of confirmations) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ confirm: c })}\n\n`));
+        if (autoExecuted.length > 0) controller.enqueue(encoder.encode(`data: ${JSON.stringify({ done: autoExecuted })}\n\n`));
+        if (replyText) {
+          // চূড়ান্ত উত্তর টুকরো করে SSE-তে (ক্লায়েন্ট একই পার্সারে পড়ে)
+          for (let i = 0; i < replyText.length; i += 120) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: replyText.slice(i, i + 120) } }] })}\n\n`));
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+          return;
+        }
+        if (upstreamStream) {
+          const reader = upstreamStream.getReader();
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            controller.enqueue(value);
+          }
+        }
+        controller.close();
+      },
+    });
+    return new Response(agentStream, { headers });
+  };
+
+  // টুল-রাউন্ড ঘটলে ফলাফলসহ চূড়ান্ত উত্তরের প্রম্পট
+  const finalMessages: AIMessage[] = [chatSystemPrompt(context, true), ...workingMessages];
+
+  // স্ট্রিমিং অনুরোধ: টুল ছাড়া সরাসরি উত্তর এসে গেলে আর বড় কল লাগে না
+  if (body.stream) {
+    if (toolEvents.length === 0 && confirmations.length === 0 && autoExecuted.length === 0 && decideReply) {
+      return prependAgentEvents(null, decideReply);
+    }
+    try {
+      const upstream = await runAIStream(finalMessages, { maxTokens: 1800, temperature: 0.35 });
+      return prependAgentEvents(upstream, null);
     } catch (error) {
       return NextResponse.json(
         { error: error instanceof Error ? error.message : 'AI সংযোগে সমস্যা', configured: true },
@@ -163,8 +287,10 @@ ${context}`,
   }
 
   try {
-    const reply = await runAI(messages, { maxTokens: 1800, temperature: 0.35 });
-    return NextResponse.json({ reply, configured: true });
+    const reply =
+      decideReply ||
+      (await runAI(finalMessages, { maxTokens: 1800, temperature: 0.35 }));
+    return NextResponse.json({ reply, confirmations, autoExecuted, configured: true });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'AI উত্তর দিতে পারেনি', configured: true },
@@ -263,78 +389,8 @@ async function generateBannerCopy(payload: { storeName?: string; tagline?: strin
 }
 
 // ================== PARSE SALE (কোড/মেসেজ → প্রোডাক্ট ম্যাচ) ==================
-function bnToEnDigits(s: string): string {
-  const bn = '০১২৩৪৫৬৭৮৯';
-  return s.replace(/[০-৯]/g, d => String(bn.indexOf(d)));
-}
+// ম্যাচিং লজিক src/lib/saleMatch.ts-এ সরানো হয়েছে (P2 — টেস্টেবল পিওর ফাংশন)
 
-function deterministicMatch(message: string, products: Product[]): AISaleMatch | null {
-  const norm = bnToEnDigits(message.toUpperCase()).trim();
-
-  // ১) SKU / বারকোড দিয়ে সরাসরি ম্যাচ
-  const prod = products.find(p => {
-    const sku = (p.sku || '').toUpperCase();
-    const barcode = (p.barcode || '').toUpperCase();
-    return (
-      (sku && norm.includes(sku)) ||
-      (barcode && barcode.length >= 5 && norm.includes(barcode)) ||
-      (p.variants || []).some(v => v.sku && norm.includes(v.sku.toUpperCase()))
-    );
-  });
-  if (!prod) return null;
-
-  // কোড অংশটা বাদ দিয়ে বাকি লেখায় সাইজ/কালার/পরিমাণ খোঁজা
-  const rest = norm
-    .replace((prod.sku || '§').toUpperCase(), ' ')
-    .replace((prod.barcode || '§').toUpperCase(), ' ')
-    .replace(/[x×]/g, ' ');
-
-  let quantity = 1;
-  const qtyMatch = rest.match(/(\d{1,3})\s*(?:টি|টা|পিস|PCS|PIECE)/);
-  if (qtyMatch) {
-    quantity = Math.max(1, parseInt(qtyMatch[1], 10));
-  } else {
-    const xMatch = message.match(/(?:x|×)\s*(\d{1,3})\b/i);
-    if (xMatch) quantity = Math.max(1, parseInt(xMatch[1], 10));
-  }
-
-  let size: string | undefined;
-  const sizeToken = rest
-    .split(/[\s,\-_/]+/)
-    .find(t => /^\d{1,2}$/.test(t) && prod.sizes.some(s => s === t));
-  if (sizeToken) size = sizeToken;
-
-  let color: string | undefined;
-  const colorHit = prod.colors.find(c => {
-    const name = c.name.toUpperCase();
-    return name.length >= 3 && rest.includes(name);
-  });
-  if (colorHit) color = colorHit.name;
-
-  // ভ্যারিয়েন্ট রেজলভ
-  let variantId: string | undefined;
-  if (prod.variants && prod.variants.length > 0) {
-    const v =
-      prod.variants.find(v => (!size || v.size === size) && (!color || v.color === color)) ||
-      prod.variants.find(v => (v.stock || 0) > 0);
-    if (v) {
-      variantId = v.id;
-      size = size || v.size;
-      color = color || v.color;
-    }
-  }
-
-  return {
-    matched: true,
-    productId: prod.id,
-    productName: prod.name,
-    variantId,
-    size,
-    color,
-    quantity,
-    confidence: 'high',
-  };
-}
 
 function buildCatalogContext(products: Product[]): string {
   return products
@@ -549,6 +605,7 @@ function extractUnitCost(message: string): number | undefined {
  * "যা শোনা হলো" দেখিয়ে নিশ্চিত করায়, তাই শতভাগ নির্ভুল কাজ হয়।
  */
 async function handleVoiceIntent(payload: { audioBase64?: string; mimeType?: string }) {
+  if (!isAIConfigured()) return aiUnavailable();
   const audio = (payload.audioBase64 || '').trim();
   if (!audio) {
     return NextResponse.json({ error: 'অডিও পাওয়া যায়নি' }, { status: 400 });
@@ -810,6 +867,9 @@ async function healthCheck(): Promise<NextResponse> {
 }
 
 export async function GET(request: Request) {
+  // AI সারফেস অ্যাডমিন-লক — কোটা ও ব্যবসার ডেটা পাবলিক থেকে সুরক্ষিত
+  if (!(await isAdminRequest(request))) return unauthorized();
+
   const { searchParams } = new URL(request.url);
   if (searchParams.get('action') === 'health') {
     return healthCheck();
@@ -818,10 +878,17 @@ export async function GET(request: Request) {
     const refresh = searchParams.get('refresh') === '1';
     return generateDailyBrief(refresh);
   }
+  if (searchParams.get('action') === 'insights-history') {
+    const list = await getInsights();
+    return NextResponse.json({ insights: list, configured: true });
+  }
   return NextResponse.json({ error: 'অজানা action' }, { status: 400 });
 }
 
 export async function POST(request: Request) {
+  // AI সারফেস অ্যাডমিন-লক
+  if (!(await isAdminRequest(request))) return unauthorized();
+
   let body: { action?: string; [k: string]: unknown };
   try {
     body = await request.json();

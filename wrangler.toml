@@ -1,0 +1,10 @@
+# Cloudflare কনফিগ — D1 মাইগ্রেশন/লোকাল ডেভ-এর জন্য (P4/P5)।
+# নোট: প্রোডাকশন Pages ডিপ্লয় এখনো dashboard-config; বাইন্ডিং-মাইগ্রেশন P3-এর
+# অ্যাডাপ্টার-সিদ্ধান্তের অংশ। আপাতত অ্যাপ D1-কে REST দিয়ে ব্যবহার করে (src/lib/d1.ts)।
+name = "shopkeeper"
+compatibility_date = "2026-10-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "shopkeeper-db"
+database_id = "a947b855-0383-49c5-bf4e-8950bda68654"

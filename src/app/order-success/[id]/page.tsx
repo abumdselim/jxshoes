@@ -8,21 +8,27 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Order } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
-import { CheckCircle, Package, Phone, MapPin, Truck, ArrowRight, ShieldCheck } from 'lucide-react';
+import { CheckCircle, Package, Phone, MapPin, Truck, ArrowRight, ShieldCheck, CloudOff } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function OrderSuccessPage() {
   const params = useParams();
   const [order, setOrder] = useState<Order | null>(null);
+  const [offlineSaved, setOfflineSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadOrder() {
       try {
-        const res = await fetch('/api/orders');
+        // নিজের অর্ডারই শুধু দেখা যায় — publicToken দিয়ে (P1 নিরাপত্তা);
+        // অফলাইনে apiFetch মিরর/লোকাল-অর্ডার থেকে ফেরত দেয়
+        const token = new URLSearchParams(window.location.search).get('t') || '';
+        const res = await apiFetch(`/api/orders/${params.id}?t=${encodeURIComponent(token)}`);
         if (res.ok) {
-          const orders: Order[] = await res.json();
-          const found = orders.find((o) => o.id === params.id);
-          if (found) setOrder(found);
+          const found: Order = await res.json();
+          setOrder(found);
+          // অফলাইনে করা অর্ডার (লোকাল কপি) — ইন্টারনেট এলে স্বয়ংক্রিয়ভাবে জমা হবে
+          setOfflineSaved(res.headers.get('X-JX-Offline') === '1' || found.id.startsWith('ord-off-'));
         }
       } catch (e) {
         console.error(e);
@@ -54,6 +60,15 @@ export default function OrderSuccessPage() {
           <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto">
             আমাদের কাস্টমার রিলেশন প্রতিনিধি খুব শীঘ্রই <span className="font-bold text-slate-900">{order?.phone || 'আপনার নম্বরে'}</span> ফোন করে অর্ডারটি নিশ্চিত করবেন।
           </p>
+
+          {offlineSaved && (
+            <div className="mt-4 mx-auto max-w-md flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-left">
+              <CloudOff className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-amber-800">
+                <span className="font-bold">অফলাইন মোড:</span> আপনার অর্ডারটি ডিভাইসে সংরক্ষিত আছে। ইন্টারনেট সংযোগ পাওয়া মাত্র স্বয়ংক্রিয়ভাবে আমাদের কাছে জমা হয়ে যাবে।
+              </p>
+            </div>
+          )}
 
           {order && (
             <div className="mt-8 text-left bg-slate-50 rounded-2xl p-6 border border-slate-200/80 space-y-4">

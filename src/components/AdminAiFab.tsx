@@ -28,6 +28,7 @@ import {
   Mic,
   Square,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 interface SaleDraft {
   product: Product;
@@ -102,6 +103,13 @@ export default function AdminAiFab() {
   const [voiceBusy, setVoiceBusy] = useState(false);
   // ইন্ট্রো রিভিল — প্রতি সেশনে একবারই ফুল রূপে দেখায়; বাকি সময় শুধু আইকন
   const [introExpanded, setIntroExpanded] = useState(false);
+  // এজেন্ট মোড: টুল-চিপ (এজেন্ট কী দেখছে/করছে) + বাকি-আদায় কনফার্মেশন কার্ড
+  const [toolChips, setToolChips] = useState<string[]>([]);
+  const [dueConfirm, setDueConfirm] = useState<{
+    customer: { id: string; name: string; phone: string; dueAmount: number };
+    amount: number;
+    method: string;
+  } | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -145,7 +153,7 @@ export default function AdminAiFab() {
     const { productId, quantity } = toast.undo;
     setToast(null);
     try {
-      const res = await fetch('/api/pos/undo-auto', {
+      const res = await apiFetch('/api/pos/undo-auto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId, quantity }),
@@ -245,7 +253,7 @@ export default function AdminAiFab() {
     setVoiceBusy(true);
     try {
       const audioB64 = await blobToBase64(blob);
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'voice-intent', audioBase64: audioB64, mimeType: mime }),
@@ -350,6 +358,7 @@ export default function AdminAiFab() {
     const text = input.trim();
     if (!text || busy || streaming) return;
     setInput('');
+    setToolChips([]);
 
     const withUser: ChatMsg[] = [...messages, { role: 'user', content: text }];
     setMessages(withUser);
@@ -357,7 +366,7 @@ export default function AdminAiFab() {
 
     try {
       // ১) AI বুঝতে দাও — সেল? রিস্টক? নতুন প্রোডাক্ট? নাকি সাধারণ প্রশ্ন?
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'parse-intent', message: text }),
@@ -367,25 +376,83 @@ export default function AdminAiFab() {
       const handled = applyIntentResponse(data, res.ok);
       if (handled) return;
 
-      // সাধারণ AI চ্যাট (স্ট্রিমিং)
+      // সাধারণ AI চ্যাট (এজেন্ট লুপ — টুল চিপ/কনফার্ম কার্ডসহ স্ট্রিমিং)
       setMessages([...withUser, { role: 'assistant', content: '' }]);
       setBusy(false);
       setStreaming(true);
-      await streamChat(withUser, delta => {
-        setMessages(prev => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last?.role === 'assistant') {
-            updated[updated.length - 1] = { ...last, content: last.content + delta };
-          }
-          return updated;
-        });
-      });
+      await streamChat(
+        withUser,
+        delta => {
+          setMessages(prev => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last?.role === 'assistant') {
+              updated[updated.length - 1] = { ...last, content: last.content + delta };
+            }
+            return updated;
+          });
+        },
+        {
+          onTool: t => setToolChips(prev => (prev.includes(t.label) ? prev : [...prev, t.label])),
+          onConfirm: c => {
+            if (c.payload?.intent === 'sale' || c.payload?.intent === 'new-product') {
+              applyIntentResponse(c.payload, true);
+            } else if (c.payload?.intent === 'due-payment') {
+              const p = c.payload as { customer: { id: string; name: string; phone: string; dueAmount: number }; amount: number; method: string };
+              setDueConfirm({ customer: p.customer, amount: Number(p.amount), method: String(p.method || 'Cash') });
+            }
+          },
+          onDone: list => {
+            for (const d of list) {
+              setToast({
+                text: `✅ ${d.message}`,
+                undo:
+                  d.undoAvailable && d.undoPayload
+                    ? { productId: String(d.undoPayload.productId), quantity: Number(d.undoPayload.quantity) }
+                    : undefined,
+              });
+            }
+          },
+        }
+      );
     } catch (err) {
       showAIError(err);
     } finally {
       setBusy(false);
       setStreaming(false);
+    }
+  };
+
+  /** এজেন্টের বাকি-আদায় প্রস্তাব — মানুষ কনফার্ম করলেই সম্পন্ন */
+  const confirmDuePayment = async () => {
+    if (!dueConfirm) return;
+    setSubmitting(true);
+    try {
+      const res = await apiFetch('/api/customers/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerId: dueConfirm.customer.id,
+          amount: dueConfirm.amount,
+          method: dueConfirm.method,
+          note: 'AI এজেন্ট (কনফার্মড)',
+        }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        const remaining = data?.customer?.dueAmount ?? Math.max(0, dueConfirm.customer.dueAmount - dueConfirm.amount);
+        setMessages(prev => [
+          ...prev,
+          { role: 'assistant', content: `✅ বাকি আদায় হয়েছে: ${dueConfirm.customer.name} — ৳${dueConfirm.amount.toLocaleString('en-BD')}। বর্তমান বাকি: ৳${Number(remaining).toLocaleString('en-BD')}।` },
+        ]);
+        setDueConfirm(null);
+      } else {
+        setToast({ text: `❌ ${data?.error || 'আদায় করা যায়নি'}`, error: true });
+      }
+    } catch {
+      setToast({ text: '❌ সার্ভারে সংযোগ করা যায়নি', error: true });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -406,7 +473,7 @@ export default function AdminAiFab() {
       const variant = saleDraft.product.variants?.find(
         v => v.size === saleDraft.size && v.color === saleDraft.color
       );
-      const res = await fetch('/api/pos/sale', {
+      const res = await apiFetch('/api/pos/sale', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -451,7 +518,7 @@ export default function AdminAiFab() {
     if (!restockDraft || restockSubmitting) return;
     setRestockSubmitting(true);
     try {
-      const res = await fetch('/api/inventory', {
+      const res = await apiFetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -492,7 +559,7 @@ export default function AdminAiFab() {
     }
     setNewProductSubmitting(true);
     try {
-      const res = await fetch('/api/products', {
+      const res = await apiFetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -611,10 +678,52 @@ export default function AdminAiFab() {
                   <br />
                   রিস্টক: <span className="text-slate-600">&quot;JX-SH-101 এ ১০টা স্টক এসেছে&quot;</span>
                   <br />
-                  নতুন পণ্য: <span className="text-slate-600">&quot;নতুন প্রোডাক্ট: Nike Air Max, দাম ৫৫০০, স্টক ২০&quot;</span>
+                  প্রশ্ন: <span className="text-slate-600">&quot;সবচেয়ে বেশি বাকি কার?&quot; / &quot;আজ কেমন চলছে?&quot;</span>
                   <br />
-                  অথবা শপ নিয়ে যেকোনো প্রশ্ন করুন।
+                  এজেন্ট নিজে ডেটা খুঁজে, স্টক-খাতা আপডেট করে উত্তর দেবে।
                 </p>
+              </div>
+            )}
+
+            {/* এজেন্ট টুল-চিপ — এজেন্ট এই মুহূর্তে যা দেখছে/করছে */}
+            {toolChips.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 justify-start">
+                {toolChips.map((label, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 px-2.5 py-1 text-[10px] font-bold"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* এজেন্টের বাকি-আদায় প্রস্তাব — কনফার্মেশন ছাড়া কখনো সম্পন্ন হয় না */}
+            {dueConfirm && (
+              <div className="flex justify-start">
+                <div className="max-w-[85%] rounded-md border border-emerald-200 bg-emerald-50 px-3.5 py-2.5">
+                  <p className="text-xs font-bold text-emerald-900">💰 বাকি আদায় কনফার্ম করুন</p>
+                  <p className="text-[11px] text-slate-600 mt-1">
+                    {dueConfirm.customer.name} ({dueConfirm.customer.phone}) — ৳{dueConfirm.amount.toLocaleString('en-BD')} ({dueConfirm.method})
+                  </p>
+                  <p className="text-[10px] text-slate-500 mt-0.5">বর্তমান বাকি: ৳{dueConfirm.customer.dueAmount.toLocaleString('en-BD')}</p>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => void confirmDuePayment()}
+                      disabled={submitting}
+                      className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold px-3 py-1.5 rounded-md text-[11px]"
+                    >
+                      {submitting ? 'হচ্ছে…' : 'নিশ্চিত করুন'}
+                    </button>
+                    <button
+                      onClick={() => setDueConfirm(null)}
+                      className="bg-white border border-slate-300 text-slate-600 font-bold px-3 py-1.5 rounded-md text-[11px]"
+                    >
+                      বাতিল
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 

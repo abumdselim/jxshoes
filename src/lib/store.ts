@@ -1,4 +1,4 @@
-import {
+import type {
   Product,
   Order,
   OrderItem,
@@ -10,6 +10,7 @@ import {
   InventoryMovement,
   ProductVariant,
   AIDailyBrief,
+  AIInsights,
   Customer,
   Expense,
   DuePayment,
@@ -18,6 +19,9 @@ import {
   FastMoverEntry,
   NotificationItem
 } from '@/types';
+import type { FullStoreData } from '@/types/fullStoreData';
+import { computeFinanceSummaryFromData, getFastMoversFromData } from './compute';
+export type { FullStoreData } from '@/types/fullStoreData';
 import {
   initialProducts,
   initialOrders,
@@ -32,20 +36,9 @@ import {
   initialDuePayments
 } from './initialData';
 import { getCfEnv } from './cfEnv';
-
-export interface FullStoreData {
-  products: Product[];
-  orders: Order[];
-  categories: CategoryItem[];
-  storeSettings: StoreSettings;
-  heroBanner: HeroBannerSettings;
-  flashDeal: FlashDealSettings;
-  coupons: Coupon[];
-  inventoryMovements: InventoryMovement[];
-  customers: Customer[];
-  expenses: Expense[];
-  duePayments: DuePayment[];
-}
+import { GENERATED_ENV } from './generatedEnv';
+import { getD1Rest, DEFAULT_TENANT_ID } from './d1';
+import { replicateOrderD1 } from './repos/replicate';
 
 const KV_KEY = 'jx_store_state';
 
@@ -386,7 +379,8 @@ export async function adjustProductStock(
 // ================== CUSTOMER LEDGER (বাকির খাতা) ==================
 
 /** ফোন নম্বর দিয়ে কাস্টমার আপসার্ট — অর্ডার/সেলের সাথে লেজার সিংক রাখে */
-function upsertCustomerInData(
+/** ফোন-কি কাস্টমার আপসার্ট — পিওর, data in-place mutate করে (P2: টেস্টেবল ও export করা) */
+export function upsertCustomerInData(
   data: FullStoreData,
   info: { name?: string; phone: string; address?: string },
   purchaseAmount: number,
@@ -430,42 +424,109 @@ export async function getOrderById(id: string): Promise<Order | undefined> {
   return orders.find(o => o.id === id);
 }
 
-export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 'createdAt' | 'status'>): Promise<Order> {
+/** চেকআউট ইনপুট (P1) — দাম/মোট/ডিসকাউন্ট ক্লায়েন্ট থেকে নেওয়া হয় না; সার্ভার নিজেই হিসাব করে */
+export interface OnlineOrderInput {
+  customerName: string;
+  phone: string;
+  address: string;
+  city: Order['city'];
+  paymentMethod: Order['paymentMethod'];
+  bkashTrxId?: string;
+  note?: string;
+  items: { productId: string; quantity: number; selectedSize: string; selectedColor: string }[];
+  couponCode?: string;
+}
+
+/** অর্ডার তৈরিতে ব্যবসায়িক ভুল (স্টক শেষ, কুপন অবৈধ) — রুট 400 হিসেবে দেখাবে */
+export class OrderValidationError extends Error {}
+
+export async function createOrder(input: OnlineOrderInput): Promise<Order> {
   const data = await getStoreData();
+
+  // --- সার্ভার-সাইড রিকম্পিউট: ক্লায়েন্টের পাঠানো price/subtotal/total/discount সম্পূর্ণ উপেক্ষা ---
+  const items: OrderItem[] = [];
+  let subtotal = 0;
+  for (const it of input.items) {
+    const prod = data.products.find(p => p.id === it.productId);
+    if (!prod) {
+      throw new OrderValidationError('একটি পণ্য খুঁজে পাওয়া যায়নি — পাতা রিফ্রেশ করে আবার চেষ্টা করুন।');
+    }
+    const variant = prod.variants && prod.variants.length > 0
+      ? prod.variants.find(v => v.size === it.selectedSize && v.color === it.selectedColor)
+      : undefined;
+    const unitPrice = variant?.price ?? prod.price;
+    const available = variant ? variant.stock ?? 0 : prod.stockCount;
+    if (available < it.quantity) {
+      throw new OrderValidationError(`দুঃখিত — "${prod.name}" পণ্যটির পর্যাপ্ত স্টক নেই।`);
+    }
+    // লাভ-ক্ষতি নিখুঁত রাখতে বিক্রির সময়ের ক্রয়মূল্য স্ন্যাপশট নেওয়া হয়
+    items.push({
+      productId: prod.id,
+      name: prod.name,
+      price: unitPrice,
+      costPrice: variant?.costPrice ?? prod.costPrice,
+      quantity: it.quantity,
+      selectedSize: it.selectedSize,
+      selectedColor: it.selectedColor,
+      image: prod.images[0] || '',
+    });
+    subtotal += unitPrice * it.quantity;
+  }
+
+  // কুপন সার্ভারেই যাচাই — ক্লায়েন্টের ডিসকাউন্ট বিশ্বাস করা হয় না
+  let discount = 0;
+  const couponCode = input.couponCode?.trim().toUpperCase() || undefined;
+  if (couponCode) {
+    const result = await validateCoupon(couponCode, subtotal);
+    if (!result.valid) throw new OrderValidationError(result.message);
+    discount = result.discount;
+  }
+
+  // ডেলিভারি ফি সেটিংস থেকে — ক্লায়েন্টের পাঠানো ফি নয়
+  const settings = data.storeSettings;
+  const baseFee = input.city === 'Inside Dhaka' ? settings.insideDhakaFee : settings.outsideDhakaFee;
+  const deliveryFee = settings.freeDeliveryAbove > 0 && subtotal >= settings.freeDeliveryAbove ? 0 : baseFee;
+  const total = Math.max(0, subtotal + deliveryFee - discount);
+
   const id = `ord-${Date.now()}`;
   const orderNumber = `SK-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  // লাভ-ক্ষতি নিখুঁত রাখতে বিক্রির সময়ের ক্রয়মূল্য স্ন্যাপশট নেওয়া হয়
-  const itemsWithCost: OrderItem[] = orderData.items.map(it => {
-    if (it.costPrice !== undefined) return it;
-    const prod = data.products.find(p => p.id === it.productId);
-    return { ...it, costPrice: prod?.costPrice };
-  });
-
   const newOrder: Order = {
-    ...orderData,
-    items: itemsWithCost,
+    customerName: input.customerName.trim(),
+    phone: input.phone.trim(),
+    address: input.address.trim(),
+    city: input.city,
+    paymentMethod: input.paymentMethod,
+    bkashTrxId: input.bkashTrxId?.trim() || undefined,
+    note: input.note?.trim() || undefined,
+    items,
+    subtotal,
+    discount: discount > 0 ? discount : undefined,
+    couponCode,
+    deliveryFee,
+    total,
     id,
     orderNumber,
-    paidAmount: orderData.paidAmount ?? orderData.total,
-    dueAmount: orderData.dueAmount ?? 0,
+    publicToken: crypto.randomUUID(),
+    paidAmount: total, // অনলাইন অর্ডারে বাকি হয় না
+    dueAmount: 0,
     status: 'Pending',
     createdAt: new Date().toISOString(),
   };
 
   // কাস্টমার ডেটাবেজে যুক্ত/আপডেট (অনলাইন অর্ডারে বাকি হয় না)
-  if (orderData.phone) {
+  if (newOrder.phone) {
     newOrder.customerId = upsertCustomerInData(
       data,
-      { name: orderData.customerName, phone: orderData.phone, address: orderData.address },
-      orderData.total,
+      { name: newOrder.customerName, phone: newOrder.phone, address: newOrder.address },
+      total,
       0
     ).id;
   }
 
   // Deduct stock for each ordered item and record inventory movements
   if (!data.inventoryMovements) data.inventoryMovements = [];
-  for (const item of orderData.items) {
+  for (const item of items) {
     const prod = data.products.find(p => p.id === item.productId);
     if (prod) {
       const prevStock = prod.stockCount;
@@ -494,7 +555,7 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
         newStock: prod.stockCount,
         unitCost: prod.costPrice,
         supplierOrInvoice: `অনলাইন অর্ডার #${orderNumber}`,
-        note: `গ্রাহক: ${orderData.customerName} (${orderData.phone})`,
+        note: `গ্রাহক: ${newOrder.customerName} (${newOrder.phone})`,
         createdAt: new Date().toISOString()
       });
     }
@@ -502,6 +563,16 @@ export async function createOrder(orderData: Omit<Order, 'id' | 'orderNumber' | 
 
   data.orders.unshift(newOrder);
   await saveStoreData(data);
+
+  // Shadow write (P5): STORE_BACKEND সুইচের আগে D1-তে হুবহু প্রতিলিপি — ডিফল্ট বন্ধ
+  // (SHADOW_WRITE_D1=1)। D1 ব্যর্থ হলে অর্ডার-ফ্লো অক্ষত — শুধু সতর্কবার্তা।
+  if ((GENERATED_ENV.SHADOW_WRITE_D1 || process.env.SHADOW_WRITE_D1) === '1') {
+    try {
+      await replicateOrderD1({ exec: getD1Rest(), tenantId: DEFAULT_TENANT_ID, deviceId: 'dev-default' }, newOrder);
+    } catch (err) {
+      console.warn('D1 shadow write warning (অর্ডার অক্ষত):', err instanceof Error ? err.message : err);
+    }
+  }
 
   // অ্যাডমিন নোটিফিকেশন — প্রতিটি নতুন অর্ডার/বিক্রিতে (অনলাইন ও POS)
   try {
@@ -649,8 +720,8 @@ export async function deleteCoupon(id: string): Promise<boolean> {
   return false;
 }
 
-export async function validateCoupon(code: string, orderTotal: number): Promise<{ valid: boolean; discount: number; message: string }> {
-  const coupons = await getCoupons();
+/** কুপন যাচাইয়ের পিওর কোর (P2) — তালিকা কলার দেয়; KV/async র‍্যাপারে থাকবে */
+export function validateCouponInData(coupons: Coupon[], code: string, orderTotal: number): { valid: boolean; discount: number; message: string } {
   const match = coupons.find(c => c.code === code.toUpperCase().trim() && c.active);
   if (!match) {
     return { valid: false, discount: 0, message: 'কুপন কোডটি সঠিক নয় বা মেয়াদ উত্তীর্ণ।' };
@@ -664,7 +735,11 @@ export async function validateCoupon(code: string, orderTotal: number): Promise<
   } else {
     discount = match.value;
   }
-  return { valid: true, discount, message: `অভিনন্দন! ৳${discount} টাকা ছাড় প্রযোজ্য হয়েছে।` };
+  return { valid: true, discount, message: `অভিনন্দন! ৳${discount} টাকা ছাড় প্রয়োজ্য হয়েছে।` };
+}
+
+export async function validateCoupon(code: string, orderTotal: number): Promise<{ valid: boolean; discount: number; message: string }> {
+  return validateCouponInData(await getCoupons(), code, orderTotal);
 }
 
 // ================== POS / IN-STORE QUICK SALE ==================
@@ -676,7 +751,9 @@ export interface PosSaleItemInput {
   color?: string;
 }
 
-export async function createPosSale(
+/** POS বিক্রির পিওর কোর (P2) — data in-place mutate করে (স্টক, movement, অর্ডার, কাস্টমার); I/O নেই */
+export function applyPosSaleInData(
+  data: FullStoreData,
   items: PosSaleItemInput[],
   options?: {
     customerName?: string;
@@ -685,8 +762,7 @@ export async function createPosSale(
     paidAmount?: number; // দেওয়া না থাকলে পুরো টাকা ক্যাশে ধরা হয়
     note?: string;
   }
-): Promise<Order | null> {
-  const data = await getStoreData();
+): Order | null {
   if (!items || items.length === 0) return null;
 
   const orderItems: OrderItem[] = [];
@@ -795,20 +871,30 @@ export async function createPosSale(
   }
 
   data.orders.unshift(newOrder);
+  return newOrder;
+}
+
+export async function createPosSale(
+  items: PosSaleItemInput[],
+  options?: Parameters<typeof applyPosSaleInData>[2]
+): Promise<Order | null> {
+  const data = await getStoreData();
+  const order = applyPosSaleInData(data, items, options);
+  if (!order) return null;
   await saveStoreData(data);
 
   // অ্যাডমিন নোটিফিকেশন — প্রতিটি নতুন অর্ডার/বিক্রিতে (অনলাইন ও POS)
   try {
     await addNotification({
       type: 'order',
-      title: `নতুন অর্ডার: ${newOrder.orderNumber}`,
-      message: `${newOrder.customerName} • ${newOrder.items.length}টি আইটেম • ৳${newOrder.total.toLocaleString('en-BD')} • ${newOrder.paymentMethod}${newOrder.source === 'in-store' ? ' (দোকানে বিক্রি)' : ''}`,
+      title: `নতুন অর্ডার: ${order.orderNumber}`,
+      message: `${order.customerName} • ${order.items.length}টি আইটেম • ৳${order.total.toLocaleString('en-BD')} • ${order.paymentMethod}${order.source === 'in-store' ? ' (দোকানে বিক্রি)' : ''}`,
     });
   } catch (err) {
     console.warn('Order notification warning:', err);
   }
 
-  return newOrder;
+  return order;
 }
 
 // ================== CUSTOMERS (কাস্টমার ডেটাবেজ) ==================
@@ -868,14 +954,16 @@ export async function deleteCustomer(id: string): Promise<boolean> {
   return false;
 }
 
-/** বাকি আদায় — কাস্টমারের খাতা কমায় + কালেকশন রেকর্ড রাখে */
-export async function recordDuePayment(input: {
-  customerId: string;
-  amount: number;
-  method: DuePayment['method'];
-  note?: string;
-}): Promise<{ customer: Customer; payment: DuePayment } | null> {
-  const data = await getStoreData();
+/** বাকি আদায়ের পিওর কোর (P2) — data in-place mutate করে; I/O নেই */
+export function applyDuePaymentInData(
+  data: FullStoreData,
+  input: {
+    customerId: string;
+    amount: number;
+    method: DuePayment['method'];
+    note?: string;
+  }
+): { customer: Customer; payment: DuePayment } | null {
   const cust = (data.customers || []).find(c => c.id === input.customerId);
   if (!cust) return null;
 
@@ -894,8 +982,21 @@ export async function recordDuePayment(input: {
   cust.dueAmount = Math.max(0, cust.dueAmount - amount);
   if (!data.duePayments) data.duePayments = [];
   data.duePayments.unshift(payment);
-  await saveStoreData(data);
   return { customer: cust, payment };
+}
+
+/** বাকি আদায় — কাস্টমারের খাতা কমায় + কালেকশন রেকর্ড রাখে */
+export async function recordDuePayment(input: {
+  customerId: string;
+  amount: number;
+  method: DuePayment['method'];
+  note?: string;
+}): Promise<{ customer: Customer; payment: DuePayment } | null> {
+  const data = await getStoreData();
+  const result = applyDuePaymentInData(data, input);
+  if (!result) return null;
+  await saveStoreData(data);
+  return result;
 }
 
 export async function getDuePayments(): Promise<DuePayment[]> {
@@ -944,89 +1045,10 @@ export async function deleteExpense(id: string): Promise<boolean> {
 }
 
 // ================== FINANCE SUMMARY (লাভ-ক্ষতি ও হিসাব) ==================
+// পিওর গণিত lib/compute.ts-এ — সার্ভার ও অফলাইন মিরর একই লজিক ব্যবহার করে
 export async function computeFinanceSummary(): Promise<FinanceSummary> {
   const data = await getStoreData();
-  const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-  const weekAgo = startOfDay - 6 * 86400000;
-  const monthAgo = startOfDay - 29 * 86400000;
-
-  const validOrders = data.orders.filter(o => o.status !== 'Cancelled');
-  const inRange = (o: { createdAt: string }, from: number) =>
-    new Date(o.createdAt).getTime() >= from;
-
-  let revenue = 0;
-  let cogs = 0;
-  for (const o of validOrders) {
-    revenue += o.total;
-    for (const it of o.items) {
-      let cost = it.costPrice;
-      if (cost === undefined) {
-        // পুরনো অর্ডারে স্ন্যাপশট না থাকলে বর্তমান ক্রয়মূল্য বা ৬৫% অনুমান
-        const prod = data.products.find(p => p.id === it.productId);
-        cost = prod?.costPrice ?? Math.round(it.price * 0.65);
-      }
-      cogs += cost * it.quantity;
-    }
-  }
-
-  const grossProfit = revenue - cogs;
-  const operatingExpenses = (data.expenses || []).reduce((s, e) => s + e.amount, 0);
-
-  const expenseMap = new Map<string, number>();
-  for (const e of data.expenses || []) {
-    expenseMap.set(e.category, (expenseMap.get(e.category) || 0) + e.amount);
-  }
-
-  // গত ৩০ দিনের দৈনিক বিক্রি সিরিজ (তারিখ অনুযায়ী)
-  const dayKey = (t: number) => new Date(t).toLocaleDateString('en-CA');
-  const revByDay = new Map<string, number>();
-  for (const o of validOrders) {
-    if (inRange(o, monthAgo)) {
-      const key = dayKey(new Date(o.createdAt).getTime());
-      revByDay.set(key, (revByDay.get(key) || 0) + o.total);
-    }
-  }
-  const dailyRevenue: { date: string; revenue: number }[] = [];
-  for (let i = 0; i < 30; i++) {
-    const key = dayKey(startOfDay - i * 86400000);
-    dailyRevenue.unshift({ date: key, revenue: revByDay.get(key) || 0 });
-  }
-
-  const todayOrders = validOrders.filter(o => inRange(o, startOfDay));
-  const totalDues = (data.customers || []).reduce((s, c) => s + (c.dueAmount || 0), 0);
-  const allPayments = data.duePayments || [];
-
-  return {
-    revenue,
-    cogs: Math.round(cogs),
-    grossProfit: Math.round(grossProfit),
-    operatingExpenses,
-    netProfit: Math.round(grossProfit - operatingExpenses),
-    totalDues,
-    totalCollected: allPayments.reduce((s, p) => s + p.amount, 0),
-    orderCount: validOrders.length,
-    customerCount: (data.customers || []).length,
-    expenseByCategory: Array.from(expenseMap.entries())
-      .map(([category, amount]) => ({ category, amount }))
-      .sort((a, b) => b.amount - a.amount),
-    dailyRevenue,
-    today: {
-      revenue: todayOrders.reduce((s, o) => s + o.total, 0),
-      orders: todayOrders.length,
-      collected: allPayments
-        .filter(p => new Date(p.createdAt).getTime() >= startOfDay)
-        .reduce((s, p) => s + p.amount, 0),
-    },
-    last7: {
-      revenue: validOrders.filter(o => inRange(o, weekAgo)).reduce((s, o) => s + o.total, 0),
-      orders: validOrders.filter(o => inRange(o, weekAgo)).length,
-    },
-    last30: {
-      revenue: validOrders.filter(o => inRange(o, monthAgo)).reduce((s, o) => s + o.total, 0),
-      orders: validOrders.filter(o => inRange(o, monthAgo)).length,
-    },
-  };
+  return computeFinanceSummaryFromData(data);
 }
 
 // ================== AI REPORTS STORAGE (আলাদা KV কি) ==================
@@ -1071,48 +1093,10 @@ export async function saveReport(report: StoredReport): Promise<void> {
 }
 
 // ================== FAST MOVERS (দ্রুততম বিক্রিত পণ্য) ==================
-/**
- * কোন পণ্য ক্রেতারা সবচেয়ে বেশি পছন্দ করেছে —
- * স্টক যুক্ত হওয়ার দিন (createdAt) থেকে গড়ে দিনে কতটা বিক্রি হয়েছে (velocity)
- * তার ভিত্তিতে র‍্যাংকিং। দ্রুত বিক্রি হয়ে স্টক শেষ হওয়াগুলোও চিহ্নিত হয়।
- */
+// পিওর গণিত lib/compute.ts-এ — সার্ভার ও অফলাইন মিরর একই লজিক ব্যবহার করে
 export async function getFastMovers(limit = 6): Promise<FastMoverEntry[]> {
   const data = await getStoreData();
-  const soldBy = new Map<string, { qty: number; revenue: number }>();
-  for (const o of data.orders) {
-    if (o.status === 'Cancelled') continue;
-    for (const it of o.items) {
-      const cur = soldBy.get(it.productId) || { qty: 0, revenue: 0 };
-      cur.qty += it.quantity;
-      cur.revenue += it.price * it.quantity;
-      soldBy.set(it.productId, cur);
-    }
-  }
-
-  const now = Date.now();
-  const movers: FastMoverEntry[] = [];
-  for (const p of data.products) {
-    const s = soldBy.get(p.id);
-    if (!s || s.qty <= 0) continue;
-    const created = new Date(p.createdAt).getTime();
-    const daysInStock = Math.max(1, Math.ceil((now - created) / 86400000));
-    movers.push({
-      productId: p.id,
-      name: p.name,
-      sku: p.sku || '-',
-      image: p.images[0] || '',
-      totalSold: s.qty,
-      revenue: Math.round(s.revenue),
-      daysInStock,
-      velocity: Math.round((s.qty / daysInStock) * 100) / 100,
-      stockLeft: p.stockCount,
-      soldOut: p.stockCount === 0,
-    });
-  }
-
-  return movers
-    .sort((a, b) => b.velocity - a.velocity || b.totalSold - a.totalSold)
-    .slice(0, limit);
+  return getFastMoversFromData(data, limit);
 }
 
 // ================== AI DAILY BRIEF CACHE (আলাদা KV কি, দিনে ১ বার জেনারেট) ==================
@@ -1156,6 +1140,41 @@ export async function saveDailyBrief(brief: AIDailyBrief): Promise<void> {
     });
   } catch (err) {
     console.warn('Daily brief KV save warning:', err);
+  }
+}
+
+// ================== AI INSIGHTS STORAGE (আলাদা KV কি, শেষ ২৪টা) ==================
+let insightsCache: AIInsights[] | null = null;
+
+export async function getInsights(): Promise<AIInsights[]> {
+  if (insightsCache) return insightsCache;
+  const kv = kvApi('jx_ai_insights');
+  if (!kv.ok) return [];
+  try {
+    const res = await fetch(kv.url, { headers: { Authorization: `Bearer ${kv.token}` }, cache: 'no-store' });
+    if (!res.ok) return [];
+    const parsed = await res.json();
+    insightsCache = Array.isArray(parsed) ? parsed : [];
+    return insightsCache;
+  } catch (err) {
+    console.warn('Insights KV fetch warning:', err);
+    return [];
+  }
+}
+
+export async function saveInsight(insight: AIInsights): Promise<void> {
+  const list = (await getInsights()).filter(i => i.generatedAt !== insight.generatedAt);
+  insightsCache = [insight, ...list].slice(0, 24);
+  const kv = kvApi('jx_ai_insights');
+  if (!kv.ok) return;
+  try {
+    await fetch(kv.url, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${kv.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(insightsCache),
+    });
+  } catch (err) {
+    console.warn('Insights KV save warning:', err);
   }
 }
 
@@ -1243,7 +1262,7 @@ function parseNotification(raw: unknown, id: string): NotificationItem | null {
     if (!n || typeof n !== 'object' || !n.title) return null;
     return {
       id: n.id || id,
-      type: n.type === 'order' || n.type === 'complaint' || n.type === 'feedback' ? n.type : 'feedback',
+      type: n.type === 'order' || n.type === 'complaint' || n.type === 'feedback' || n.type === 'ai' ? n.type : 'feedback',
       title: String(n.title),
       message: String(n.message || ''),
       read: Boolean(n.read),

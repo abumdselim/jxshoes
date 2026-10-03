@@ -9,6 +9,7 @@ import { formatPrice } from '@/lib/utils';
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
 import { CheckCircle2, Truck, ShieldCheck, MapPin, Phone, User, Tag, ArrowRight, Check, AlertCircle } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     async function loadSettings() {
       try {
-        const res = await fetch('/api/settings');
+        const res = await apiFetch('/api/settings');
         if (res.ok) setSettings(await res.json());
       } catch (e) {}
     }
@@ -55,7 +56,7 @@ export default function CheckoutPage() {
 
     setValidatingCoupon(true);
     try {
-      const res = await fetch('/api/coupons/validate', {
+      const res = await apiFetch('/api/coupons/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code: couponInput.trim(), orderTotal: subtotal }),
@@ -107,19 +108,25 @@ export default function CheckoutPage() {
         total: grandTotal,
       };
 
-      const res = await fetch('/api/orders', {
+      const res = await apiFetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderPayload),
       });
 
       if (!res.ok) {
-        throw new Error('অর্ডার সম্পন্ন করা সম্ভব হয়নি। আবার চেষ্টা করুন।');
+        let msg = 'অর্ডার সম্পন্ন করা সম্ভব হয়নি। আবার চেষ্টা করুন।';
+        try {
+          const j = await res.json();
+          if (j?.error) msg = j.error;
+        } catch {}
+        throw new Error(msg);
       }
 
       const order = await res.json();
       clearCart();
-      router.push(`/order-success/${order.id}`);
+      // publicToken ছাড়া অর্ডার-সাকসেস পেজ অর্ডারটি দেখতে পাবে না (P1 নিরাপত্তা)
+      router.push(`/order-success/${order.id}?t=${order.publicToken || ''}`);
     } catch (err: any) {
       setError(err.message || 'একটি ত্রুটি ঘটেছে');
       setSubmitting(false);

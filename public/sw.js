@@ -1,13 +1,20 @@
 /**
- * Shopkeeper Admin service worker
- * - স্ট্যাটিক অ্যাসেট: cache-first
- * - পেজ নেভিগেশন: network-first, অফলাইনে ক্যাশ থেকে
- * - /api/ কখনো ক্যাশ হয় না (ডায়নামিক ডেটা)
+ * Shopkeeper service worker (v2 — অফলাইন-ফার্স্ট)
+ * - স্ট্যাটিক অ্যাসেট ও R2 মিডিয়া (/api/media/*): cache-first
+ * - পেজ নেভিগেশন: network-first, অফলাইনে ক্যাশ/শেল থেকে
+ * - ইনস্টলে অ্যাডমিন + শপ শেল প্রিক্যাশ
+ * - /api/ ডেটা ক্যাশ হয় না — সেটা apiFetch + IndexedDB মিরর সামলায় (অফলাইন রিড + সিঙ্ক)
  */
-const CACHE = 'shopkeeper-admin-v1';
+const CACHE = 'shopkeeper-shell-v2';
+const PRECACHE_URLS = ['/', '/admin', '/shop'];
 
-self.addEventListener('install', () => {
-  self.skipWaiting();
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => Promise.allSettled(PRECACHE_URLS.map((u) => cache.add(u))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -63,7 +70,13 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  if (url.pathname.startsWith('/api/')) return; // ডায়নামিক ডেটা কখনো ক্যাশ নয়
+  // R2 মিডিয়া ইমেজ — immutable, cache-first
+  if (url.pathname.startsWith('/api/media/')) {
+    event.respondWith(cacheFirst(req));
+    return;
+  }
+  // বাকি /api/ ডেটা ক্যাশ হয় না — apiFetch + মিররের দায়িত্ব
+  if (url.pathname.startsWith('/api/')) return;
   if (isStatic(url)) {
     event.respondWith(cacheFirst(req));
   } else if (req.mode === 'navigate') {

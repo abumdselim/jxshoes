@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getProducts, saveProduct } from '@/lib/store';
+import { isAdminRequest, requireAdmin } from '@/lib/adminAuth';
+import type { Product } from '@/types';
 
 export const runtime = 'edge';
+
+/** পাবলিক পেলোড থেকে ক্রয়মূল্য (costPrice) বাদ — ক্রয়মূল্য/লাভ শুধু অ্যাডমিনই দেখবে */
+function publicProductView(p: Product) {
+  return {
+    ...p,
+    costPrice: undefined as number | undefined,
+    variants: p.variants?.map(v => ({ ...v, costPrice: undefined as number | undefined })),
+  };
+}
 
 export async function GET(request: Request) {
   try {
@@ -19,13 +30,18 @@ export async function GET(request: Request) {
       products = products.filter(p => p.isFeatured);
     }
 
-    return NextResponse.json(products);
+    if (await isAdminRequest(request)) {
+      return NextResponse.json(products);
+    }
+    return NextResponse.json(products.map(publicProductView));
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     if (!body.name || !body.price) {

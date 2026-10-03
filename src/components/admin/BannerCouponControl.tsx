@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { HeroBannerSettings, FlashDealSettings, Coupon, Product } from '@/types';
 import { Megaphone, Flame, Ticket, Check, Plus, Trash2, Save, Sparkles } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function BannerCouponControl() {
   const [heroBanner, setHeroBanner] = useState<HeroBannerSettings | null>(null);
@@ -27,7 +28,7 @@ export default function BannerCouponControl() {
   const generateBannerCopy = async () => {
     setAiBannerLoading(true);
     try {
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,10 +60,10 @@ export default function BannerCouponControl() {
   const loadData = async () => {
     try {
       const [mRes, cRes, pRes, sRes] = await Promise.all([
-        fetch('/api/marketing'),
-        fetch('/api/coupons'),
-        fetch('/api/products'),
-        fetch('/api/settings'),
+        apiFetch('/api/marketing'),
+        apiFetch('/api/coupons'),
+        apiFetch('/api/products'),
+        apiFetch('/api/settings'),
       ]);
       if (mRes.ok) {
         const mData = await mRes.json();
@@ -89,7 +90,7 @@ export default function BannerCouponControl() {
   const handleSaveMarketing = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/marketing', {
+      const res = await apiFetch('/api/marketing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ heroBanner, flashDeal }),
@@ -108,7 +109,7 @@ export default function BannerCouponControl() {
     if (!newCoupon.code || !newCoupon.value) return;
 
     try {
-      const res = await fetch('/api/coupons', {
+      const res = await apiFetch('/api/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -120,7 +121,7 @@ export default function BannerCouponControl() {
       });
       if (res.ok) {
         setNewCoupon({ code: '', discountType: 'fixed', value: '', minOrder: '1000' });
-        const cRes = await fetch('/api/coupons');
+        const cRes = await apiFetch('/api/coupons');
         if (cRes.ok) setCoupons(await cRes.json());
       }
     } catch (e) {
@@ -130,7 +131,7 @@ export default function BannerCouponControl() {
 
   const handleDeleteCoupon = async (id: string) => {
     try {
-      const res = await fetch(`/api/coupons?id=${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/coupons?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
         setCoupons((prev) => prev.filter((c) => c.id !== id));
       }

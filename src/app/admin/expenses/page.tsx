@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { Expense } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Receipt, Plus, Trash2, TrendingDown } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 const EXPENSE_CATEGORIES = [
   'দোকান ভাড়া',
@@ -30,7 +31,7 @@ export default function AdminExpensesPage() {
 
   const loadExpenses = async () => {
     try {
-      const res = await fetch('/api/expenses');
+      const res = await apiFetch('/api/expenses');
       if (res.ok) setExpenses(await res.json());
     } finally {
       setLoading(false);
@@ -55,7 +56,7 @@ export default function AdminExpensesPage() {
     if (!category || !form.amount || Number(form.amount) <= 0 || submitting) return;
     setSubmitting(true);
     try {
-      const res = await fetch('/api/expenses', {
+      const res = await apiFetch('/api/expenses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ category, amount: Number(form.amount), note: form.note || undefined }),
@@ -76,7 +77,7 @@ export default function AdminExpensesPage() {
 
   const remove = async (id: string) => {
     if (!confirm('এই খরচটা মুছে ফেলবেন?')) return;
-    const res = await fetch(`/api/expenses?id=${id}`, { method: 'DELETE' });
+    const res = await apiFetch(`/api/expenses?id=${id}`, { method: 'DELETE' });
     if (res.ok) loadExpenses();
   };
 

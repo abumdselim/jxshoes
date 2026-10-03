@@ -23,6 +23,7 @@ import {
   History,
   Mail,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function AdminReportsPage() {
   const [reports, setReports] = useState<StoredReport[]>([]);
@@ -36,7 +37,7 @@ export default function AdminReportsPage() {
 
   const loadReports = async () => {
     try {
-      const res = await fetch('/api/reports');
+      const res = await apiFetch('/api/reports');
       if (res.ok) {
         const data = await res.json();
         setReports(Array.isArray(data) ? data : []);
@@ -49,7 +50,7 @@ export default function AdminReportsPage() {
 
   useEffect(() => {
     loadReports();
-    fetch('/api/settings')
+    apiFetch('/api/settings')
       .then(r => (r.ok ? r.json() : null))
       .then(s => s?.email && setEmailTo(s.email))
       .catch(() => {});
@@ -59,7 +60,7 @@ export default function AdminReportsPage() {
     setGenerating(type);
     setGenError(null);
     try {
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'generate-report', reportType: type }),
@@ -83,7 +84,7 @@ export default function AdminReportsPage() {
     setEmailing(true);
     setEmailMsg(null);
     try {
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'email-report', reportId: selected.id, to: emailTo || undefined }),

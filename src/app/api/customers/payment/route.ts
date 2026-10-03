@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { recordDuePayment } from '@/lib/store';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
-/** বাকি আদায় — Body: { customerId, amount, method, note? } */
+/** বাকি আদায় (অ্যাডমিন) — Body: { customerId, amount, method, note? } */
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     if (!body.customerId || !body.amount || Number(body.amount) <= 0) {

@@ -8,6 +8,8 @@ export const GENERATED_ENV: Record<string, string> = {
   CLOUDFLARE_ACCOUNT_ID: '',
   CLOUDFLARE_API_TOKEN: '',
   CLOUDFLARE_KV_ID: '',
+  D1_DATABASE_ID: '',
+  SHADOW_WRITE_D1: '',
   ADMIN_PASSWORD: '',
   CRON_SECRET: '',
   GEMINI_API_KEY: '',

@@ -5,6 +5,7 @@ import { Home, LayoutGrid, Search, Headphones, X, ArrowRight, Sparkles, Shopping
 import { useCart } from '@/context/CartContext';
 import { usePathname, useRouter } from 'next/navigation';
 import { initialStoreSettings } from '@/lib/initialData';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 const POPULAR_SEARCH_TAGS = [
   'লোফার জুতা',
@@ -24,7 +25,7 @@ export default function MobileBottomNav() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('/api/settings')
+    apiFetch('/api/settings')
       .then((res) => res.json())
       .then((data) => {
         if (data?.hotline) setHotline(data.hotline);

@@ -11,6 +11,7 @@ import { initialProducts } from '@/lib/initialData';
 import { formatPrice } from '@/lib/utils';
 import { useCart } from '@/context/CartContext';
 import { ShoppingBag, Truck, RotateCcw, ShieldCheck, Star, Check, ArrowLeft, Zap, Heart, ShoppingCart } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -27,7 +28,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const res = await fetch(`/api/products/${params.id}`);
+        const res = await apiFetch(`/api/products/${params.id}`);
         if (res.ok) {
           const data = await res.json();
           setProduct(data);

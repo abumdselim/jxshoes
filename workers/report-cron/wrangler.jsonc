@@ -4,6 +4,7 @@
   "compatibility_date": "2026-10-01",
   "triggers": {
     "crons": [
+      "0 2 * * *",
       "0 2 * * 1",
       "0 2 1 * *"
     ]

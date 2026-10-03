@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 import { Order } from '@/types';
 import { formatPrice } from '@/lib/utils';
 import { Printer, MapPin, Phone, Globe, AlertCircle, Sparkles } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 /* ── helpers ── */
 function formatDateBn(dateStr: string) {
@@ -41,7 +42,7 @@ export default function InvoicePage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/orders');
+        const res = await apiFetch('/api/orders');
         if (!res.ok) throw new Error();
         const orders: Order[] = await res.json();
         const found = orders.find((o) => o.id === id || o.orderNumber === id);

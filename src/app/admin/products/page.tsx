@@ -19,6 +19,7 @@ import {
   Pencil,
   Star
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -68,7 +69,7 @@ export default function AdminProductsPage() {
     }
     setAiDescLoading(true);
     try {
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -96,7 +97,7 @@ export default function AdminProductsPage() {
 
   const loadProducts = async () => {
     try {
-      const res = await fetch('/api/products');
+      const res = await apiFetch('/api/products');
       if (res.ok) {
         const data = await res.json();
         setProducts(data);
@@ -174,7 +175,7 @@ export default function AdminProductsPage() {
         const uploadData = new FormData();
         uploadData.append('file', file);
 
-        const res = await fetch('/api/upload', {
+        const res = await apiFetch('/api/upload', {
           method: 'POST',
           body: uploadData,
         });
@@ -245,7 +246,8 @@ export default function AdminProductsPage() {
       const url = editingProduct ? `/api/products/${editingProduct.id}` : '/api/products';
       const method = editingProduct ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
+      // apiFetch — নইলে অফলাইনে পণ্য সেভ নীরবে হারিয়ে যায় (P8 রিভিউ-র কুইক-উইন)
+      const res = await apiFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -263,7 +265,7 @@ export default function AdminProductsPage() {
   const handleDeleteProduct = async (id: string) => {
     if (confirm('আপনি কি নিশ্চিত যে এই প্রোডাক্টটি মুছে ফেলতে চান?')) {
       try {
-        const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+        const res = await apiFetch(`/api/products/${id}`, { method: 'DELETE' });
         if (res.ok) {
           loadProducts();
         }
@@ -279,7 +281,7 @@ export default function AdminProductsPage() {
     if (isNaN(newPrice) || newPrice <= 0) return;
 
     try {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await apiFetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ price: newPrice }),

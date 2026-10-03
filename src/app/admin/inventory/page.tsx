@@ -31,6 +31,7 @@ import {
   RefreshCw,
   ArrowRight
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function AdminInventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -62,6 +63,22 @@ export default function AdminInventoryPage() {
   const [restockNote, setRestockNote] = useState<string>('');
   const [restockSubmitting, setRestockSubmitting] = useState(false);
 
+  // AI ইনসাইট ডিপ-লিংক: /admin/inventory?restock=<productId> → রিস্টক মোডাল প্রি-ফিল
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+    const productId = new URLSearchParams(window.location.search).get('restock');
+    if (!productId) return;
+    const product = products.find(p => p.id === productId);
+    if (product) {
+      setSelectedProductForRestock(product);
+      setRestockQty(10);
+      setIsRestockModalOpen(true);
+      setActiveTab('inventory');
+      // হিস্ট্রি থেকে প্যারাম সরিয়ে দেয় — রিলোডে আবার না খোলে
+      window.history.replaceState({}, '', '/admin/inventory');
+    }
+  }, [loading, products]);
+
   // Stock Adjustment Modal State
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [selectedProductForAdjust, setSelectedProductForAdjust] = useState<Product | null>(null);
@@ -80,7 +97,7 @@ export default function AdminInventoryPage() {
   const loadRestockPlan = async () => {
     setAiPlanLoading(true);
     try {
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'restock-plan' }),
@@ -101,7 +118,7 @@ export default function AdminInventoryPage() {
   const loadInventory = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/inventory');
+      const res = await apiFetch('/api/inventory');
       if (res.ok) {
         const data = await res.json();
         setProducts(data.products || []);
@@ -142,7 +159,7 @@ export default function AdminInventoryPage() {
 
     setRestockSubmitting(true);
     try {
-      const res = await fetch('/api/inventory', {
+      const res = await apiFetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -185,7 +202,7 @@ export default function AdminInventoryPage() {
 
     setAdjustSubmitting(true);
     try {
-      const res = await fetch('/api/inventory', {
+      const res = await apiFetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -215,7 +232,7 @@ export default function AdminInventoryPage() {
   const handleQuickInlineStock = async (product: Product, delta: number) => {
     const newStock = Math.max(0, product.stockCount + delta);
     try {
-      const res = await fetch('/api/inventory', {
+      const res = await apiFetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

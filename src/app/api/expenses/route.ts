@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getExpenses, saveExpense, deleteExpense } from '@/lib/store';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
-export async function GET() {
+export async function GET(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     return NextResponse.json(await getExpenses());
   } catch {
@@ -12,6 +15,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     if (!body.category || !body.amount || Number(body.amount) <= 0) {
@@ -29,6 +34,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

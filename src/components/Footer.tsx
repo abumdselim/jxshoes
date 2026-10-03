@@ -5,6 +5,7 @@ import { Truck, RotateCcw, ShieldCheck, PhoneCall, Heart, MessageSquareHeart } f
 import { StoreSettings } from '@/types';
 import { initialStoreSettings } from '@/lib/initialData';
 import FeedbackForm from '@/components/FeedbackForm';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function Footer() {
   const [settings, setSettings] = useState<StoreSettings>(initialStoreSettings);
@@ -12,7 +13,7 @@ export default function Footer() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch('/api/settings');
+        const res = await apiFetch('/api/settings');
         if (res.ok) setSettings(await res.json());
       } catch (e) {}
     }

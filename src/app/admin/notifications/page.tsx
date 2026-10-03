@@ -19,9 +19,11 @@ import {
   Trash2,
   Loader2,
   Inbox,
+  Sparkles,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
-type Filter = 'all' | 'unread' | 'order' | 'complaint' | 'feedback';
+type Filter = 'all' | 'unread' | 'order' | 'complaint' | 'feedback' | 'ai';
 
 const TYPE_META: Record<
   NotificationItem['type'],
@@ -30,11 +32,13 @@ const TYPE_META: Record<
   order: { label: 'নতুন অর্ডার', icon: ShoppingCart, cls: 'bg-blue-50 text-blue-600 border-blue-200' },
   complaint: { label: 'অভিযোগ', icon: AlertTriangle, cls: 'bg-red-50 text-red-600 border-red-200' },
   feedback: { label: 'পরামর্শ', icon: MessageCircle, cls: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
+  ai: { label: 'AI সতর্কতা', icon: Sparkles, cls: 'bg-orange-50 text-orange-600 border-orange-200' },
 };
 
 const FILTERS: { key: Filter; label: string }[] = [
   { key: 'all', label: 'সব' },
   { key: 'unread', label: 'অপঠিত' },
+  { key: 'ai', label: 'AI সতর্কতা' },
   { key: 'order', label: 'নতুন অর্ডার' },
   { key: 'complaint', label: 'অভিযোগ' },
   { key: 'feedback', label: 'পরামর্শ' },
@@ -48,7 +52,7 @@ export default function AdminNotificationsPage() {
 
   const load = async () => {
     try {
-      const res = await fetch('/api/notifications');
+      const res = await apiFetch('/api/notifications');
       if (res.ok) setItems(await res.json());
     } finally {
       setLoading(false);
@@ -70,7 +74,7 @@ export default function AdminNotificationsPage() {
   const markAllRead = async () => {
     setBusy(true);
     try {
-      await fetch('/api/notifications', {
+      await apiFetch('/api/notifications', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ all: true }),
@@ -83,7 +87,7 @@ export default function AdminNotificationsPage() {
 
   const markRead = async (id: string) => {
     setItems(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
-    await fetch('/api/notifications', {
+    await apiFetch('/api/notifications', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
@@ -92,7 +96,7 @@ export default function AdminNotificationsPage() {
 
   const removeItem = async (id: string) => {
     setItems(prev => prev.filter(n => n.id !== id));
-    await fetch('/api/notifications', {
+    await apiFetch('/api/notifications', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),

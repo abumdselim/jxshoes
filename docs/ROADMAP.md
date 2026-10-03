@@ -79,7 +79,60 @@ JxShoes শুধু একটা ই-কমার্স ওয়েবসা�
 
 ---
 
-## ⬜ ফেজ ২ — পরবর্তী (রোডম্যাপ)
+## ✅ ফেজ ১.৭ — নিরাপত্তা হটফিক্স (সম্পন্ন: ৩ অক্টোবর ২০২৬)
+
+প্রফেশনালাইজেশন সিরিজের P1 অনুযায়ী (অডিট: `docs/audits/p1-api-route-audit.md`):
+
+- ✅ **সব API রাউট অথ-গেটেড** — `requireAdmin()` কেন্দ্রীয় হেল্পার (`src/lib/adminAuth.ts`) + middleware-এ `/api/:path*` matcher ও PUBLIC allowlist (দ্বিতীয় প্রতিরক্ষা); অডিটে ধরা ৩৪টি অথহীন অ্যাডমিন method বন্ধ
+- ✅ **সব-অর্ডার-লিক বন্ধ** — `GET /api/orders` (সব কাস্টমারের নাম-ফোন-ঠিকানা-TrxID) এখন অ্যাডমিন-অনলি; কাস্টমার নিজের অর্ডার অনুমান-অযোগ্য `publicToken` দিয়ে দেখে (`GET /api/orders/[id]?t=...` — adminNote/costPrice বাদ, ভুল টোকেনে 404)
+- ✅ **সার্ভার-সাইড রিকম্পিউট** — চেকআউটে দাম/সাবটোটাল/কুপন/ডেলিভারি-ফি/মোট/স্টক সার্ভারেই যাচাই ও গণনা (`createOrder` নতুন `OnlineOrderInput`; zod ভ্যালিডেশনসহ) — ক্লায়েন্টের পাঠানো টাকার অঙ্ক আর বিশ্বাস করা হয় না
+- ✅ **রেট-লিমিট** (`src/lib/rateLimit.ts`, KV সফট লিমিট) — লগইন ৫/১৫মি (constant-time তুলনাসহ), অর্ডার ১০/ঘণ্টা, ফিডব্যাক ১০/ঘণ্টা, কুপন-যাচাই ৩০/১৫মি
+- ✅ **আপলোড সীমা** — অ্যাডমিন-অনলি, JPEG/PNG/WebP, 5MB, র‍্যান্ডম ফাইলনেম
+- ✅ **সিকিউরিটি হেডার** (next.config.mjs) — nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy, CSP Report-Only
+- ✅ **ক্রয়মূল্য গোপন** — পাবলিক product GET পেলোডে `costPrice` বাদ (অ্যাডমিন কুকিতে পূর্ণ)
+- ✅ স্মোক-টেস্ট: `bash scripts/security-smoke.sh` (ডেভ সার্ভার + ADMIN_PASSWORD সহ)
+- ⬜ সেশন-ভিত্তিক অথ, রোল, অডিট লগ → P6; সিক্রেট/বাইন্ডিং কাঠামো → P3 (`docs/adr/001-hosting-adapter.md`)
+
+---
+
+## ✅ ফেজ ১.৮ — টেস্ট সেফটি-নেট (P2) (সম্পন্ন: ৩ অক্টোবর ২০২৬)
+
+- ✅ **Vitest সেটআপ** (`vitest.config.ts`, `src/test/setup.ts` TZ=UTC, `npm test`) — ৫০টি ইউনিট-টেস্ট পাস + ১৩টি ক্যারেক্টারাইজেশন-TODO রেজিস্টার (`src/lib/characterization.test.ts`)
+- ✅ **পিওর-কোর extraction (আচরণ অপরিবর্তিত):** `validateCouponInData`, `applyPosSaleInData`, `applyDuePaymentInData`, `upsertCustomerInData` export (store.ts); `bnToEnDigits`+`deterministicMatch` → `src/lib/saleMatch.ts` (ai/route.ts থেকে)
+- ✅ **কভারেজ:** ফাইন্যান্স-সামারি (COGS ৬৫%-ফলব্যাক চেইন, ক্যান্সেল, বাকি), ইনভেন্টরি-সামারি, কুপন (ক্যাপহীনতা লক), বাকি-লেজার (ওভার-পেমেন্ট/min-১ ক্ল্যাম্প লক), POS (ভ্যারিয়েন্ট-চেইন, বাকি, ওভারসেল লক), ASR-ম্যাচিং (হাইফেন-দুর্বলতা লক), extractJson, adminAuth (fail-open ডকুমেন্টেড)
+- ✅ **CI গেট:** `.github/workflows/ci.yml` (PR+push: tsc→lint→test→build) + `deploy.yml`-এ gate job — ফেল করলে ডিপ্লয় আটকায়
+- ✅ **Playwright স্কেফোল্ড:** `playwright.config.ts` + `e2e/smoke.spec.ts` (login/রিডাইরেক্ট/401-গার্ড/পাবলিক-গার্ড) — চালাতে `npx playwright install chromium && npm run e2e`
+- ✅ কনটেক্সট: `AGENTS.md` (P0) — প্রতিটি AI সেশনের নিয়ম
+- ⬜ পরবর্তী: P4 migrations (স্কিমা OK-র পরে) → P5 রিপো লেয়ার → P6 রোল/সেশন
+
+---
+
+## ✅ ফেজ ১.৯ — D1 মাইগ্রেশন ফাইল + Next প্যাচ-আপগ্রেড (P4 ধাপ ৩, P3 আংশিক) (সম্পন্ন: ৩ অক্টোবর ২০২৬)
+
+- ✅ **`migrations/0001_init.sql`** — DB_SCHEMA.md §৫-এর ৩০ টেবিল + সব ইনডেক্স, হুবহু DDL
+- ✅ **`scripts/seed-d1.ts` + `migrations/seed_demo.sql`** — initialData → D1 ডেমো-সিড (টাকা ×১০০ পয়শায়; পুরনো বাকি = `OPENING` লেজার-এন্ট্রি)
+- ✅ **আসল SQLite-এ যাচাইকৃত** (node:sqlite): ৩০ টেবিল প্রয়োগ পাস, ৯১ INSERT, অভিন্নতা `SUM(due_entries) == SUM(due_cached)` ও `stock_cached == SUM(ভ্যারিয়েন্ট)`
+- ✅ **প্রয়োগ-গাইড:** `migrations/README.md` (wrangler d1 create/execute) — প্রয়োগের পরেও অ্যাপ KV-তেই চলবে; D1-লাইভ P5-এ (`STORE_BACKEND=kv|d1` ফ্ল্যাগ)
+- ✅ **Next.js প্যাচ-আপগ্রেড:** 14.2.24 → **14.2.35** — tsc/lint/test + পূর্ণ `next build` পাস
+- ⚠️ npm audit-এ অবশিষ্ট ১৭টির মধ্যে **১ critical (next) 14.x-এ ফিক্স নেই** — মেজর-আপগ্রেড (15/16) লাগবে, যা হোস্টিং-অ্যাডাপ্টার সিদ্ধান্তের সাথে একসাথে (ADR: `docs/adr/001-hosting-adapter.md`); বাকি high-গুলো build-tool transitive (wrangler/next-on-pages/eslint-ডিপ) — runtime-exposed নয়
+
+---
+
+## 🟡 ফেজ ২.০ — D1 লাইভ + রিপো লেয়ার শুরু (P5 ধাপ ১–৩, ৫) (৩ অক্টোবর ২০২৬, চলমান)
+
+- ✅ **D1 ডেটাবেস তৈরি:** `shopkeeper-db` (APAC) — wrangler.toml + .env/deploy.yml-এ D1_DATABASE_ID
+- ✅ **মাইগ্রেশন লাইভ-প্রয়োগ:** 0001 (২৮ টেবিল) + 0002 (orders.public_token) — রিমোট D1-এ
+- ✅ **`src/lib/d1.ts`** — SqlExecutor ইন্টারফেস (REST ইমপ্ল; নেটিভ-বাইন্ডিং সোয়াপ P3-এ) + `d1Local.ts` (node:sqlite, টেস্টে)
+- ✅ **`src/lib/repos/orders.ts`** — রেফারেন্স রিপো: অর্ডার+আইটেম+মুভমেন্ট+কাস্টমার+আইডেম্পোটেন্সি **এক ব্যাচে**; গার্ডেড ডিক্রিমেন্ট (অ্যাটমিক স্টক); নেগেটিভ-স্টক নীতি উভয় মোড; ডিভাইস-সিকোয়েন্স ইনভয়েস
+- ✅ **আসল KV→D1 মাইগ্রেশন:** `scripts/migrate-kv-to-d1.ts` (ড্রাই-রান/apply/চেকসাম) — **আসল ডেটা মাইগ্রেট হয়ে ১৩/১৩ চেকসাম PASS** (৫ অর্ডার, ৳২৩,২৬০ রেভিনিউ, ১২ পণ্য/স্টক ২৮৯, ১৬ মুভমেন্ট; ১টি বিশাল base64 ছবি স্কিপ → R2-মাইগ্রেশনে)
+- ✅ **টেস্ট:** ৪টি D1-রিপো টেস্ট (লেনদেন-অ্যাটমিসিটি, আইডেম্পোটেন্সি-রিপ্লে, রোলব্যাক-প্রমাণ, নেগেটিভ-পতাকা) — মোট ৫৪ পাস
+- ✅ **Shadow write চালু:** `src/lib/repos/replicate.ts` — প্রতিটি নতুন অর্ডার KV-তে হওয়ার সাথে সাথে হুবহু D1-তে প্রতিলিপি (একই id/টোকেন; `SHADOW_WRITE_D1=1`, .env-এ চালু; D1 ব্যর্থ হলে অর্ডার-ফ্লো অক্ষত; কাস্টমার-ক্যাশ/মুভমেন্ট সুইচ-সময় পর্যন্ত KV-র মালিকানায়) — ৩টি টেস্টসহ, মোট ৫৭ পাস
+- ⬜ **বাকি (P5 ধাপ ৬–৮):** বাকি ডোমেইন-রিপো (products/customers/inventory/finance…), রাউট-সুইচ (STORE_BACKEND=kv|d1, ডিফল্ট kv), ai/route.ts action-বিভাজন, কনকারেন্সি-টেস্ট — অ্যাপ আপাতত KV-তেই চলছে
+- ⚠️ নোট: D1 REST-এ explicit BEGIN/COMMIT নিষিদ্ধ (কোড 7500) — প্রতি /query-কলই অ্যাটমিক; ১০০KB+ স্টেটমেন্ট সীমা (base64 data-URI R2-তে সরাতে হবে); সুইচের আগে একবার মাইগ্রেশন-স্ক্রিপ্ট পুনঃচালনা + কাস্টমার/অর্ডার-ক্যাশ রিফ্রেশ লাগবে
+
+---
+
+## ⬜ ফেজ ২ বাকি — রোডম্যাপ
 
 - ⬜ **WhatsApp ডেলিভারি** — Meta WhatsApp Business API বা Twilio অ্যাকাউন্ট খুলে রিপোর্ট/অ্যালার্ট হোয়াটসঅ্যাপে (ইমেইল চ্যানেল রেডি আছে, প্রোভাইডার কনফিগ বসালেই চলবে)
 - ⬜ **অ্যাডমিন লগইন ও সিকিউরিটি** (পাসওয়ার্ড/রোল — লাইভ ক্লায়েন্টকে দেওয়ার আগে বাধ্যতামূলক)

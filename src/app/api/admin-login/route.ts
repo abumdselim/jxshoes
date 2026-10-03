@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { GENERATED_ENV } from '@/lib/generatedEnv';
+import { timingSafeEqualStr } from '@/lib/adminAuth';
+import { clientIp, isRateAllowed, incrementRateCount, resetRateCount } from '@/lib/rateLimit';
 
 export const runtime = 'edge';
 
@@ -20,6 +22,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'পাসওয়ার্ড কনফিগার করা নেই' }, { status: 500 });
   }
 
+  // ব্রুট-ফোর্স গেট (P1) — প্রতি IP ১৫ মিনিটে ৫টি ব্যর্থ চেষ্টা
+  const ip = clientIp(request);
+  if (!(await isRateAllowed('login', ip, 5))) {
+    return NextResponse.json(
+      { error: 'অনেক বেশি ভুল চেষ্টা হয়েছে — ১৫ মিনিট পরে আবার চেষ্টা করুন' },
+      { status: 429 }
+    );
+  }
+
   let body: { password?: unknown } = {};
   try {
     body = await request.json();
@@ -28,19 +39,23 @@ export async function POST(request: Request) {
   }
 
   const supplied = typeof body.password === 'string' ? body.password : '';
-  if (!supplied || supplied !== password) {
+  // প্লেইন তুলনা নয় — দুটো হ্যাশ ধ্রুব-সময়ে মেলানো হয়
+  const passwordHash = await sha256(password);
+  const suppliedHash = await sha256(supplied);
+  if (!supplied || !timingSafeEqualStr(suppliedHash, passwordHash)) {
+    await incrementRateCount('login', ip, 900);
     return NextResponse.json({ error: 'ভুল পাসওয়ার্ড' }, { status: 401 });
   }
 
   // কুকিতে পাসওয়ার্ড নয়, শুধু তার SHA-256 হ্যাশ রাখা হয়
-  const hash = await sha256(password);
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(ADMIN_COOKIE, hash, {
+  res.cookies.set(ADMIN_COOKIE, passwordHash, {
     httpOnly: true,
     sameSite: 'lax',
     path: '/',
     maxAge: COOKIE_MAX_AGE,
     secure: process.env.NODE_ENV === 'production',
   });
+  await resetRateCount('login', ip, 900);
   return res;
 }

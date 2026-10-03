@@ -26,6 +26,7 @@ import {
   TrendingUp,
   Wallet,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -61,7 +62,7 @@ export default function AdminCustomersPage() {
 
   const loadCustomers = async () => {
     try {
-      const res = await fetch('/api/customers');
+      const res = await apiFetch('/api/customers');
       if (res.ok) {
         const data = await res.json();
         setCustomers(data.customers || []);
@@ -102,7 +103,7 @@ export default function AdminCustomersPage() {
     if (!payTarget || !payAmount || Number(payAmount) <= 0 || paySubmitting) return;
     setPaySubmitting(true);
     try {
-      const res = await fetch('/api/customers/payment', {
+      const res = await apiFetch('/api/customers/payment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -131,7 +132,7 @@ export default function AdminCustomersPage() {
     setLedgerTarget(c);
     setLedgerLoading(true);
     try {
-      const res = await fetch(`/api/customers/${c.id}`);
+      const res = await apiFetch(`/api/customers/${c.id}`);
       if (res.ok) {
         const data = await res.json();
         setLedgerOrders(data.orders || []);
@@ -146,7 +147,7 @@ export default function AdminCustomersPage() {
     if (!addForm.name.trim() || !addForm.phone.trim() || addSubmitting) return;
     setAddSubmitting(true);
     try {
-      const res = await fetch('/api/customers', {
+      const res = await apiFetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -175,7 +176,7 @@ export default function AdminCustomersPage() {
 
   const removeCustomer = async (c: Customer) => {
     if (!confirm(`"${c.name}" কে কাস্টমার তালিকা থেকে মুছে ফেলবেন?`)) return;
-    const res = await fetch(`/api/customers?id=${c.id}`, { method: 'DELETE' });
+    const res = await apiFetch(`/api/customers?id=${c.id}`, { method: 'DELETE' });
     if (res.ok) {
       showFeedback('কাস্টমার মুছে ফেলা হয়েছে');
       loadCustomers();

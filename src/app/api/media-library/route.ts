@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import { getMediaLibrary, saveMediaLibrary } from '@/lib/store';
+import { requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
-/** মিডিয়া লাইব্রেরি — আপলোড করা কিন্তু এখনো কোনো প্রোডাক্টে যুক্ত না হওয়া ছবির URL তালিকা */
-export async function GET() {
+/** মিডিয়া লাইব্রেরি (অ্যাডমিন) — আপলোড করা কিন্তু এখনো কোনো প্রোডাক্টে যুক্ত না হওয়া ছবির URL তালিকা */
+export async function GET(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     return NextResponse.json(await getMediaLibrary());
   } catch {
@@ -13,6 +16,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const urls: string[] = Array.isArray(body?.urls)
@@ -30,6 +35,8 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const remove: string[] = Array.isArray(body?.urls)

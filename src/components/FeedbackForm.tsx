@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { Send, Loader2, CheckCircle2 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 export default function FeedbackForm() {
   const [type, setType] = useState<'feedback' | 'complaint'>('feedback');
@@ -26,7 +27,7 @@ export default function FeedbackForm() {
     setSending(true);
     setError(null);
     try {
-      const res = await fetch('/api/feedback', {
+      const res = await apiFetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, name, phone, message }),

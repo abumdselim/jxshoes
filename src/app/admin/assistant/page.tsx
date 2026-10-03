@@ -24,6 +24,7 @@ import {
   Square,
   CheckCircle,
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 /** চ্যাট মেসেজে ইনলাইন অ্যাকশন (ভয়েস কমান্ড কনফার্ম করার জন্য) */
 interface AssistantMsg extends ChatMsg {
@@ -41,6 +42,13 @@ interface AssistantMsg extends ChatMsg {
     supplier: string;
     description: string;
   };
+  duePaymentAction?: {
+    customer: { id: string; name: string; phone: string; dueAmount: number };
+    amount: number;
+    method: string;
+  };
+  /** এজেন্ট টুল-চিপ — এজেন্ট কী দেখছে/করছে */
+  toolLabels?: string[];
   done?: boolean;
 }
 
@@ -80,8 +88,8 @@ const blobToBase64 = (blob: Blob): Promise<string> =>
 const QUICK_QUESTIONS = [
   { label: 'আজকের সেলস কেমন?', icon: TrendingUp },
   { label: 'কোন প্রোডাক্ট বেশি বিক্রি হচ্ছে?', icon: Package },
-  { label: 'কোন স্টক শেষ হয়ে যাচ্ছে?', icon: AlertTriangle },
-  { label: 'মোট লাভ কত হতে পারে?', icon: Banknote },
+  { label: 'সবচেয়ে বেশি বাকি কার?', icon: Banknote },
+  { label: 'আগামী সপ্তাহে কী অপেক্ষা করব?', icon: AlertTriangle },
 ];
 
 export default function AdminAssistantPage() {
@@ -159,7 +167,7 @@ export default function AdminAssistantPage() {
       return updated;
     });
     try {
-      const res = await fetch('/api/inventory', {
+      const res = await apiFetch('/api/inventory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -194,7 +202,7 @@ export default function AdminAssistantPage() {
       return updated;
     });
     try {
-      const res = await fetch('/api/pos/sale', {
+      const res = await apiFetch('/api/pos/sale', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -232,7 +240,7 @@ export default function AdminAssistantPage() {
     try {
       const sizesArr = act.sizes.split(',').map(x => x.trim()).filter(Boolean);
       const colorsArr = act.colors.split(',').map(x => x.trim()).filter(Boolean).map(name => ({ name: name, hex: colorHex(name) }));
-      const res = await fetch('/api/products', {
+      const res = await apiFetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -271,7 +279,7 @@ export default function AdminAssistantPage() {
     setError(null);
     try {
       const audioB64 = await blobToBase64(blob);
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'voice-intent', audioBase64: audioB64, mimeType: mime }),
@@ -388,16 +396,83 @@ export default function AdminAssistantPage() {
     setStreaming(true);
 
     try {
-      await streamChat(withUser, delta => {
-        setMessages(prev => {
-          const updated = [...prev];
-          const last = updated[updated.length - 1];
-          if (last?.role === 'assistant') {
-            updated[updated.length - 1] = { ...last, content: last.content + delta };
-          }
-          return updated;
-        });
-      });
+      await streamChat(
+        withUser,
+        delta => {
+          setMessages(prev => {
+            const updated = [...prev];
+            const last = updated[updated.length - 1];
+            if (last?.role === 'assistant') {
+              updated[updated.length - 1] = { ...last, content: last.content + delta };
+            }
+            return updated;
+          });
+        },
+        {
+          // এজেন্ট টুল-চিপ — শেষ (স্ট্রিমিং) অ্যাসিস্ট্যান্ট মেসেজে জমা হয়
+          onTool: t => {
+            setMessages(prev => {
+              const updated = [...prev];
+              for (let i = updated.length - 1; i >= 0; i--) {
+                if (updated[i].role === 'assistant') {
+                  const labels = updated[i].toolLabels || [];
+                  if (!labels.includes(t.label)) updated[i] = { ...updated[i], toolLabels: [...labels, t.label] };
+                  break;
+                }
+              }
+              return updated;
+            });
+          },
+          // এজেন্টের কনফার্মেশন প্রস্তাব — ইনলাইন অ্যাকশন বাটনে রূপ নেয়
+          onConfirm: c => {
+            setMessages(prev => {
+              const updated = [...prev];
+              for (let i = updated.length - 1; i >= 0; i--) {
+                if (updated[i].role === 'assistant') {
+                  if (c.payload?.intent === 'sale') {
+                    const p = c.payload as { product: { id: string; name: string; sizes: string[]; colors: { name: string }[] }; match: { size?: string; color?: string; quantity?: number } };
+                    updated[i] = {
+                      ...updated[i],
+                      saleAction: {
+                        productId: p.product.id,
+                        productName: p.product.name,
+                        quantity: p.match?.quantity || 1,
+                        size: p.match?.size,
+                        color: p.match?.color,
+                      },
+                    };
+                  } else if (c.payload?.intent === 'new-product') {
+                    const d = c.payload as { draft: { name: string; price: number; category?: string; subCategory?: string; costPrice?: number; stockCount?: number; supplier?: string } };
+                    updated[i] = {
+                      ...updated[i],
+                      newProductAction: {
+                        name: d.draft.name,
+                        category: d.draft.category || 'shoes',
+                        subCategory: d.draft.subCategory || 'General',
+                        price: String(d.draft.price),
+                        costPrice: d.draft.costPrice ? String(d.draft.costPrice) : '',
+                        sizes: '',
+                        colors: '',
+                        stockCount: String(d.draft.stockCount ?? 10),
+                        supplier: d.draft.supplier || '',
+                        description: '',
+                      },
+                    };
+                  } else if (c.payload?.intent === 'due-payment') {
+                    const p = c.payload as { customer: { id: string; name: string; phone: string; dueAmount: number }; amount: number; method: string };
+                    updated[i] = {
+                      ...updated[i],
+                      duePaymentAction: { customer: p.customer, amount: Number(p.amount), method: String(p.method || 'Cash') },
+                    };
+                  }
+                  break;
+                }
+              }
+              return updated;
+            });
+          },
+        }
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'AI সংযোগে সমস্যা হয়েছে');
       // খালি অ্যাসিস্ট্যান্ট বাবল বাদ দাও
@@ -408,6 +483,32 @@ export default function AdminAssistantPage() {
     } finally {
       setStreaming(false);
       inputRef.current?.focus();
+    }
+  };
+
+  /** এজেন্টের বাকি-আদায় প্রস্তাব কনফার্ম */
+  const confirmDuePayment = async (idx: number) => {
+    const m = messagesRef.current[idx];
+    if (!m?.duePaymentAction || m.done) return;
+    const { customer, amount, method } = m.duePaymentAction;
+    setMessages(prev => prev.map((msg, i) => (i === idx ? { ...msg, done: true } : msg)));
+    try {
+      const res = await apiFetch('/api/customers/payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ customerId: customer.id, amount, method, note: 'AI এজেন্ট (কনফার্মড)' }),
+      });
+      const data = await res.json().catch(() => null);
+      if (res.ok) {
+        const remaining = data?.customer?.dueAmount ?? Math.max(0, customer.dueAmount - amount);
+        setMessages(prev => [...prev, { role: 'assistant', content: `✅ বাকি আদায় হয়েছে: ${customer.name} — ৳${amount.toLocaleString('en-BD')}। বর্তমান বাকি: ৳${Number(remaining).toLocaleString('en-BD')}।` }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${data?.error || 'আদায় করা যায়নি'}` }]);
+        setMessages(prev => prev.map((msg, i) => (i === idx ? { ...msg, done: false } : msg)));
+      }
+    } catch {
+      setError('সার্ভারে সংযোগ করা যায়নি');
+      setMessages(prev => prev.map((msg, i) => (i === idx ? { ...msg, done: false } : msg)));
     }
   };
 
@@ -494,6 +595,15 @@ export default function AdminAssistantPage() {
                     : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md'
                 }`}
               >
+                {m.toolLabels && m.toolLabels.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {m.toolLabels.map((label, li) => (
+                      <span key={li} className="inline-flex items-center gap-1 rounded-full bg-orange-50 border border-orange-200 text-orange-700 px-2.5 py-0.5 text-[10px] font-bold">
+                        {label}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 {m.content ||
                   (streaming && i === messages.length - 1 ? (
                     <span className="inline-flex gap-1 items-center h-4">
@@ -536,6 +646,21 @@ export default function AdminAssistantPage() {
                   <CheckCircle className="w-4 h-4" />
                   ইনভেন্টরিতে যোগ করুন
                 </button>
+              )}
+              {m.duePaymentAction && !m.done && (
+                <div className="ml-11 max-w-sm rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <p className="text-xs font-bold text-emerald-900">
+                    💰 বাকি আদায়: {m.duePaymentAction.customer.name} — ৳{m.duePaymentAction.amount.toLocaleString('en-BD')} ({m.duePaymentAction.method})
+                  </p>
+                  <p className="text-[11px] text-slate-500 mt-0.5">বর্তমান বাকি: ৳{m.duePaymentAction.customer.dueAmount.toLocaleString('en-BD')}</p>
+                  <button
+                    onClick={() => void confirmDuePayment(i)}
+                    className="mt-2 inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    নিশ্চিত করুন
+                  </button>
+                </div>
               )}
             </div>
           ))}

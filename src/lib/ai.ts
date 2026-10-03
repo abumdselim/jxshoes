@@ -18,7 +18,8 @@
  * ব্রাউজারে পাঠানো যাবে না।
  */
 
-import { computeFinanceSummary, getCustomers, getOrders, getProducts, getStoreSettings } from './store';
+import { getStoreData } from './store';
+import { computeFinanceSummaryFromData, computeSalesForecast, computeDaysOfCover } from './compute';
 import { getCfEnv } from './cfEnv';
 
 export interface AIMessage {
@@ -61,6 +62,10 @@ function buildRequestBody(messages: AIMessage[], opts: RunAIOptions, stream: boo
   });
 }
 
+// Edge রানটাইমের কিছু ফেচ-ইমপ্লিমেন্টেশন স্ট্রিং-বডিকে latin-1 ধরে এনকোড করে —
+// তাতে বাংলা '?' হয়ে যায়। তাই JSON বডি সরাসরি UTF-8 বাইট হিসেবেই পাঠানো হয়।
+const utf8Body = (json: string): BodyInit => new TextEncoder().encode(json);
+
 /**
  * দুই ধরনের রেসপন্স শেপ থেকে টেক্সট বের করে:
  * ১) legacy: result.response (স্ট্রিং, বা JSON হলে পার্সড অবজেক্ট)
@@ -94,9 +99,9 @@ async function callModel(model: string, messages: AIMessage[], opts: RunAIOption
       method: 'POST',
       headers: {
         Authorization: `Bearer ${target.token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
-      body: buildRequestBody(messages, opts, false),
+      body: utf8Body(buildRequestBody(messages, opts, false)),
     });
     lastStatus = res.status;
     if (res.ok) break;
@@ -144,9 +149,9 @@ export async function runAIStream(
       method: 'POST',
       headers: {
         Authorization: `Bearer ${target.token}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       },
-      body: buildRequestBody(messages, opts, true),
+      body: utf8Body(buildRequestBody(messages, opts, true)),
     });
     if (!res.ok || !res.body) {
       const errText = await res.text().catch(() => `HTTP ${res.status}`);
@@ -230,13 +235,15 @@ export async function runAIJson<T>(
  * (প্রোডাক্ট/স্টক/সেলস সামারি — আসল ডেটা, তাই AI সঠিক উত্তর দিতে পারে)
  */
 export async function buildStoreContext(orderLimit = 25): Promise<string> {
-  const [products, orders, settings, customers, finance] = await Promise.all([
-    getProducts(),
-    getOrders(),
-    getStoreSettings(),
-    getCustomers(),
-    computeFinanceSummary(),
-  ]);
+  // একবারই KV ফেচ — বাকি সব পিওর কম্পিউট (লেটেন্সি ও খরচ বাঁচায়)
+  const data = await getStoreData();
+  const products = data.products;
+  const orders = [...data.orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const settings = data.storeSettings;
+  const customers = data.customers;
+  const expenses = data.expenses || [];
+  const movements = data.inventoryMovements || [];
+  const finance = computeFinanceSummaryFromData(data);
 
   const lines: string[] = [];
   lines.push(
@@ -285,6 +292,45 @@ export async function buildStoreContext(orderLimit = 25): Promise<string> {
   const dueCustomers = customers.filter(c => (c.dueAmount || 0) > 0).sort((a, b) => b.dueAmount - a.dueAmount).slice(0, 8);
   if (dueCustomers.length > 0) {
     lines.push(`- যাদের বাকি আছে: ${dueCustomers.map(c => `${c.name} (${c.phone}): ৳${c.dueAmount}`).join('; ')}`);
+  }
+
+  // ট্রেন্ড ও ফোরকাস্ট — "কাল/আগামী সপ্তাহে কী অপেক্ষা করব" প্রশ্নের ভিত্তি
+  const forecast = computeSalesForecast(data);
+  lines.push('');
+  lines.push(`ট্রেন্ড ও ফোরকাস্ট: শেষ ৭ দিনের গড় দৈনিক ৳${forecast.last7Avg}, তার আগের সপ্তাহ ৳${forecast.prev7Avg} — ট্রেন্ড ${forecast.trend === 'up' ? 'উর্ধ্বমুখী' : forecast.trend === 'down' ? 'নিম্নমুখী' : 'স্থিতিশীল'} (${forecast.wowGrowthPercent}%)। আগামী ৭ দিনের সম্ভাব্য বিক্রয় ৳${forecast.projectedNext7Total}।`);
+  lines.push(`১৪ দিনের দৈনিক বিক্রয় সিরিজ (তারিখ:৳): ${forecast.last14Series.map(s => `${s.date.slice(5)}:${s.revenue}`).join(', ')}`);
+
+  // খরচের খাতাভুক্তি — ক্যাটাগরি ভিত্তিক
+  const expenseByCategory = new Map<string, number>();
+  for (const e of expenses) expenseByCategory.set(e.category, (expenseByCategory.get(e.category) || 0) + e.amount);
+  if (expenseByCategory.size > 0) {
+    lines.push(`খরচের ক্যাটাগরি ভাগ (মোট ৳${finance.operatingExpenses}): ${Array.from(expenseByCategory.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([c, a]) => `${c} ৳${a}`).join(', ')}`);
+  }
+
+  // স্টক সতর্কতা — লো/আউট-অফ-স্টক নামসহ
+  const lowStock = products.filter(p => p.stockCount > 0 && p.stockCount <= (p.minStockAlert || 5));
+  const outOfStock = products.filter(p => p.stockCount === 0);
+  if (lowStock.length > 0) lines.push(`লো-স্টক (${lowStock.length}টি): ${lowStock.slice(0, 10).map(p => `${p.name} (${p.sku}, বাকি ${p.stockCount})`).join('; ')}`);
+  if (outOfStock.length > 0) lines.push(`স্টক শেষ (${outOfStock.length}টি): ${outOfStock.slice(0, 10).map(p => `${p.name} (${p.sku})`).join('; ')}`);
+
+  // ৩০ দিনের স্টক মুভমেন্ট সারসংক্ষেপ
+  const monthAgoMov = Date.now() - 30 * 86400000;
+  const movSummary = new Map<string, { count: number; net: number }>();
+  for (const m of movements) {
+    if (new Date(m.createdAt).getTime() < monthAgoMov) continue;
+    const cur = movSummary.get(m.type) || { count: 0, net: 0 };
+    cur.count++;
+    cur.net += m.quantity;
+    movSummary.set(m.type, cur);
+  }
+  if (movSummary.size > 0) {
+    lines.push(`৩০ দিনের স্টক মুভমেন্ট: ${Array.from(movSummary.entries()).map(([t, v]) => `${t} ×${v.count} (নেট ${v.net > 0 ? '+' : ''}${v.net})`).join(', ')}`);
+  }
+
+  // days-of-cover — কোনটা কত দিন চলবে
+  const covers = computeDaysOfCover(data, 8).filter(c => c.verdict === 'critical' || c.verdict === 'low');
+  if (covers.length > 0) {
+    lines.push(`স্টক-কভার সতর্কতা (বর্তমান গতিতে কত দিন চলবে): ${covers.map(c => `${c.name} ${c.daysOfCover ?? '∞'} দিন`).join(', ')}`);
   }
 
   // প্রোডাক্ট-ভিত্তিক বিক্রি

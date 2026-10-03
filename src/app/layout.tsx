@@ -4,6 +4,7 @@ import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import CartDrawer from '@/components/CartDrawer';
 import MobileBottomNav from '@/components/MobileBottomNav';
+import OfflineProvider from '@/lib/offline/OfflineProvider';
 
 const hindSiliguri = Hind_Siliguri({
   weight: ['300', '400', '500', '600', '700'],
@@ -46,9 +47,11 @@ export default function RootLayout({
       </head>
       <body className={`${hindSiliguri.className} antialiased min-h-screen flex flex-col bg-slate-50 text-slate-900 pb-20 md:pb-0 font-sans overflow-x-clip selection:bg-orange-500 selection:text-white`}>
         <CartProvider>
-          {children}
-          <CartDrawer />
-          <MobileBottomNav />
+          <OfflineProvider>
+            {children}
+            <CartDrawer />
+            <MobileBottomNav />
+          </OfflineProvider>
         </CartProvider>
       </body>
     </html>

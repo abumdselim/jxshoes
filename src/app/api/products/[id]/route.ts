@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getProductById, saveProduct, deleteProduct } from '@/lib/store';
+import { isAdminRequest, requireAdmin } from '@/lib/adminAuth';
 
 export const runtime = 'edge';
 
@@ -11,13 +12,23 @@ export async function GET(
   if (!product) {
     return NextResponse.json({ error: 'Product not found' }, { status: 404 });
   }
-  return NextResponse.json(product);
+  // পাবলিক পেলোড থেকে ক্রয়মূল্য (costPrice) বাদ — ক্রয়মূল্য/লাভ শুধু অ্যাডমিনই দেখবে
+  if (await isAdminRequest(request)) {
+    return NextResponse.json(product);
+  }
+  return NextResponse.json({
+    ...product,
+    costPrice: undefined as number | undefined,
+    variants: product.variants?.map(v => ({ ...v, costPrice: undefined as number | undefined })),
+  });
 }
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   try {
     const body = await request.json();
     const updated = await saveProduct({ ...body, id: params.id });
@@ -31,6 +42,8 @@ export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
 ) {
+  const denied = await requireAdmin(request);
+  if (denied) return denied;
   const success = await deleteProduct(params.id);
   if (success) {
     return NextResponse.json({ message: 'Product deleted' });

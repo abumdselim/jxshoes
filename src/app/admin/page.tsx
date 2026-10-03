@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { Product, Order, AIDailyBrief, AIInsights, FastMoverEntry } from '@/types';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { TrendChart, DonutChart, BarList } from '@/components/admin/Charts';
@@ -21,6 +22,7 @@ import {
   Lightbulb,
   Flame
 } from 'lucide-react';
+import { apiFetch } from '@/lib/offline/apiFetch';
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -46,7 +48,7 @@ export default function AdminDashboardPage() {
   const loadBrief = async (refresh = false) => {
     if (refresh) setBriefRefreshing(true);
     try {
-      const res = await fetch(`/api/ai?action=daily-brief${refresh ? '&refresh=1' : ''}`);
+      const res = await apiFetch(`/api/ai?action=daily-brief${refresh ? '&refresh=1' : ''}`);
       const data = await res.json().catch(() => null);
       if (data && data.configured === false) {
         setBriefState('unconfigured');
@@ -68,11 +70,12 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [prodRes, ordRes, setRes, fmRes] = await Promise.all([
-          fetch('/api/products'),
-          fetch('/api/orders'),
-          fetch('/api/settings'),
-          fetch('/api/analytics/fast-movers'),
+        const [prodRes, ordRes, setRes, fmRes, insRes] = await Promise.all([
+          apiFetch('/api/products'),
+          apiFetch('/api/orders'),
+          apiFetch('/api/settings'),
+          apiFetch('/api/analytics/fast-movers'),
+          apiFetch('/api/ai?action=insights-history'),
         ]);
         if (prodRes.ok) setProducts(await prodRes.json());
         if (ordRes.ok) setOrders(await ordRes.json());
@@ -81,6 +84,13 @@ export default function AdminDashboardPage() {
           setOwnerName(s?.ownerName || '');
         }
         if (fmRes.ok) setFastMovers(await fmRes.json());
+        // শেষ সংরক্ষিত ইনসাইট — আবার খুললেই দেখা যায়, প্রতিবার রিজেনারেট লাগে না
+        if (insRes.ok) {
+          const insData = await insRes.json().catch(() => null);
+          if (Array.isArray(insData?.insights) && insData.insights.length > 0) {
+            setInsights(insData.insights[0]);
+          }
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -95,7 +105,7 @@ export default function AdminDashboardPage() {
     setInsightsLoading(true);
     setInsightsError(null);
     try {
-      const res = await fetch('/api/ai', {
+      const res = await apiFetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'insights' }),
@@ -201,7 +211,7 @@ export default function AdminDashboardPage() {
 
   const handleQuickStatusChange = async (orderId: string, newStatus: Order['status']) => {
     try {
-      const res = await fetch(`/api/orders/${orderId}`, {
+      const res = await apiFetch(`/api/orders/${orderId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -636,11 +646,28 @@ export default function AdminDashboardPage() {
                     📦 রিস্টক প্রয়োজন
                   </div>
                   <ul className="space-y-2">
-                    {insights.restockNeeds.map((r, i) => (
-                      <li key={i} className="text-xs text-slate-700">
-                        <span className="font-bold text-slate-900">{r.name}</span> — {r.suggestion}
-                      </li>
-                    ))}
+                    {insights.restockNeeds.map((r, i) => {
+                      // পরামর্শের নাম থেকে প্রোডাক্ট ম্যাচ — সরাসরি রিস্টক মোডালে নিয়ে যায়
+                      const match = products.find(
+                        p =>
+                          p.name === r.name ||
+                          r.name.toLowerCase().includes(p.name.toLowerCase()) ||
+                          p.name.toLowerCase().includes(r.name.toLowerCase())
+                      );
+                      return (
+                        <li key={i} className="text-xs text-slate-700">
+                          <span className="font-bold text-slate-900">{r.name}</span> — {r.suggestion}
+                          {match && (
+                            <Link
+                              href={`/admin/inventory?restock=${encodeURIComponent(match.id)}`}
+                              className="ml-2 inline-block text-[10px] font-bold text-amber-700 hover:text-amber-900 underline"
+                            >
+                              রিস্টক করুন →
+                            </Link>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
               )}
