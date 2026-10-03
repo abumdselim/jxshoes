@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { runDailyWatchers } from '@/lib/watchers';
 import { getDailyBrief } from '@/lib/store';
+import { getCfEnv } from '@/lib/cfEnv';
 
 export const runtime = 'edge';
 
@@ -12,7 +13,7 @@ export const runtime = 'edge';
  * সব সতর্কতা আইডি-কনভেনশনে ডিডুপ — দিনে একবারই আসে।
  */
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET || '';
+  const secret = getCfEnv().cronSecret;
   const provided = request.headers.get('x-cron-secret') || new URL(request.url).searchParams.get('secret') || '';
   if (!secret || provided !== secret) {
     return NextResponse.json({ error: 'অননুমোদিত' }, { status: 401 });
