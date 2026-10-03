@@ -626,7 +626,7 @@ export default function Landing() {
       <nav className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <img src="/shopkeeper-logo.png" alt="Shopkeeper" className="h-8 w-auto" style={{ mixBlendMode: 'screen' }} />
           </div>
           <div className="hidden sm:flex items-center gap-6 text-xs font-bold text-slate-300">
@@ -937,7 +937,7 @@ export default function Landing() {
       <footer className="bg-slate-950 border-t border-white/10 text-slate-400">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
           <div>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <img src="/shopkeeper-logo.png" alt="Shopkeeper" className="h-8 w-auto" style={{ mixBlendMode: 'screen' }} />
             <p className="mt-4 text-xs leading-relaxed max-w-sm">
               দোকানের সম্পূর্ণ ই-কমার্স ও ম্যানেজমেন্ট সিস্টেম — অর্ডার, ইনভেন্টরি, বাকির খাতা,

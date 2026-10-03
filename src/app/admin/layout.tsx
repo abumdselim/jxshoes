@@ -94,7 +94,7 @@ export default function AdminLayout({
           {/* লোগো — হেডারের একদম মাঝখানে; ক্লিক করলে ড্যাশবোর্ডে ফেরে */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center">
             <a href="/admin" aria-label="Shopkeeper হোম">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <img
                 src="/shopkeeper-logo-orange.png"
                 alt="Shopkeeper"

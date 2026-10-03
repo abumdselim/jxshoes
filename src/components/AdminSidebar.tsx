@@ -194,7 +194,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
         <div className="p-5 pb-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center justify-between gap-2">
             <a href="/admin" aria-label="Shopkeeper হোম" className="flex-1 min-w-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <img
                 src="/shopkeeper-logo.png"
                 alt="Shopkeeper"

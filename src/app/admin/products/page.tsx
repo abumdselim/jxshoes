@@ -786,7 +786,7 @@ export default function AdminProductsPage() {
                         key={idx}
                         className="relative aspect-square rounded-md overflow-hidden border border-slate-200 group bg-slate-50"
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        { }
                         <img src={u} alt={`ছবি ${idx + 1}`} className="w-full h-full object-cover" />
                         {idx === 0 && (
                           <span className="absolute top-1.5 left-1.5 bg-orange-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">

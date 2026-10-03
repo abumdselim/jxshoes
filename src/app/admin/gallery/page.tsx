@@ -359,7 +359,7 @@ export default function AdminGalleryPage() {
             {library.map((url, i) => (
               <div key={url} className="bg-white rounded-md border border-amber-200 overflow-hidden group">
                 <div className="relative aspect-square bg-slate-50">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  { }
                   <img src={url} alt={`নতুন ছবি ${i + 1}`} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-slate-900/55 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                     <button
@@ -412,7 +412,7 @@ export default function AdminGalleryPage() {
               className="bg-white rounded-md border border-slate-200/80 overflow-hidden group"
             >
               <div className="relative aspect-square bg-slate-50">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                { }
                 <img src={it.url} alt={it.productName} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-slate-900/55 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <button

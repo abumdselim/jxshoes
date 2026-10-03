@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Loader2, Lock } from 'lucide-react';
 
@@ -46,7 +47,7 @@ export default function LoginPage() {
         <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl shadow-black/40 p-7 sm:p-8">
           {/* লোগো */}
           <div className="flex flex-col items-center gap-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <img
               src="/shopkeeper-logo.png"
               alt="Shopkeeper"
@@ -119,9 +120,9 @@ export default function LoginPage() {
 
         {/* ফুটার লিংক */}
         <div className="mt-6 flex items-center justify-center gap-4 text-xs text-slate-500">
-          <a href="/" className="hover:text-white transition-colors">
+          <Link href="/" className="hover:text-white transition-colors">
             ← হোম
-          </a>
+          </Link>
           <span className="text-slate-700">|</span>
           <a href="/shop" className="hover:text-white transition-colors">
             ডেমো শপ
