@@ -4,14 +4,16 @@
  * চালাতে: npx playwright install chromium && npm run e2e
  */
 import { test, expect } from '@playwright/test';
+import { readLocalAdminPassword } from './helpers';
 
-const ADMIN_PASSWORD = 'test-pass-123';
+const ADMIN_PASSWORD = readLocalAdminPassword();
 
 test('লগইন → অ্যাডমিন ড্যাশবোর্ড রেন্ডার + sk_admin কুকি', async ({ page, context }) => {
   await page.goto('/login');
   await page.fill('input[type="password"]', ADMIN_PASSWORD);
   await page.keyboard.press('Enter');
-  await page.waitForURL(/\/admin/, { timeout: 30_000 });
+  // dev-মোডে /admin প্রথমবার কম্পাইল + ড্যাশবোর্ড ডেটা — বড় টাইমআউট
+  await page.waitForURL(/\/admin/, { timeout: 90_000 });
   const cookies = await context.cookies();
   expect(cookies.some(c => c.name === 'sk_admin')).toBe(true);
   await expect(page.locator('body')).toContainText(/ড্যাশবোর্ড|স্বাগতম|আজকের/, { timeout: 30_000 });
