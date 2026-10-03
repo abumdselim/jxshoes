@@ -4,13 +4,29 @@
  * টেনে মিররকে চূড়ান্ত সত্যের সাথে মিলিয়ে দেয়।
  * রিপ্লে সরাসরি fetch দিয়ে — apiFetch দিয়ে নয় (দুবার কিউ এড়াতে)।
  */
-import { outboxGetAll, outboxDelete, outboxPut, OutboxOp } from './db';
+import { outboxGetAll, outboxDelete, outboxPut, kvGet, kvSet, OutboxOp } from './db';
 import { pullSnapshot, loadMeta, loadMirror, saveReportsCache, saveBriefCache, saveMediaCache } from './snapshot';
 import type { StoredReport, AIDailyBrief } from '@/types';
 
 /** navigator.onLine === false হলে নিশ্চিত অফলাইন (apiFetch থেকে আলাদা — সাইকেল এড়াতে) */
 function isOffline(): boolean {
   return typeof navigator !== 'undefined' && navigator.onLine === false;
+}
+
+/**
+ * লোকাল-আইডি → সার্ভার-আইডি ম্যাপ (রাউন্ড-জুড়ে IDB-তে থাকে)।
+ * অফলাইনে তৈরি কাস্টমার/প্রোডাক্ট/অর্ডারের রেফারেন্স রিপ্লে-র সময়
+ * স্বয়ংক্রিয়ভাবে সার্ভার-আইডিতে রূপান্তর হয় — নইলে dependent অপ 404 খায়।
+ */
+const IDMAP_KEY = 'idMap';
+
+async function loadIdMap(): Promise<Map<string, string>> {
+  const stored = await kvGet<[string, string][]>(IDMAP_KEY);
+  return new Map(stored || []);
+}
+
+async function saveIdMap(map: Map<string, string>): Promise<void> {
+  await kvSet(IDMAP_KEY, Array.from(map));
 }
 
 let syncing = false;
@@ -102,26 +118,63 @@ async function runSyncRound(force: boolean): Promise<SyncResult> {
     let newlyFailed = 0;
 
     if (pending.length > 0) {
+      const idMap = await loadIdMap();
+      const remap = (text: string) => {
+        let out = text;
+        for (const [k, v] of idMap) out = out.split(k).join(v);
+        return out;
+      };
+
       for (const op of pending) {
+        // লোকাল-আইডি → সার্ভার-আইডি রূপান্তর (URL ও বডি দুই জায়গায়)
+        const url = remap(op.url);
+        const bodyStr = op.body !== undefined ? remap(JSON.stringify(op.body)) : undefined;
         try {
-          const res = await fetch(op.url, {
+          const res = await fetch(url, {
             method: op.method,
             headers: { 'Content-Type': 'application/json' },
-            body: op.body !== undefined ? JSON.stringify(op.body) : undefined,
+            body: bodyStr,
           });
           if (res.ok) {
+            // তৈরি হওয়া এন্টিটির server-id ম্যাপে রাখা — পরের অপগুলোর রেফারেন্স ঠিক হয়
+            if (op.ref) {
+              const json = (await res.json().catch(() => null)) as Record<string, unknown> | null;
+              if (json && typeof json === 'object') {
+                const nested = ['product', 'order', 'customer', 'expense', 'coupon'] as const;
+                let serverId: unknown = json.id;
+                for (const key of nested) {
+                  if (serverId === undefined && json[key] && typeof json[key] === 'object') {
+                    serverId = (json[key] as Record<string, unknown>).id;
+                  }
+                }
+                if (serverId) {
+                  // কী = খালি লোকাল আইডি — আইডিতেই টাইপ-প্রিফিক্স এমবেডেড (cust-off-/prod-off-…)।
+                  // টাইপ-প্রিফিক্সসহ কী দিলে remap-এর সাধারণ স্ট্রিং-ম্যাচ কখনোই খুঁজে পেত না।
+                  idMap.set(op.ref.id, String(serverId));
+                  await saveIdMap(idMap);
+                }
+              }
+            }
             await outboxDelete(op.id);
             replayed++;
+          } else if (res.status === 429) {
+            // রেট-লিমিট — এই রাউন্ড থামাও (পরের রাউন্ডে আবার)
+            break;
           } else if (res.status >= 400 && res.status < 500) {
             // সার্ভার চিরকালের জন্য প্রত্যাখ্যান করল — failed হিসেবে দেখাও, ডেটা হারাবে না
-            op.status = 'failed';
             op.attempts++;
             op.lastError = `সার্ভার বলছে: ${res.status}`;
+            op.status = 'failed';
             await outboxPut(op);
             newlyFailed++;
           } else {
-            // 5xx — সার্ভার সমস্যা; এই রাউন্ড থামাও
-            break;
+            // 5xx — এই অপ পরে আবার চেষ্টা হবে; রাউন্ড চলতে থাকে (বাকি অপ আটকে পড়বে না)
+            op.attempts++;
+            if (op.attempts >= 8) {
+              op.status = 'failed';
+              op.lastError = `সার্ভার বারবার ব্যর্থ (${res.status})`;
+            }
+            await outboxPut(op);
           }
         } catch {
           // নেটওয়ার্ক এখনো ভাঙা — পুরো রাউন্ড বাতিল

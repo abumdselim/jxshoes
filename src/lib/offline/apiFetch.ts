@@ -42,7 +42,13 @@ function opLabel(method: string, path: string, body?: Record<string, unknown>): 
   return `${method} ${path.replace('/api/', '')}`;
 }
 
-async function enqueueOp(method: string, path: string, body: unknown, label: string): Promise<void> {
+async function enqueueOp(
+  method: string,
+  path: string,
+  body: unknown,
+  label: string,
+  ref?: { type: 'product' | 'category' | 'customer' | 'expense' | 'coupon' | 'order'; id: string }
+): Promise<void> {
   const op: OutboxOp = {
     id: localId('op'),
     method,
@@ -52,6 +58,7 @@ async function enqueueOp(method: string, path: string, body: unknown, label: str
     attempts: 0,
     status: 'pending',
     label,
+    ref,
   };
   await outboxPut(op);
   broadcast({ type: 'ops-changed' });
@@ -200,9 +207,10 @@ export async function apiFetch(path: string, init?: RequestInit): Promise<Respon
     const working = cloneMirror(mirror);
     const result = await applyMutation(working, method, path, body);
     if (result) {
-      if (result.status < 400) {
+      if (result.status < 400 && !result.noQueue) {
         await persistMirror(working);
-        await enqueueOp(method, path, body, result.label || opLabel(method, path, body));
+        // রিপ্লে-বডি থাকলে সেটাই কিউ হবে (আংশিক এডিট সার্ভারে ভাঙে)
+        await enqueueOp(method, path, result.replayBody ?? body, result.label || opLabel(method, path, body), result.ref);
       }
       return jsonResponse(result.payload, result.status, true);
     }
@@ -220,4 +228,10 @@ function fileToDataUri(file: File | Blob): Promise<string> {
     reader.onerror = () => reject(new Error('read failed'));
     reader.readAsDataURL(file);
   });
+}
+
+// ডেভ-টেস্টিং হুক — প্রোডাকশনে অনুপস্থিত; ইন্টিগ্রেশন-টেস্টে আসল apiFetch কোডপথ
+// (কিউ/মিরর/রিপ্লে) চালাতে ব্যবহৃত
+if (process.env.NODE_ENV !== 'production' && typeof window !== 'undefined') {
+  (window as unknown as Record<string, unknown>).__apiFetch = apiFetch;
 }

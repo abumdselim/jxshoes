@@ -118,6 +118,8 @@ export interface OutboxOp {
   status: 'pending' | 'failed';
   /** সিঙ্ক সেন্টারে দেখানোর বাংলা লেবেল, যেমন "নতুন খরচ: বিদ্যুৎ বিল" */
   label: string;
+  /** এই অপ যে লোকাল এন্টিটি তৈরি করেছে — রিপ্লে-র পরে server-id ম্যাপিংয়ে ব্যবহৃত */
+  ref?: { type: 'product' | 'category' | 'customer' | 'expense' | 'coupon' | 'order'; id: string };
 }
 
 /** কলিশন-সেফ লোকাল আইডি — সার্ভারের Date.now() আইডির সাথে ধরা খাবে না */

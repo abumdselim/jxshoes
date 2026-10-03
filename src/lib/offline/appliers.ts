@@ -37,6 +37,12 @@ export interface LocalResult {
   status: number;
   payload: unknown;
   label: string;
+  /** রিপ্লে-র জন্য সম্পূর্ণ বডি (আংশিক এডিট সার্ভারে ভাঙে — যেমন PUT products {price}) */
+  replayBody?: unknown;
+  /** রিড-অনলি কম্পিউট (validate) — কিউ করা হবে না */
+  noQueue?: boolean;
+  /** এই অপ যে লোকাল এন্টিটি তৈরি করেছে — সিঙ্কে server-id ম্যাপিং */
+  ref?: { type: 'product' | 'category' | 'customer' | 'expense' | 'coupon' | 'order'; id: string };
 }
 
 const nowIso = () => new Date().toISOString();
@@ -109,7 +115,7 @@ export async function applyMutation(
     const full = buildProduct(data, body || {}, undefined);
     data.products.unshift(full);
     pushRestockMovement(data, full, 'নতুন প্রোডাক্ট হিসেবে প্রাথমিক স্টক এন্ট্রি');
-    return { status: 201, payload: full, label: `নতুন প্রোডাক্ট: ${full.name}` };
+    return { status: 201, payload: full, label: `নতুন প্রোডাক্ট: ${full.name}`, ref: { type: 'product', id: full.id } };
   }
   const putProduct = m.match(/^PUT \/api\/products\/([^/?]+)$/);
   if (putProduct) {
@@ -118,7 +124,7 @@ export async function applyMutation(
     const idx = data.products.findIndex(p => p.id === id);
     if (idx < 0) return { status: 404, payload: { error: 'Product not found' }, label: `প্রোডাক্ট এডিট (পাওয়া যায়নি)` };
     data.products[idx] = { ...data.products[idx], ...full };
-    return { status: 200, payload: data.products[idx], label: `প্রোডাক্ট আপডেট: ${full.name}` };
+    return { status: 200, payload: data.products[idx], label: `প্রোডাক্ট আপডেট: ${full.name}`, replayBody: data.products[idx] };
   }
   const delProduct = m.match(/^DELETE \/api\/products\/([^/?]+)$/);
   if (delProduct) {
@@ -187,7 +193,7 @@ export async function applyMutation(
       title: `নতুন অর্ডার: ${orderNumber}`,
       message: `${order.customerName} • ${order.items.length}টি আইটেম • ৳${total.toLocaleString('en-BD')} • ${order.paymentMethod}`,
     });
-    return { status: 201, payload: order, label: `নতুন অর্ডার: ${orderNumber} (৳${total})` };
+    return { status: 201, payload: order, label: `নতুন অর্ডার: ${orderNumber} (৳${total})`, ref: { type: 'order', id: order.id } };
   }
   const patchOrder = m.match(/^PATCH \/api\/orders\/([^/?]+)$/);
   if (patchOrder) {
@@ -287,7 +293,7 @@ export async function applyMutation(
       title: `নতুন অর্ডার: ${order.orderNumber}`,
       message: `${order.customerName} • ${order.items.length}টি আইটেম • ৳${subtotal.toLocaleString('en-BD')} • Cash on Delivery (দোকানে বিক্রি)`,
     });
-    return { status: 200, payload: order, label: `POS বিক্রি: ${order.orderNumber} (৳${subtotal})` };
+    return { status: 200, payload: order, label: `POS বিক্রি: ${order.orderNumber} (৳${subtotal})`, ref: { type: 'order', id: order.id } };
   }
 
   // ---------- CUSTOMERS ----------
@@ -318,7 +324,7 @@ export async function applyMutation(
       createdAt: nowIso(),
     };
     data.customers.unshift(cust);
-    return { status: 201, payload: cust, label: `নতুন কাস্টমার: ${cust.name}` };
+    return { status: 201, payload: cust, label: `নতুন কাস্টমার: ${cust.name}`, ref: { type: 'customer', id: cust.id } };
   }
   if (m === 'DELETE /api/customers') {
     const id = new URL(path).searchParams.get('id') || (body?.id as string) || '';
@@ -361,7 +367,7 @@ export async function applyMutation(
       createdAt: nowIso(),
     };
     data.expenses.unshift(exp);
-    return { status: 201, payload: exp, label: `খরচ যোগ: ${exp.category} — ৳${exp.amount}` };
+    return { status: 201, payload: exp, label: `খরচ যোগ: ${exp.category} — ৳${exp.amount}`, ref: { type: 'expense', id: exp.id } };
   }
   if (m === 'DELETE /api/expenses') {
     const id = new URL(path).searchParams.get('id') || (body?.id as string) || '';
@@ -388,7 +394,7 @@ export async function applyMutation(
     const idx = data.categories.findIndex(c => c.id === cat.id);
     if (idx >= 0) data.categories[idx] = cat;
     else data.categories.push(cat);
-    return { status: 201, payload: cat, label: `ক্যাটাগরি সংরক্ষণ: ${cat.name}` };
+    return { status: 201, payload: cat, label: `ক্যাটাগরি সংরক্ষণ: ${cat.name}`, ref: { type: 'category', id: cat.id } };
   }
   const delCategory = m.match(/^DELETE \/api\/categories\/([^/?]+)$/);
   if (delCategory) {
@@ -416,7 +422,7 @@ export async function applyMutation(
     const idx = data.coupons.findIndex(c => c.id === coup.id);
     if (idx >= 0) data.coupons[idx] = coup;
     else data.coupons.unshift(coup);
-    return { status: 201, payload: coup, label: `কুপন সংরক্ষণ: ${coup.code}` };
+    return { status: 201, payload: coup, label: `কুপন সংরক্ষণ: ${coup.code}`, ref: { type: 'coupon', id: coup.id } };
   }
   if (m === 'DELETE /api/coupons') {
     const id = new URL(path).searchParams.get('id') || (body?.id as string) || '';
@@ -430,12 +436,12 @@ export async function applyMutation(
     const code = String(body?.code || '').toUpperCase().trim();
     const orderTotal = Number(body?.orderTotal) || 0;
     const match = data.coupons.find(c => c.code === code && c.active);
-    if (!match) return { status: 200, payload: { valid: false, discount: 0, message: 'কুপন কোডটি সঠিক নয় বা মেয়াদ উত্তীর্ণ।' }, label: '' };
+    if (!match) return { status: 200, payload: { valid: false, discount: 0, message: 'কুপন কোডটি সঠিক নয় বা মেয়াদ উত্তীর্ণ।' }, label: '', noQueue: true };
     if (orderTotal < match.minOrder) {
-      return { status: 200, payload: { valid: false, discount: 0, message: `এই কুপন ব্যবহারের জন্য ন্যূনতম ৳${match.minOrder} টাকার অর্ডার প্রয়োজন।` }, label: '' };
+      return { status: 200, payload: { valid: false, discount: 0, message: `এই কুপন ব্যবহারের জন্য ন্যূনতম ৳${match.minOrder} টাকার অর্ডার প্রয়োজন।` }, label: '', noQueue: true };
     }
     const discount = match.discountType === 'percentage' ? Math.round((orderTotal * match.value) / 100) : match.value;
-    return { status: 200, payload: { valid: true, discount, message: `অভিনন্দন! ৳${discount} টাকা ছাড় প্রযোজ্য হয়েছে।` }, label: '' };
+    return { status: 200, payload: { valid: true, discount, message: `অভিনন্দন! ৳${discount} টাকা ছাড় প্রযোজ্য হয়েছে।` }, label: '', noQueue: true };
   }
 
   // ---------- SETTINGS & MARKETING ----------
