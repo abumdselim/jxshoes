@@ -90,12 +90,12 @@ export default function MobileBottomNav() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="যেমন: লেদার লোফার, স্নিকার্স বা হ্যান্ডব্যাগ..."
-                className="w-full bg-slate-100 text-slate-900 text-sm rounded-2xl pl-11 pr-24 py-3.5 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white border border-transparent focus:border-orange-500 transition-all font-sans"
+                className="w-full bg-slate-100 text-slate-900 text-sm rounded-2xl pl-11 pr-24 py-3.5 focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:bg-white border border-transparent focus:border-orange-500 transition-all font-sans"
               />
               <Search className="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5" />
               <button
                 type="submit"
-                className="absolute right-2 top-2 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors"
+                className="absolute right-2 top-2 px-3.5 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold rounded-xl shadow-2xs transition-colors"
               >
                 খুঁজুন
               </button>
@@ -174,7 +174,7 @@ export default function MobileBottomNav() {
             <div className="relative">
               <ShoppingCart className="w-5 h-5 text-slate-600 group-hover:text-orange-600 transition-colors" />
               {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 bg-orange-600 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs animate-bounce">
+                <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 bg-orange-600 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-2xs animate-bounce">
                   {totalItems}
                 </span>
               )}

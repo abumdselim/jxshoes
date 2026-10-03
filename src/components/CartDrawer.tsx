@@ -14,7 +14,7 @@ export default function CartDrawer() {
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
         onClick={() => setIsCartOpen(false)}
       />
 
@@ -65,7 +65,7 @@ export default function CartDrawer() {
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-20 h-20 rounded-xl object-cover border border-slate-200 flex-shrink-0 bg-white"
+                    className="w-20 h-20 rounded-xl object-cover border border-slate-200 shrink-0 bg-white"
                   />
                   <div className="flex-1 flex flex-col justify-between">
                     <div>

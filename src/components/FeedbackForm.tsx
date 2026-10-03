@@ -50,7 +50,7 @@ export default function FeedbackForm() {
   };
 
   const inputCls =
-    'w-full bg-slate-800/80 border border-slate-700 rounded-md px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-orange-500';
+    'w-full bg-slate-800/80 border border-slate-700 rounded-md px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-hidden focus:border-orange-500';
 
   return (
     <form onSubmit={submit} className="space-y-3">

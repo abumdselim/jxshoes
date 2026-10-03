@@ -621,7 +621,7 @@ export default function AdminAiFab() {
       >
         <AnimatedBotIcon
           strokeWidth={2.4}
-          className={`flex-shrink-0 transition-all ${introExpanded ? 'w-6 h-6' : 'w-8 h-8'}`}
+          className={`shrink-0 transition-all ${introExpanded ? 'w-6 h-6' : 'w-8 h-8'}`}
         />
         <span
           className={`text-sm font-bold whitespace-nowrap overflow-hidden transition-all duration-500 ${
@@ -636,7 +636,7 @@ export default function AdminAiFab() {
       {open && (
         <div className="fixed bottom-24 right-4 sm:right-8 z-40 w-[calc(100vw-2rem)] sm:w-96 max-w-md flex flex-col rounded-md bg-white border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4">
           {/* হেডার */}
-          <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between flex-shrink-0">
+          <div className="bg-slate-900 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-md bg-orange-600 flex items-center justify-center">
                 <Bot className="w-4 h-4" />
@@ -755,13 +755,13 @@ export default function AdminAiFab() {
           </div>
 
           {/* ইনপুট */}
-          <div className="p-3 border-t border-slate-100 bg-white flex items-center gap-2 flex-shrink-0">
+          <div className="p-3 border-t border-slate-100 bg-white flex items-center gap-2 shrink-0">
             <button
               onClick={toggleRecording}
               disabled={busy || streaming || voiceBusy}
               title={recording ? 'রেকর্ডিং শেষ করুন' : 'মুখে বলুন — ভয়েস কমান্ড'}
               aria-label="ভয়েস কমান্ড"
-              className={`p-2.5 rounded-md transition-colors flex-shrink-0 ${
+              className={`p-2.5 rounded-md transition-colors shrink-0 ${
                 recording
                   ? 'bg-red-600 text-white animate-pulse'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
@@ -780,7 +780,7 @@ export default function AdminAiFab() {
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
               placeholder={recording ? '🎙️ শুনছি… কথা বলুন' : 'যেমন: JX-SH-101 42 2টি'}
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500"
               disabled={busy || streaming || recording}
             />
             <button
@@ -801,7 +801,7 @@ export default function AdminAiFab() {
 
       {/* সেল কনফার্মেশন পপআপ */}
       {saleDraft && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-md w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
             {/* হেডার */}
             <div className="bg-orange-600 text-white px-6 py-4 flex items-center justify-between">
@@ -824,7 +824,7 @@ export default function AdminAiFab() {
             <div className="p-6 space-y-4">
               {saleDraft.clarification && saleDraft.confidence !== 'high' && (
                 <div className="flex gap-2 bg-amber-50 border border-amber-200 rounded-md p-3 text-xs text-amber-800">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
                   <span>{saleDraft.clarification}</span>
                 </div>
               )}
@@ -862,7 +862,7 @@ export default function AdminAiFab() {
                     onChange={e =>
                       setSaleDraft({ ...saleDraft, size: e.target.value })
                     }
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                   >
                     {saleDraft.product.sizes.map(s => (
                       <option key={s} value={s}>
@@ -880,7 +880,7 @@ export default function AdminAiFab() {
                     onChange={e =>
                       setSaleDraft({ ...saleDraft, color: e.target.value })
                     }
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                   >
                     {saleDraft.product.colors.map(c => (
                       <option key={c.name} value={c.name}>
@@ -978,13 +978,13 @@ export default function AdminAiFab() {
                       value={saleDraft.customerPhone}
                       onChange={e => setSaleDraft({ ...saleDraft, customerPhone: e.target.value })}
                       placeholder="কাস্টমারের ফোন (বাধ্যতামূলক) — খাতা এই নম্বরে খুলবে"
-                      className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
+                      className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-red-400"
                     />
                     <input
                       value={saleDraft.customerName}
                       onChange={e => setSaleDraft({ ...saleDraft, customerName: e.target.value })}
                       placeholder="কাস্টমারের নাম"
-                      className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-red-400"
+                      className="w-full bg-white border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-red-400"
                     />
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-bold text-slate-600 whitespace-nowrap">আদায় ৳</span>
@@ -993,7 +993,7 @@ export default function AdminAiFab() {
                         value={saleDraft.paidAmount}
                         onChange={e => setSaleDraft({ ...saleDraft, paidAmount: e.target.value })}
                         placeholder="0"
-                        className="w-24 bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-red-400"
+                        className="w-24 bg-white border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-red-400"
                       />
                       <span className="text-[11px] font-bold text-red-600 ml-auto">
                         বাকি থাকবে: ৳{draftDue.toLocaleString('en-BD')}
@@ -1041,7 +1041,7 @@ export default function AdminAiFab() {
 
       {/* রিস্টক কনফার্মেশন পপআপ */}
       {restockDraft && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-md w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95">
             <div className="bg-emerald-600 text-white px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -1091,7 +1091,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={restockDraft.unitCost}
                     onChange={e => setRestockDraft({ ...restockDraft, unitCost: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
                 <div>
@@ -1100,7 +1100,7 @@ export default function AdminAiFab() {
                     value={restockDraft.supplierOrInvoice}
                     onChange={e => setRestockDraft({ ...restockDraft, supplierOrInvoice: e.target.value })}
                     placeholder="যেমন: চালান #CH-100"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
               </div>
@@ -1129,9 +1129,9 @@ export default function AdminAiFab() {
 
       {/* নতুন প্রোডাক্ট তৈরির পপআপ */}
       {newProductDraft && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-md w-full max-w-md overflow-hidden max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95">
-            <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2.5">
                 <Sparkles className="w-5 h-5" />
                 <div>
@@ -1150,7 +1150,7 @@ export default function AdminAiFab() {
                 <input
                   value={newProductDraft.name}
                   onChange={e => setNewProductDraft({ ...newProductDraft, name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -1160,7 +1160,7 @@ export default function AdminAiFab() {
                   <select
                     value={newProductDraft.category}
                     onChange={e => setNewProductDraft({ ...newProductDraft, category: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="shoes">জুতা (Shoes)</option>
                     <option value="bags">ব্যাগ (Bags)</option>
@@ -1173,7 +1173,7 @@ export default function AdminAiFab() {
                     value={newProductDraft.subCategory}
                     onChange={e => setNewProductDraft({ ...newProductDraft, subCategory: e.target.value })}
                     placeholder="যেমন: Sneakers"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -1185,7 +1185,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={newProductDraft.price}
                     onChange={e => setNewProductDraft({ ...newProductDraft, price: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -1194,7 +1194,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={newProductDraft.costPrice}
                     onChange={e => setNewProductDraft({ ...newProductDraft, costPrice: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -1205,7 +1205,7 @@ export default function AdminAiFab() {
                   <input
                     value={newProductDraft.sizes}
                     onChange={e => setNewProductDraft({ ...newProductDraft, sizes: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -1213,7 +1213,7 @@ export default function AdminAiFab() {
                   <input
                     value={newProductDraft.colors}
                     onChange={e => setNewProductDraft({ ...newProductDraft, colors: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -1225,7 +1225,7 @@ export default function AdminAiFab() {
                     type="number"
                     value={newProductDraft.stockCount}
                     onChange={e => setNewProductDraft({ ...newProductDraft, stockCount: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
@@ -1233,7 +1233,7 @@ export default function AdminAiFab() {
                   <input
                     value={newProductDraft.supplier}
                     onChange={e => setNewProductDraft({ ...newProductDraft, supplier: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
@@ -1263,7 +1263,7 @@ export default function AdminAiFab() {
       {/* টোস্ট */}
       {toast && (
         <div
-          className={`fixed top-20 right-4 z-[70] max-w-sm rounded-md px-5 py-3.5 text-xs font-bold animate-in fade-in slide-in-from-top-4 ${
+          className={`fixed top-20 right-4 z-70 max-w-sm rounded-md px-5 py-3.5 text-xs font-bold animate-in fade-in slide-in-from-top-4 ${
             toast.error ? 'bg-red-600 text-white' : 'bg-emerald-600 text-white'
           }`}
         >

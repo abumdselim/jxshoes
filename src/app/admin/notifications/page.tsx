@@ -185,7 +185,7 @@ export default function AdminNotificationsPage() {
                 }`}
               >
                 <div
-                  className={`w-10 h-10 rounded-md border flex items-center justify-center flex-shrink-0 ${meta.cls}`}
+                  className={`w-10 h-10 rounded-md border flex items-center justify-center shrink-0 ${meta.cls}`}
                 >
                   <Icon className="w-5 h-5" />
                 </div>
@@ -196,7 +196,7 @@ export default function AdminNotificationsPage() {
                       {meta.label}
                     </span>
                     {!n.read && (
-                      <span className="w-2 h-2 rounded-full bg-orange-500 flex-shrink-0" />
+                      <span className="w-2 h-2 rounded-full bg-orange-500 shrink-0" />
                     )}
                     <span className="text-[10px] text-slate-400 font-semibold ml-auto">
                       {fmtTime(n.createdAt)}
@@ -205,7 +205,7 @@ export default function AdminNotificationsPage() {
                   <div className={`text-sm mt-1.5 ${n.read ? 'text-slate-600' : 'text-slate-900 font-bold'}`}>
                     {n.title}
                   </div>
-                  <div className="text-xs text-slate-500 mt-1 leading-relaxed break-words">{n.message}</div>
+                  <div className="text-xs text-slate-500 mt-1 leading-relaxed wrap-break-word">{n.message}</div>
 
                   <div className="flex items-center gap-3 mt-2.5">
                     {n.type === 'order' && (

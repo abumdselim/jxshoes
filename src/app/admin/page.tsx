@@ -304,7 +304,7 @@ export default function AdminDashboardPage() {
                     <ul className="space-y-1.5">
                       {brief.advice.map((a, i) => (
                         <li key={i} className="text-xs text-slate-700 flex gap-2">
-                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                           <span>{a}</span>
                         </li>
                       ))}
@@ -320,7 +320,7 @@ export default function AdminDashboardPage() {
                     <ul className="space-y-1.5">
                       {brief.alerts.map((a, i) => (
                         <li key={i} className="text-xs text-slate-700 flex gap-2">
-                          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0 mt-1.5" />
+                          <span className="w-1.5 h-1.5 bg-amber-500 rounded-full shrink-0 mt-1.5" />
                           <span>{a}</span>
                         </li>
                       ))}
@@ -514,7 +514,7 @@ export default function AdminDashboardPage() {
                 <div key={m.productId} className="flex items-center gap-3.5 px-5 sm:px-6 py-3.5 hover:bg-slate-50/60 transition-colors">
                   {/* র‍্যাংক */}
                   <div
-                    className={`w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold text-white flex-shrink-0 ${
+                    className={`w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold text-white shrink-0 ${
                       i < 3 ? rankStyles[i] : 'bg-slate-200 text-slate-600'
                     }`}
                   >
@@ -522,9 +522,9 @@ export default function AdminDashboardPage() {
                   </div>
 
                   {m.image ? (
-                    <img src={m.image} alt="" className="w-11 h-11 rounded-md object-cover border border-slate-200 flex-shrink-0" />
+                    <img src={m.image} alt="" className="w-11 h-11 rounded-md object-cover border border-slate-200 shrink-0" />
                   ) : (
-                    <div className="w-11 h-11 rounded-md bg-slate-100 flex-shrink-0" />
+                    <div className="w-11 h-11 rounded-md bg-slate-100 shrink-0" />
                   )}
 
                   <div className="min-w-0 flex-1">
@@ -543,7 +543,7 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="text-right flex-shrink-0 hidden sm:block">
+                  <div className="text-right shrink-0 hidden sm:block">
                     {m.soldOut ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 text-red-700 font-bold text-[11px] border border-red-200">
                         <AlertTriangle className="w-3 h-3" /> দ্রুত রিস্টক
@@ -696,7 +696,7 @@ export default function AdminDashboardPage() {
                 <ul className="space-y-2">
                   {insights.recommendations.map((r, i) => (
                     <li key={i} className="text-xs text-slate-200 flex gap-2">
-                      <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                       <span>{r}</span>
                     </li>
                   ))}
@@ -841,7 +841,7 @@ export default function AdminDashboardPage() {
                     <select
                       value={order.status}
                       onChange={(e) => handleQuickStatusChange(order.id, e.target.value as any)}
-                      className={`text-xs font-bold rounded-md px-2.5 py-1.5 border focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                      className={`text-xs font-bold rounded-md px-2.5 py-1.5 border focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
                         order.status === 'Pending'
                           ? 'bg-amber-50 text-amber-800 border-amber-200'
                           : order.status === 'Processing'

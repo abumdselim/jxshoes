@@ -26,7 +26,7 @@ export default function Footer() {
         {/* Value Proposition Badges */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 pb-10 sm:pb-12 border-b border-slate-800">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
               <Truck className="w-6 h-6" />
             </div>
             <div>
@@ -36,7 +36,7 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
               <RotateCcw className="w-6 h-6" />
             </div>
             <div>
@@ -46,7 +46,7 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
@@ -56,7 +56,7 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0">
               <PhoneCall className="w-6 h-6" />
             </div>
             <div>

@@ -59,7 +59,7 @@ export default function AdminLayout({
     <div className="fixed inset-0 bg-slate-200 text-slate-900 flex overflow-hidden">
 
       {/* Desktop Sidebar — always visible, never scrolls */}
-      <div className="hidden md:flex w-64 flex-shrink-0 h-full">
+      <div className="hidden md:flex w-64 shrink-0 h-full">
         <AdminSidebar />
       </div>
 
@@ -67,7 +67,7 @@ export default function AdminLayout({
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
             onClick={() => setMobileSidebarOpen(false)}
           />
           <div className="absolute left-0 top-0 bottom-0 w-72 max-w-[85%] shadow-2xl overflow-hidden animate-in slide-in-from-left duration-300 ease-out">
@@ -79,7 +79,7 @@ export default function AdminLayout({
       {/* Main Content — flex-1, only this column scrolls */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* মোবাইল-অনলি স্লিম বার — ডেস্কটপে প্রতিটা পেজের নিজের স্টিকি হেডলাইনই হেডার */}
-        <header className="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 h-14 px-4 flex items-center justify-between flex-shrink-0 relative">
+        <header className="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 h-14 px-4 flex items-center justify-between shrink-0 relative">
           <div className="flex items-center gap-3">
             {/* Mobile Hamburger */}
             <button
@@ -134,7 +134,7 @@ export default function AdminLayout({
               onChange={(e) => setHeaderQuery(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') goToSearch(); }}
               placeholder="প্রোডাক্ট খুঁজুন..."
-              className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500"
             />
             <button
               onClick={goToSearch}

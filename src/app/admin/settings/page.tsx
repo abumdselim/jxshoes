@@ -93,7 +93,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.storeName}
                 onChange={(e) => setSettings({ ...settings, storeName: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-hidden focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -105,7 +105,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.tagline}
                 onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -118,7 +118,7 @@ export default function AdminSettingsPage() {
                 value={settings.ownerName || ''}
                 onChange={(e) => setSettings({ ...settings, ownerName: e.target.value })}
                 placeholder="যেমন: রফিক ভাই"
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
               <p className="text-[10px] text-slate-400 mt-1">
                 AI অ্যাসিস্ট্যান্ট প্রতিদিন দিনের শুরুতে এই নাম ধরে স্বাগতম জানাবে।
@@ -133,7 +133,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.hotline}
                 onChange={(e) => setSettings({ ...settings, hotline: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -145,7 +145,7 @@ export default function AdminSettingsPage() {
                 type="email"
                 value={settings.email}
                 onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -157,7 +157,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.address}
                 onChange={(e) => setSettings({ ...settings, address: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>
@@ -179,7 +179,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.announcementText}
                 onChange={(e) => setSettings({ ...settings, announcementText: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -191,7 +191,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.announcementSecondary}
                 onChange={(e) => setSettings({ ...settings, announcementSecondary: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>
@@ -213,7 +213,7 @@ export default function AdminSettingsPage() {
                 type="number"
                 value={settings.insideDhakaFee}
                 onChange={(e) => setSettings({ ...settings, insideDhakaFee: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -225,7 +225,7 @@ export default function AdminSettingsPage() {
                 type="number"
                 value={settings.outsideDhakaFee}
                 onChange={(e) => setSettings({ ...settings, outsideDhakaFee: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-bold focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -237,7 +237,7 @@ export default function AdminSettingsPage() {
                 type="number"
                 value={settings.freeDeliveryAbove}
                 onChange={(e) => setSettings({ ...settings, freeDeliveryAbove: Number(e.target.value) })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>
@@ -259,7 +259,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.bkashNumber}
                 onChange={(e) => setSettings({ ...settings, bkashNumber: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
 
@@ -271,7 +271,7 @@ export default function AdminSettingsPage() {
                 type="text"
                 value={settings.nagadNumber}
                 onChange={(e) => setSettings({ ...settings, nagadNumber: e.target.value })}
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
             </div>
           </div>

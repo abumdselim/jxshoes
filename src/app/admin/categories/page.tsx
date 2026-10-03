@@ -170,7 +170,7 @@ export default function AdminCategoriesPage() {
                 <div className="flex items-center gap-3.5">
                   {/* মডার্ন আইকন টাইল — ছবির বদলে */}
                   <div
-                    className={`w-16 h-16 rounded-md ${solid} flex items-center justify-center flex-shrink-0`}
+                    className={`w-16 h-16 rounded-md ${solid} flex items-center justify-center shrink-0`}
                   >
                     <MdiIcon body={body} className="w-8 h-8 text-white" />
                   </div>
@@ -201,7 +201,7 @@ export default function AdminCategoriesPage() {
 
       {/* Add Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-md max-w-md w-full p-6 sm:p-8 border border-slate-200">
             <div className="flex items-center justify-between border-b pb-4 mb-5">
               <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
@@ -227,7 +227,7 @@ export default function AdminCategoriesPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="যেমন: স্যান্ডেল ও চটি (Sandals)"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-semibold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 font-semibold"
                 />
                 <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
                   <SlidersHorizontal className="w-3 h-3" />
@@ -242,7 +242,7 @@ export default function AdminCategoriesPage() {
                 <select
                   value={formData.parentType}
                   onChange={(e) => setFormData({ ...formData, parentType: e.target.value as any })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-bold"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-bold"
                 >
                   <option value="shoes">জুতা (Shoes)</option>
                   <option value="bags">ব্যাগ (Bags)</option>
@@ -259,7 +259,7 @@ export default function AdminCategoriesPage() {
                   value={formData.itemCountLabel}
                   onChange={(e) => setFormData({ ...formData, itemCountLabel: e.target.value })}
                   placeholder="যেমন: ৫+ কালার, নতুন কালেকশন"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -272,7 +272,7 @@ export default function AdminCategoriesPage() {
                   value={formData.image}
                   onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                   placeholder="https://... (খালি রাখলে ডিফল্ট ছবি বসবে)"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs font-mono focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
                 {formData.image.trim() && (
                   <div className="mt-2 flex items-center gap-2">

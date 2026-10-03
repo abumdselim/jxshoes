@@ -203,7 +203,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
 
       {generating && (
         <div className="bg-white rounded-md border border-slate-200 p-5 flex items-center gap-3 text-sm text-slate-600">
-          <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+          <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin shrink-0" />
           AI আপনার পুরো হিসাব মিলিয়ে রিপোর্ট লিখছে… প্রায় ২০-৩০ সেকেন্ড লাগতে পারে।
         </div>
       )}
@@ -313,7 +313,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
                       <ul className="mt-2.5 space-y-1.5">
                         {(sec.highlights || []).map((h, j) => (
                           <li key={j} className="text-xs text-teal-700 font-bold flex gap-2">
-                            <CheckCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
+                            <CheckCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                             {h}
                           </li>
                         ))}
@@ -331,7 +331,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
                     <ul className="space-y-2">
                       {selected.recommendations.map((r, i) => (
                         <li key={i} className="text-xs text-slate-200 flex gap-2">
-                          <span className="w-1.5 h-1.5 bg-orange-400 rounded-full flex-shrink-0 mt-1.5" />
+                          <span className="w-1.5 h-1.5 bg-orange-400 rounded-full shrink-0 mt-1.5" />
                           {r}
                         </li>
                       ))}
@@ -349,7 +349,7 @@ ${recs ? `<div class="recs"><h3>AI-এর পরামর্শ</h3><ul>${recs}<
                       value={emailTo}
                       onChange={e => setEmailTo(e.target.value)}
                       placeholder="prapok@example.com (সেটিংস থেকে ডিফল্ট)"
-                      className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                     />
                     <button
                       onClick={sendEmail}

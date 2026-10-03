@@ -16,14 +16,14 @@ export default function CartPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1">
         <h1 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200/80 text-orange-600 flex items-center justify-center shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200/80 text-orange-600 flex items-center justify-center shadow-2xs">
             <ShoppingCart className="w-6 h-6 text-orange-600" />
           </div>
           <span>আপনার কার্ট ({totalItems} টি পণ্য)</span>
         </h1>
 
         {cart.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-16 text-center shadow-sm">
+          <div className="bg-white rounded-3xl border border-slate-200 p-16 text-center shadow-xs">
             <div className="w-20 h-20 rounded-full bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center mx-auto mb-4">
               <ShoppingCart className="w-10 h-10 text-orange-600" />
             </div>
@@ -39,7 +39,7 @@ export default function CartPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* Items list */}
-            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm divide-y divide-slate-100">
+            <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-xs divide-y divide-slate-100">
               {cart.map((item) => (
                 <div
                   key={`${item.productId}-${item.selectedSize}-${item.selectedColor}`}
@@ -49,13 +49,13 @@ export default function CartPage() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-20 h-20 rounded-2xl object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
+                      className="w-20 h-20 rounded-2xl object-cover bg-slate-100 border border-slate-200 shrink-0"
                     />
                     <div>
                       <h3 className="font-bold text-slate-900 text-base">{item.name}</h3>
                       <div className="flex items-center gap-2 text-xs text-slate-500 mt-1 font-medium">
-                        <span className="bg-slate-100 px-2 py-0.5 rounded">সাইজ: {item.selectedSize}</span>
-                        <span className="bg-slate-100 px-2 py-0.5 rounded">কালার: {item.selectedColor}</span>
+                        <span className="bg-slate-100 px-2 py-0.5 rounded-sm">সাইজ: {item.selectedSize}</span>
+                        <span className="bg-slate-100 px-2 py-0.5 rounded-sm">কালার: {item.selectedColor}</span>
                       </div>
                       <div className="text-sm font-extrabold text-orange-600 mt-1">
                         {formatPrice(item.price)}
@@ -97,7 +97,7 @@ export default function CartPage() {
             </div>
 
             {/* Summary */}
-            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6">
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-6">
               <h3 className="font-bold text-lg text-slate-900">অর্ডার সারসংক্ষেপ</h3>
 
               <div className="space-y-3 text-sm">

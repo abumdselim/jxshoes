@@ -468,7 +468,7 @@ export default function AdminInventoryPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="প্রোডাক্টের নাম, SKU কোড (যেমন: JX-SH-001), বারকোড বা সাপ্লায়ার খুঁজুন..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-md pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 font-sans"
+                className="w-full bg-slate-50 border border-slate-200 rounded-md pl-10 pr-4 py-2.5 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 font-sans"
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
@@ -478,7 +478,7 @@ export default function AdminInventoryPage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="all">সকল ক্যাটাগরি</option>
                 <option value="shoes">জুতা (Shoes)</option>
@@ -488,7 +488,7 @@ export default function AdminInventoryPage() {
               <select
                 value={stockStatusFilter}
                 onChange={(e) => setStockStatusFilter(e.target.value as any)}
-                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                className="bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="all">সকল স্টক অবস্থা</option>
                 <option value="instock">পর্যাপ্ত স্টক (&gt;5)</option>
@@ -551,7 +551,7 @@ export default function AdminInventoryPage() {
                               <img
                                 src={p.images[0]}
                                 alt={p.name}
-                                className="w-12 h-12 rounded-md object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
+                                className="w-12 h-12 rounded-md object-cover bg-slate-100 border border-slate-200 shrink-0"
                               />
                               <div>
                                 <a
@@ -592,7 +592,7 @@ export default function AdminInventoryPage() {
                             ) : (
                               <div className="flex flex-wrap gap-1 text-[10px] text-slate-500">
                                 {p.sizes.slice(0, 4).map((s) => (
-                                  <span key={s} className="bg-slate-100 px-1.5 py-0.5 rounded">
+                                  <span key={s} className="bg-slate-100 px-1.5 py-0.5 rounded-sm">
                                     {s}
                                   </span>
                                 ))}
@@ -796,7 +796,7 @@ export default function AdminInventoryPage() {
         <div className="space-y-4">
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-md flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0" />
+              <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0" />
               <div>
                 <h4 className="text-sm font-bold text-amber-900">রি-অর্ডার তালিকা (Reorder Alert Sheet)</h4>
                 <p className="text-xs text-amber-700">
@@ -829,7 +829,7 @@ export default function AdminInventoryPage() {
           {/* AI রিস্টক প্ল্যান */}
           {aiPlanLoading && (
             <div className="bg-white border border-slate-200 rounded-md p-5 flex items-center gap-3 text-sm text-slate-600">
-              <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+              <span className="w-5 h-5 border-2 border-orange-600 border-t-transparent rounded-full animate-spin shrink-0" />
               AI প্রতিটা প্রোডাক্টের বিক্রির গতি আর স্টক মিলিয়ে হিসাব করছে…
             </div>
           )}
@@ -891,7 +891,7 @@ export default function AdminInventoryPage() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-xs font-bold px-2 py-0.5 bg-slate-100 rounded text-slate-700">
+                    <span className="font-mono text-xs font-bold px-2 py-0.5 bg-slate-100 rounded-sm text-slate-700">
                       {p.sku}
                     </span>
                     <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-200">
@@ -931,7 +931,7 @@ export default function AdminInventoryPage() {
 
       {/* MODAL 1: RESTOCK SHIPMENT MODAL */}
       {isRestockModalOpen && selectedProductForRestock && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-md max-w-lg w-full p-6 sm:p-8 border border-slate-200 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
               <div className="flex items-center gap-2">
@@ -966,7 +966,7 @@ export default function AdminInventoryPage() {
                       setRestockCost(String(found.costPrice || ''));
                     }
                   }}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                 >
                   {products.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -989,7 +989,7 @@ export default function AdminInventoryPage() {
                     value={restockQty}
                     onChange={(e) => setRestockQty(Number(e.target.value))}
                     placeholder="যেমন: 20"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-sm font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
 
@@ -1002,7 +1002,7 @@ export default function AdminInventoryPage() {
                     value={restockCost}
                     onChange={(e) => setRestockCost(e.target.value)}
                     placeholder="যেমন: 2450"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                   />
                 </div>
               </div>
@@ -1017,7 +1017,7 @@ export default function AdminInventoryPage() {
                   value={restockInvoice}
                   onChange={(e) => setRestockInvoice(e.target.value)}
                   placeholder="যেমন: চালান #CH-2026-99, হাজারীবাগ লেদার"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -1031,7 +1031,7 @@ export default function AdminInventoryPage() {
                   value={restockNote}
                   onChange={(e) => setRestockNote(e.target.value)}
                   placeholder="যেমন: শীতকালীন নতুন সাইজের লট"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -1075,7 +1075,7 @@ export default function AdminInventoryPage() {
 
       {/* MODAL 2: STOCK ADJUSTMENT MODAL */}
       {isAdjustModalOpen && selectedProductForAdjust && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-md max-w-lg w-full p-6 sm:p-8 border border-slate-200 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5">
               <div className="flex items-center gap-2">
@@ -1115,7 +1115,7 @@ export default function AdminInventoryPage() {
                   min={0}
                   value={adjustTargetStock}
                   onChange={(e) => setAdjustTargetStock(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-base font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2.5 text-base font-bold text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                 />
               </div>
 
@@ -1127,7 +1127,7 @@ export default function AdminInventoryPage() {
                 <select
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value as any)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 >
                   <option value="ADJUSTMENT">ফিজিক্যাল স্টক অডিট (গণনায় কম/বেশি পাওয়া গেছে)</option>
                   <option value="DAMAGE">ড্যামেজ / নষ্ট পণ্য (স্টক থেকে বাদ)</option>
@@ -1145,7 +1145,7 @@ export default function AdminInventoryPage() {
                   value={adjustNote}
                   onChange={(e) => setAdjustNote(e.target.value)}
                   placeholder="যেমন: স্যাম্পল ডিসপ্লেতে ১ পিস রাখা হয়েছে"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-sans"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3.5 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500 font-sans"
                 />
               </div>
 

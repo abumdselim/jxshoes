@@ -324,7 +324,7 @@ function MiniAiCard() {
         গতকাল ১২টি অর্ডারে বিক্রি ৳৯,৪০০ — গত সপ্তাহের চেয়ে ১৮% বেশি। দুপুরের আগেই বাকি আদায়ের ফলো-আপ কল দিন।
       </div>
       <div className="mt-0.5 sm:mt-1.5 flex items-center gap-1">
-        <CheckCircle2 className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-emerald-400 flex-shrink-0" />
+        <CheckCircle2 className="w-1.5 h-1.5 sm:w-2 sm:h-2 text-emerald-400 shrink-0" />
         <span className="text-[4px] sm:text-[6px] text-emerald-300 font-bold truncate">স্টক কমে গেছে: হাইকিং বুট (৪২ সাইজ)</span>
       </div>
     </div>
@@ -341,7 +341,7 @@ function MiniMetrics({ count, cols }: { count: number; cols: 2 | 4 }) {
           <div key={m.label} className="bg-white rounded-md border border-slate-200/80 p-1 sm:p-2 min-w-0">
             <div className="flex items-center justify-between gap-0.5">
               <span className="text-[3.5px] sm:text-[5.5px] font-bold uppercase tracking-wider text-slate-500 truncate">{m.label}</span>
-              <div className={`w-2 h-2 sm:w-3.5 sm:h-3.5 rounded-md flex items-center justify-center flex-shrink-0 ${m.iconBg}`}>
+              <div className={`w-2 h-2 sm:w-3.5 sm:h-3.5 rounded-md flex items-center justify-center shrink-0 ${m.iconBg}`}>
                 <Icon className="w-1 h-1 sm:w-2 sm:h-2" />
               </div>
             </div>
@@ -359,12 +359,12 @@ function MiniChartCard({ withDonut }: { withDonut?: boolean }) {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1 mb-0.5 sm:mb-1.5">
           <span className="text-[4px] sm:text-[6.5px] font-bold text-slate-900 truncate">বিক্রয় ট্রেন্ড (৩০ দিন)</span>
-          <span className="text-[4px] sm:text-[6px] font-bold text-slate-400 flex-shrink-0">মোট: ৳৫,২৪,০০০</span>
+          <span className="text-[4px] sm:text-[6px] font-bold text-slate-400 shrink-0">মোট: ৳৫,২৪,০০০</span>
         </div>
         <div className="h-8 sm:h-16"><MiniTrendChart /></div>
       </div>
       {withDonut && (
-        <div className="w-8 sm:w-20 flex-shrink-0 flex flex-col items-center justify-center">
+        <div className="w-8 sm:w-20 shrink-0 flex flex-col items-center justify-center">
           <div className="w-full h-8 sm:h-16"><MiniDonut /></div>
           <span className="text-[3.5px] sm:text-[5.5px] font-bold text-slate-500 mt-0.5">ক্যাটাগরি আয়</span>
         </div>
@@ -384,11 +384,11 @@ function MiniOrders() {
       <div className="divide-y divide-slate-100">
         {MINI_ORDERS.map(o => (
           <div key={o.n} className="flex items-center gap-1 sm:gap-2 px-1.5 sm:px-3 py-0.5 sm:py-1.5">
-            <span className="text-[4px] sm:text-[6.5px] font-mono font-bold text-slate-500 flex-shrink-0">{o.n}</span>
+            <span className="text-[4px] sm:text-[6.5px] font-mono font-bold text-slate-500 shrink-0">{o.n}</span>
             <span className="text-[4px] sm:text-[6.5px] font-bold text-slate-900 truncate">{o.c}</span>
-            <span className="ml-auto text-[4px] sm:text-[6.5px] font-bold text-slate-900 flex-shrink-0">{o.p}</span>
+            <span className="ml-auto text-[4px] sm:text-[6.5px] font-bold text-slate-900 shrink-0">{o.p}</span>
             <span
-              className={`text-[3.5px] sm:text-[5.5px] font-bold px-0.5 sm:px-1 py-px rounded-md border flex-shrink-0 ${
+              className={`text-[3.5px] sm:text-[5.5px] font-bold px-0.5 sm:px-1 py-px rounded-md border shrink-0 ${
                 o.done ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'
               }`}
             >
@@ -408,7 +408,7 @@ function MiniAdmin({ device }: { device: 'desktop' | 'tablet' | 'mobile' }) {
   if (mobile) {
     return (
       <div className="h-full w-full bg-slate-200 text-left flex flex-col">
-        <div className="bg-white border-b border-slate-200 h-6 flex items-center justify-between px-2 flex-shrink-0">
+        <div className="bg-white border-b border-slate-200 h-6 flex items-center justify-between px-2 shrink-0">
           <div className="space-y-0.5">
             <span className="block w-2.5 h-px bg-slate-500" />
             <span className="block w-2.5 h-px bg-slate-500" />
@@ -416,7 +416,7 @@ function MiniAdmin({ device }: { device: 'desktop' | 'tablet' | 'mobile' }) {
           </div>
           <div className="w-3 h-3 rounded-md bg-orange-600 flex items-center justify-center text-[5px] font-bold text-white">S</div>
         </div>
-        <div className="bg-white border-b border-slate-200 px-2 py-1 flex gap-1 overflow-hidden flex-shrink-0">
+        <div className="bg-white border-b border-slate-200 px-2 py-1 flex gap-1 overflow-hidden shrink-0">
           {['ড্যাশবোর্ড', 'অর্ডার', 'ইনভেন্টরি', 'হিসাব'].map((t, i) => (
             <span
               key={t}
@@ -441,7 +441,7 @@ function MiniAdmin({ device }: { device: 'desktop' | 'tablet' | 'mobile' }) {
   /* ডেস্কটপ/ট্যাবলেট — আসল AdminSidebar-এর অনুরূপ ডার্ক সাইডবার */
   return (
     <div className="h-full w-full bg-slate-200 text-left flex">
-      <div className="w-9 sm:w-14 bg-slate-900 border-r border-slate-800 flex flex-col flex-shrink-0">
+      <div className="w-9 sm:w-14 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0">
         <div className="p-1.5 sm:p-2.5 border-b border-slate-800 flex justify-center">
           <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-md bg-orange-600 flex items-center justify-center text-[6px] sm:text-[9px] font-bold text-white">
             S
@@ -449,16 +449,16 @@ function MiniAdmin({ device }: { device: 'desktop' | 'tablet' | 'mobile' }) {
         </div>
         <nav className="flex-1 p-1 sm:p-1.5 space-y-0.5 sm:space-y-1 overflow-hidden">
           <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-1.5 py-1 sm:py-1.5 rounded-md bg-orange-600">
-            <LayoutDashboard className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 text-white flex-shrink-0" />
+            <LayoutDashboard className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 text-white shrink-0" />
             <span className="h-0.5 sm:h-1 flex-1 rounded-full bg-white/70" />
           </div>
           <div className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-1.5 py-1 sm:py-1.5 rounded-md">
-            <Bot className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 text-orange-400 flex-shrink-0" />
+            <Bot className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 text-orange-400 shrink-0" />
             <span className="h-0.5 sm:h-1 flex-1 rounded-full bg-slate-700" />
           </div>
           {MINI_SIDEBAR_ICONS.map((Icon, i) => (
             <div key={i} className="flex items-center gap-1 sm:gap-1.5 px-1 sm:px-1.5 py-1 sm:py-1.5 rounded-md">
-              <Icon className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 text-slate-500 flex-shrink-0" />
+              <Icon className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 text-slate-500 shrink-0" />
               <span className="h-0.5 sm:h-1 flex-1 rounded-full bg-slate-700" style={{ maxWidth: `${85 - i * 10}%` }} />
             </div>
           ))}
@@ -484,13 +484,13 @@ function AiManagerMockup() {
     <div className="rounded-md border border-slate-200 bg-white overflow-hidden text-left">
       {/* হেডার — আসল অ্যাসিস্ট্যান্ট পেজের মতো */}
       <div className="flex items-center gap-3 p-4 border-b border-slate-200">
-        <div className="w-9 h-9 rounded-md bg-orange-600 flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-md bg-orange-600 flex items-center justify-center shrink-0">
           <Bot className="w-5 h-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-bold text-slate-900">AI অ্যাসিস্ট্যান্ট</div>
           <div className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block flex-shrink-0" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0" />
             আপনার দোকানের লাইভ ডেটায় চালু
           </div>
         </div>
@@ -510,12 +510,12 @@ function AiManagerMockup() {
           <div className="mt-3 grid grid-cols-2 gap-2">
             <div className="rounded-md bg-white p-2.5 min-w-0">
               <div className="text-[8px] font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1">
-                <Lightbulb className="w-2.5 h-2.5 flex-shrink-0" /> আজকের পরামর্শ
+                <Lightbulb className="w-2.5 h-2.5 shrink-0" /> আজকের পরামর্শ
               </div>
               <div className="mt-1.5 space-y-1">
                 {['দুপুরের আগেই বাকি আদায়ের ফলো-আপ কল দিন', 'সন্ধ্যায় ফ্ল্যাশ ডিল চালু করুন'].map(t => (
                   <div key={t} className="flex gap-1.5 text-[9px] text-slate-700 leading-snug">
-                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500 shrink-0 mt-0.5" />
                     <span>{t}</span>
                   </div>
                 ))}
@@ -523,12 +523,12 @@ function AiManagerMockup() {
             </div>
             <div className="rounded-md bg-white border border-amber-300 p-2.5 min-w-0">
               <div className="text-[8px] font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1">
-                <AlertTriangle className="w-2.5 h-2.5 flex-shrink-0" /> জরুরি সতর্কতা
+                <AlertTriangle className="w-2.5 h-2.5 shrink-0" /> জরুরি সতর্কতা
               </div>
               <div className="mt-1.5 space-y-1">
                 {['স্টক কমে গেছে: হাইকিং বুট (৪২ সাইজ)', '২টি অর্ডার ২৪ ঘণ্টায় প্রসেস হয়নি'].map(t => (
                   <div key={t} className="flex gap-1.5 text-[9px] text-slate-700 leading-snug">
-                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full flex-shrink-0 mt-1" />
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full shrink-0 mt-1" />
                     <span>{t}</span>
                   </div>
                 ))}
@@ -544,7 +544,7 @@ function AiManagerMockup() {
           </div>
         </div>
         <div className="flex gap-2 justify-start">
-          <div className="w-7 h-7 rounded-md bg-orange-600 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 rounded-md bg-orange-600 flex items-center justify-center shrink-0">
             <Bot className="w-4 h-4 text-white" />
           </div>
           <div className="max-w-[80%] rounded-md rounded-bl-md bg-white border border-slate-200 px-4 py-3 text-xs leading-relaxed text-slate-700">
@@ -556,13 +556,13 @@ function AiManagerMockup() {
 
       {/* ইনপুট বার — মাইক + ইনপুট + সেন্ড, আসল অ্যাসিস্ট্যান্টের মতো */}
       <div className="p-3 border-t border-slate-100 bg-white flex items-center gap-2.5">
-        <div className="p-2.5 rounded-md bg-slate-100 flex-shrink-0">
+        <div className="p-2.5 rounded-md bg-slate-100 shrink-0">
           <Mic className="w-4 h-4 text-slate-600" />
         </div>
         <div className="flex-1 rounded-md bg-slate-50 border border-slate-200 px-4 py-2.5 text-[11px] text-slate-400 truncate">
           আপনার প্রশ্ন লিখুন…
         </div>
-        <div className="p-2.5 rounded-md bg-orange-600 flex-shrink-0">
+        <div className="p-2.5 rounded-md bg-orange-600 shrink-0">
           <ArrowRight className="w-4 h-4 text-white" />
         </div>
       </div>
@@ -586,7 +586,7 @@ function DeviceFrame({ device }: { device: 'desktop' | 'tablet' | 'mobile' }) {
   }
   if (device === 'tablet') {
     return (
-      <div className="w-full max-w-sm mx-auto rounded-[1.4rem] border-[10px] border-slate-800 overflow-hidden bg-slate-100">
+      <div className="w-full max-w-sm mx-auto rounded-[1.4rem] border-10 border-slate-800 overflow-hidden bg-slate-100">
         <div className="h-64">{<MiniAdmin device="tablet" />}</div>
       </div>
     );
@@ -623,7 +623,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-white">
       {/* ── নেভ বার ── */}
-      <nav className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-white/10">
+      <nav className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -755,9 +755,9 @@ export default function Landing() {
                         : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'
                     }`}
                   >
-                    <FIcon className={`w-4 h-4 flex-shrink-0 ${activeFeature === i ? 'text-orange-400' : 'text-orange-600'}`} />
+                    <FIcon className={`w-4 h-4 shrink-0 ${activeFeature === i ? 'text-orange-400' : 'text-orange-600'}`} />
                     <span className="truncate">{f.title}</span>
-                    {activeFeature === i && <ArrowRight className="w-4 h-4 ml-auto flex-shrink-0 hidden lg:block" />}
+                    {activeFeature === i && <ArrowRight className="w-4 h-4 ml-auto shrink-0 hidden lg:block" />}
                   </button>
                 );
               })}
@@ -774,7 +774,7 @@ export default function Landing() {
               <div className="mt-6 space-y-2.5">
                 {feature.points.map(p => (
                   <div key={p} className="flex items-start gap-2.5 text-xs sm:text-sm font-semibold text-slate-700">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                     {p}
                   </div>
                 ))}
@@ -801,7 +801,7 @@ export default function Landing() {
                     style={{ animationDelay: `${i * 0.08}s` }}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-md bg-orange-600/10 flex items-center justify-center flex-shrink-0">
+                      <div className="w-9 h-9 rounded-md bg-orange-600/10 flex items-center justify-center shrink-0">
                         <GIcon className="w-5 h-5 text-orange-600" />
                       </div>
                       <h4 className="text-sm font-bold text-slate-900">{g.title}</h4>
@@ -812,7 +812,7 @@ export default function Landing() {
                           key={item}
                           className="inline-flex items-center gap-1.5 rounded-md bg-slate-50 border border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold text-slate-600"
                         >
-                          <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0" />
+                          <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
                           {item}
                         </li>
                       ))}
@@ -843,7 +843,7 @@ export default function Landing() {
                 const PIcon = p.icon;
                 return (
                   <div key={p.title} className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-md bg-orange-600/20 border border-orange-500/30 flex items-center justify-center flex-shrink-0">
+                    <div className="w-9 h-9 rounded-md bg-orange-600/20 border border-orange-500/30 flex items-center justify-center shrink-0">
                       <PIcon className="w-4 h-4 text-orange-400" />
                     </div>
                     <div>
@@ -898,7 +898,7 @@ export default function Landing() {
               return (
                 <div
                   key={w.title}
-                  className="bg-white/5 border border-white/10 rounded-lg p-6 backdrop-blur animate-fade-up"
+                  className="bg-white/5 border border-white/10 rounded-lg p-6 backdrop-blur-sm animate-fade-up"
                   style={{ animationDelay: `${i * 0.1}s` }}
                 >
                   <div className="w-11 h-11 rounded-md bg-orange-600/20 border border-orange-500/30 flex items-center justify-center">

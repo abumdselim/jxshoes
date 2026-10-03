@@ -48,11 +48,11 @@ function SyncStatusBadge() {
       }`}
     >
       {syncing ? (
-        <Loader2 className="w-3.5 h-3.5 flex-shrink-0 animate-spin text-orange-400" />
+        <Loader2 className="w-3.5 h-3.5 shrink-0 animate-spin text-orange-400" />
       ) : !online ? (
-        <CloudOff className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+        <CloudOff className="w-3.5 h-3.5 shrink-0 text-slate-400" />
       ) : (
-        <RefreshCw className="w-3.5 h-3.5 flex-shrink-0 text-orange-400" />
+        <RefreshCw className="w-3.5 h-3.5 shrink-0 text-orange-400" />
       )}
       <span className="truncate text-left">
         {!online
@@ -191,7 +191,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
     <aside className="w-64 bg-slate-900 text-white h-full flex flex-col border-r border-slate-800 overflow-hidden">
       <div className="flex-1 min-h-0 flex flex-col">
         {/* Brand Header — সবসময় উপরে ফিক্সড */}
-        <div className="p-5 pb-4 border-b border-slate-800 flex-shrink-0">
+        <div className="p-5 pb-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center justify-between gap-2">
             <a href="/admin" aria-label="Shopkeeper হোম" className="flex-1 min-w-0">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -205,7 +205,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
             {onCloseMobile && (
               <button
                 onClick={onCloseMobile}
-                className="p-2 -mr-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 md:hidden flex-shrink-0"
+                className="p-2 -mr-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 md:hidden shrink-0"
                 aria-label="মেনু বন্ধ করুন"
               >
                 <X className="w-5 h-5" />
@@ -230,7 +230,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
                     : 'text-white hover:bg-slate-800'
                 }`}
               >
-                <Icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
                 <span className="truncate">{item.label}</span>
                 {item.badge ? (
                   <span className="ml-auto bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
@@ -244,7 +244,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
       </div>
 
       {/* Bottom Storefront return — সবসময় নিচে ফিক্সড */}
-      <div className="p-4 border-t border-slate-800 flex-shrink-0">
+      <div className="p-4 border-t border-slate-800 shrink-0">
         <SyncStatusBadge />
         <a
           href="/shop"
@@ -256,7 +256,7 @@ export default function AdminSidebar({ onCloseMobile }: AdminSidebarProps) {
             <ExternalLink className="w-4 h-4 text-orange-400" />
             <span>লাইভ শপ প্রিভিউ</span>
           </span>
-          <span className="text-[10px] bg-slate-700 text-orange-400 px-2 py-0.5 rounded font-mono">
+          <span className="text-[10px] bg-slate-700 text-orange-400 px-2 py-0.5 rounded-sm font-mono">
             Preview
           </span>
         </a>

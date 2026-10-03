@@ -112,7 +112,7 @@ export default function AdminOrdersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="অর্ডার নং, নাম বা ফোন দিয়ে খুঁজুন..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-md pl-10 pr-4 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500/20 font-medium"
+            className="w-full bg-slate-50 border border-slate-200 rounded-md pl-10 pr-4 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 font-medium"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
         </div>
@@ -163,7 +163,7 @@ export default function AdminOrdersPage() {
                   <select
                     value={order.status}
                     onChange={(e) => handleStatusChange(order.id, e.target.value as any)}
-                    className={`text-xs font-bold rounded-md px-3 py-1.5 border focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
+                    className={`text-xs font-bold rounded-md px-3 py-1.5 border focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors ${
                       order.status === 'Pending'
                         ? 'bg-amber-50 text-amber-800 border-amber-300'
                         : order.status === 'Processing'
@@ -205,7 +205,7 @@ export default function AdminOrdersPage() {
                     </a>
                   </div>
                   <div className="flex items-start gap-1.5 text-slate-600">
-                    <MapPin className="w-3.5 h-3.5 text-orange-600 flex-shrink-0 mt-0.5" />
+                    <MapPin className="w-3.5 h-3.5 text-orange-600 shrink-0 mt-0.5" />
                     <span>{order.address} ({order.city})</span>
                   </div>
 
@@ -261,10 +261,10 @@ export default function AdminOrdersPage() {
                           <div>
                             <div className="font-bold text-slate-900">{it.name}</div>
                             <div className="text-slate-500 flex items-center gap-2 mt-0.5">
-                              <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-semibold text-orange-600">
+                              <span className="bg-white px-1.5 py-0.5 rounded-sm border border-slate-200 font-semibold text-orange-600">
                                 সাইজ: {it.selectedSize}
                               </span>
-                              <span className="bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                              <span className="bg-white px-1.5 py-0.5 rounded-sm border border-slate-200">
                                 কালার: {it.selectedColor}
                               </span>
                             </div>
@@ -283,11 +283,11 @@ export default function AdminOrdersPage() {
                   <div className="flex flex-wrap items-center justify-between pt-2 text-xs border-t border-slate-100">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold text-slate-500">পদ্ধতি:</span>
-                      <span className="font-bold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded">
+                      <span className="font-bold text-slate-800 bg-slate-100 px-2.5 py-0.5 rounded-sm">
                         {order.paymentMethod}
                       </span>
                       {order.bkashTrxId && (
-                        <span className="font-mono bg-orange-50 text-orange-700 px-2 py-0.5 rounded font-bold">
+                        <span className="font-mono bg-orange-50 text-orange-700 px-2 py-0.5 rounded-sm font-bold">
                           TrxID: {order.bkashTrxId}
                         </span>
                       )}

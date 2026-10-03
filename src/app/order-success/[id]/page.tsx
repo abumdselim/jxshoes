@@ -44,7 +44,7 @@ export default function OrderSuccessPage() {
       <Navbar />
 
       <main className="max-w-3xl mx-auto px-4 py-16 flex-1">
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-sm text-center">
+        <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 shadow-xs text-center">
           <div className="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-6 shadow-md ring-8 ring-emerald-50/50">
             <CheckCircle className="w-10 h-10" />
           </div>
@@ -63,7 +63,7 @@ export default function OrderSuccessPage() {
 
           {offlineSaved && (
             <div className="mt-4 mx-auto max-w-md flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-left">
-              <CloudOff className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <CloudOff className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-800">
                 <span className="font-bold">অফলাইন মোড:</span> আপনার অর্ডারটি ডিভাইসে সংরক্ষিত আছে। ইন্টারনেট সংযোগ পাওয়া মাত্র স্বয়ংক্রিয়ভাবে আমাদের কাছে জমা হয়ে যাবে।
               </p>
@@ -124,7 +124,7 @@ export default function OrderSuccessPage() {
 
               {/* Address */}
               <div className="border-t border-slate-200 pt-3 text-xs text-slate-600 flex items-start gap-2">
-                <MapPin className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-slate-800">ডেলিভারি ঠিকানা: </span>
                   {order.address} ({order.city})

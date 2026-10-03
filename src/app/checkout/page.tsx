@@ -170,7 +170,7 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Customer & Shipping Information (7 cols) */}
           <div className="lg:col-span-7 space-y-8">
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-4">
                 <MapPin className="w-5 h-5 text-orange-600" />
                 <span>ডেলিভারি ঠিকানা ও তথ্য দিন</span>
@@ -188,7 +188,7 @@ export default function CheckoutPage() {
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
                       placeholder="যেমন: তানভীর আহমেদ"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white focus:border-orange-500 font-medium font-sans"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:bg-white focus:border-orange-500 font-medium font-sans"
                     />
                     <User className="w-4 h-4 text-slate-400 absolute right-4 top-3.5" />
                   </div>
@@ -205,7 +205,7 @@ export default function CheckoutPage() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="যেমন: 01712345678"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white focus:border-orange-500 font-medium font-sans"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:bg-white focus:border-orange-500 font-medium font-sans"
                     />
                     <Phone className="w-4 h-4 text-slate-400 absolute right-4 top-3.5" />
                   </div>
@@ -265,7 +265,7 @@ export default function CheckoutPage() {
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="বাড়ি নং, রোড নং, এলাকা, থানা, জেলা..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:bg-white focus:border-orange-500 font-medium font-sans"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:bg-white focus:border-orange-500 font-medium font-sans"
                   />
                 </div>
 
@@ -278,14 +278,14 @@ export default function CheckoutPage() {
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="যেমন: সন্ধ্যার পরে ডেলিভারি দিলে ভালো হয়"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none font-sans"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-hidden font-sans"
                   />
                 </div>
               </div>
             </div>
 
             {/* Payment Method Card */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-4">
                 <ShieldCheck className="w-5 h-5 text-orange-600" />
                 <span>পেমেন্ট পদ্ধতি বেছে নিন</span>
@@ -354,7 +354,7 @@ export default function CheckoutPage() {
                           value={bkashTrxId}
                           onChange={(e) => setBkashTrxId(e.target.value)}
                           placeholder="TrxID (যেমন: BK89X23...)"
-                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500 font-mono"
                         />
                       </div>
                     )}
@@ -366,7 +366,7 @@ export default function CheckoutPage() {
 
           {/* Order Summary & Coupon (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6 sticky top-28">
+            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6 sticky top-28">
               <h3 className="text-lg font-bold text-slate-900 flex items-center justify-between border-b border-slate-100 pb-4">
                 <span>অর্ডার আইটেম ({cart.length})</span>
                 <span className="text-xs text-slate-500 font-normal">রিভিউ</span>
@@ -382,7 +382,7 @@ export default function CheckoutPage() {
                     <img
                       src={item.image}
                       alt={item.name}
-                      className="w-14 h-14 rounded-xl object-cover bg-slate-100 border border-slate-200 flex-shrink-0"
+                      className="w-14 h-14 rounded-xl object-cover bg-slate-100 border border-slate-200 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-slate-900 truncate text-xs sm:text-sm">{item.name}</h4>
@@ -412,7 +412,7 @@ export default function CheckoutPage() {
                     value={couponInput}
                     onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                     placeholder="যেমন: NEW100 বা EID10"
-                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold uppercase focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono font-bold uppercase focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                   />
                   <button
                     type="button"
@@ -479,7 +479,7 @@ export default function CheckoutPage() {
               </button>
 
               <div className="text-center text-xs text-slate-400 inline-flex items-center justify-center gap-1.5 w-full">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                 <span>আপনার সকল তথ্য নিরাপদ ও সুরক্ষিত রাখা হয়</span>
               </div>
             </div>

@@ -222,7 +222,7 @@ function HomePageContent() {
         {/* ═══════════════════════════════════════════════════
             HERO SECTION — Premium Dark Luxury Look
         ═══════════════════════════════════════════════════ */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-stone-950 text-white pt-10 pb-20 sm:pt-14 sm:pb-28">
+        <section className="relative overflow-hidden bg-linear-to-b from-slate-950 via-slate-900 to-stone-950 text-white pt-10 pb-20 sm:pt-14 sm:pb-28">
           {/* Ambient Lighting Gradients */}
           <div className="absolute top-1/4 left-1/4 -translate-y-1/2 w-96 h-96 bg-orange-600/25 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-10 right-10 w-96 h-96 bg-amber-500/20 rounded-full blur-[140px] pointer-events-none" />
@@ -242,7 +242,7 @@ function HomePageContent() {
                 {/* H1 Title */}
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15] text-white">
                   {heroBanner.titlePart1} <br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-amber-300 to-orange-500">
+                  <span className="text-transparent bg-clip-text bg-linear-to-r from-orange-400 via-amber-300 to-orange-500">
                     {heroBanner.titleHighlight}
                   </span>
                 </h1>
@@ -316,15 +316,15 @@ function HomePageContent() {
 
                 {/* Left Card: Shoes */}
                 <div className="space-y-3 pt-4">
-                  <div className="rounded-3xl overflow-hidden aspect-[4/5] bg-slate-800 border border-white/10 shadow-2xl group relative">
+                  <div className="rounded-3xl overflow-hidden aspect-4/5 bg-slate-800 border border-white/10 shadow-2xl group relative">
                     <img
                       src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800"
                       alt="Sneakers"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-3 right-3 text-left">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-black/40 px-2 py-0.5 rounded backdrop-blur">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-orange-400 bg-black/40 px-2 py-0.5 rounded-sm backdrop-blur-sm">
                         হট কালেকশন
                       </span>
                       <p className="text-xs sm:text-sm font-bold text-white mt-1 line-clamp-1">
@@ -336,15 +336,15 @@ function HomePageContent() {
 
                 {/* Right Card: Leather Bags */}
                 <div className="space-y-3 pt-10">
-                  <div className="rounded-3xl overflow-hidden aspect-[4/5] bg-slate-800 border border-white/10 shadow-2xl group relative">
+                  <div className="rounded-3xl overflow-hidden aspect-4/5 bg-slate-800 border border-white/10 shadow-2xl group relative">
                     <img
                       src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800"
                       alt="Leather Bag"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/70 via-transparent to-transparent" />
                     <div className="absolute bottom-3 left-3 right-3 text-left">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-black/40 px-2 py-0.5 rounded backdrop-blur">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-black/40 px-2 py-0.5 rounded-sm backdrop-blur-sm">
                         এক্সক্লুসিভ ব্যাগ
                       </span>
                       <p className="text-xs sm:text-sm font-bold text-white mt-1 line-clamp-1">
@@ -368,7 +368,7 @@ function HomePageContent() {
           <div className="bg-white rounded-3xl p-5 sm:p-7 shadow-xl border border-slate-200/90 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
 
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <div className="w-12 h-12 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0 shadow-inner">
                 <Truck className="w-6 h-6" />
               </div>
               <div>
@@ -378,7 +378,7 @@ function HomePageContent() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 shadow-inner">
                 <RotateCcw className="w-6 h-6" />
               </div>
               <div>
@@ -388,7 +388,7 @@ function HomePageContent() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-inner">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
@@ -398,7 +398,7 @@ function HomePageContent() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 shadow-inner">
+              <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 shadow-inner">
                 <PhoneCall className="w-6 h-6" />
               </div>
               <div>
@@ -415,9 +415,9 @@ function HomePageContent() {
             PROMO VOUCHER BANNER (Instant Coupon Code)
         ═══════════════════════════════════════════════════ */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-          <div className="rounded-2xl bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 p-4 sm:p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="rounded-2xl bg-linear-to-r from-orange-500 via-amber-500 to-orange-600 p-4 sm:p-5 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3 text-center sm:text-left">
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
                 <Gift className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -436,7 +436,7 @@ function HomePageContent() {
               </span>
               <button
                 onClick={() => handleCopyCoupon('JX100')}
-                className="px-4 py-2 rounded-xl bg-white text-orange-600 hover:bg-orange-50 text-xs font-black shadow transition-all flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-white text-orange-600 hover:bg-orange-50 text-xs font-black shadow-sm transition-all flex items-center gap-1.5"
               >
                 {couponCopied ? (
                   <>
@@ -483,7 +483,7 @@ function HomePageContent() {
                 key={cat.id}
                 href={`/shop?category=${cat.parentType}#catalog`}
                 onClick={() => setSelectedCategory(cat.parentType)}
-                className="bg-white rounded-3xl p-3.5 border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-orange-500/50 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
+                className="bg-white rounded-3xl p-3.5 border border-slate-200/90 shadow-xs hover:shadow-xl hover:border-orange-500/50 transition-all duration-300 flex flex-col items-center text-center group cursor-pointer"
               >
                 <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 mb-2.5 border border-slate-100 group-hover:scale-105 transition-transform duration-300">
                   <img
@@ -509,7 +509,7 @@ function HomePageContent() {
         ═══════════════════════════════════════════════════ */}
         {flashDeal.enabled && dealProduct && (
           <section id="flash-deal" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="rounded-3xl bg-gradient-to-r from-stone-900 via-slate-900 to-orange-950 p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden border border-orange-500/20">
+            <div className="rounded-3xl bg-linear-to-r from-stone-900 via-slate-900 to-orange-950 p-6 sm:p-10 text-white shadow-2xl relative overflow-hidden border border-orange-500/20">
               <div className="absolute right-0 top-0 w-96 h-96 bg-orange-600/20 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -556,7 +556,7 @@ function HomePageContent() {
                       <span className="text-orange-400 font-bold">৮২% বিক্রি সম্পন্ন</span>
                     </div>
                     <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-white/10">
-                      <div className="bg-gradient-to-r from-orange-500 to-amber-400 h-2 rounded-full w-[82%]" />
+                      <div className="bg-linear-to-r from-orange-500 to-amber-400 h-2 rounded-full w-[82%]" />
                     </div>
                   </div>
 
@@ -633,7 +633,7 @@ function HomePageContent() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white border border-slate-200 text-xs font-bold rounded-xl px-3 py-2 text-slate-700 focus:outline-none shadow-xs"
+                className="bg-white border border-slate-200 text-xs font-bold rounded-xl px-3 py-2 text-slate-700 focus:outline-hidden shadow-2xs"
               >
                 <option value="featured">ফিচার্ড / নতুন</option>
                 <option value="rating">রেটিং: সর্বোচ্চ</option>
@@ -644,7 +644,7 @@ function HomePageContent() {
           </div>
 
           {/* Filter Bar */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-sm mb-8 space-y-4">
+          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-xs mb-8 space-y-4">
 
             {/* Collection Filter Tabs */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
@@ -750,7 +750,7 @@ function HomePageContent() {
               ))}
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center my-6 shadow-sm">
+            <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center my-6 shadow-xs">
               <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto mb-3" />
               <p className="text-base font-bold text-slate-800">কোনো প্রোডাক্ট পাওয়া যায়নি!</p>
               <p className="text-xs text-slate-400 mt-1">অন্য কোনো ফিল্টার বা সাইজ বেছে নিয়ে দেখুন।</p>
@@ -783,7 +783,7 @@ function HomePageContent() {
 
               {/* Left Column: Image with Quality Badge */}
               <div className="lg:col-span-5 relative">
-                <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/10 aspect-[4/3] bg-slate-800">
+                <div className="rounded-3xl overflow-hidden shadow-2xl border border-white/10 aspect-4/3 bg-slate-800">
                   <img
                     src="https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&q=80&w=1000"
                     alt="Leather Craftsmanship"
@@ -814,7 +814,7 @@ function HomePageContent() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-1">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs space-y-1">
                     <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-2">
                       <Gem className="w-5 h-5" />
                     </div>
@@ -824,7 +824,7 @@ function HomePageContent() {
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-1">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs space-y-1">
                     <div className="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 mb-2">
                       <Feather className="w-5 h-5" />
                     </div>
@@ -834,7 +834,7 @@ function HomePageContent() {
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-1">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs space-y-1">
                     <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 mb-2">
                       <Layers className="w-5 h-5" />
                     </div>
@@ -844,7 +844,7 @@ function HomePageContent() {
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm space-y-1">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs space-y-1">
                     <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-2">
                       <ShieldCheck className="w-5 h-5" />
                     </div>
@@ -883,7 +883,7 @@ function HomePageContent() {
               {testimonials.map((t, idx) => (
                 <div
                   key={idx}
-                  className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
+                  className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -926,7 +926,7 @@ function HomePageContent() {
             DELIVERY PARTNERS & COVERAGE STRIP
         ═══════════════════════════════════════════════════ */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
             <div>
               <h3 className="text-base sm:text-lg font-black text-slate-900">
                 সারা দেশে ৬৪ জেলায় বিশ্বস্ত ডেলিভারি নেটওয়ার্ক
@@ -966,7 +966,7 @@ function HomePageContent() {
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-xs"
+                className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === idx ? null : idx)}

@@ -116,7 +116,7 @@ export default function ProductDetailPage() {
           <span className="text-slate-900 truncate max-w-xs">{product.name}</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 bg-white p-4 sm:p-8 lg:p-10 rounded-3xl border border-slate-200/80 shadow-sm">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 bg-white p-4 sm:p-8 lg:p-10 rounded-3xl border border-slate-200/80 shadow-xs">
           {/* Images Section */}
           <div className="space-y-4">
             <div className="aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative group">
@@ -139,7 +139,7 @@ export default function ProductDetailPage() {
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(img)}
-                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all ${
+                    className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${
                       selectedImage === img
                         ? 'border-orange-600 scale-95 shadow-md ring-2 ring-orange-500/20'
                         : 'border-slate-200 hover:border-slate-300'
@@ -278,7 +278,7 @@ export default function ProductDetailPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={handleAddToCart}
-                  className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 font-extrabold text-sm border-2 border-orange-500/30 transition-all shadow-sm"
+                  className="flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-orange-50 hover:bg-orange-100 text-orange-600 font-extrabold text-sm border-2 border-orange-500/30 transition-all shadow-xs"
                 >
                   <ShoppingBag className="w-5 h-5" />
                   <span>ব্যাগে যোগ করুন</span>

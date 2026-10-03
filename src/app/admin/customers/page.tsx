@@ -277,7 +277,7 @@ export default function AdminCustomersPage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="নাম বা ফোন নম্বর দিয়ে খুঁজুন…"
-          className="w-full bg-white border border-slate-200 rounded-md pl-11 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          className="w-full bg-white border border-slate-200 rounded-md pl-11 pr-4 py-3 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500"
         />
       </div>
 
@@ -362,7 +362,7 @@ export default function AdminCustomersPage() {
 
       {/* টাকা জমা মোডাল */}
       {payTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-md w-full max-w-md p-6 sm:p-8">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5">
@@ -390,7 +390,7 @@ export default function AdminCustomersPage() {
                   type="number"
                   value={payAmount}
                   onChange={e => setPayAmount(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm font-bold focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -420,7 +420,7 @@ export default function AdminCustomersPage() {
                   value={payNote}
                   onChange={e => setPayNote(e.target.value)}
                   placeholder="যেমন: আংশিক পরিশোধ"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
@@ -451,9 +451,9 @@ export default function AdminCustomersPage() {
 
       {/* খাতা মোডাল */}
       {ledgerTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-md w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
-            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between flex-shrink-0">
+            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
               <div>
                 <h3 className="font-bold text-sm">খাতা — {ledgerTarget.name}</h3>
                 <p className="text-[11px] text-slate-300">
@@ -526,7 +526,7 @@ export default function AdminCustomersPage() {
 
       {/* নতুন কাস্টমার মোডাল */}
       {addOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-md w-full max-w-md p-6 sm:p-8 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-bold text-slate-900">নতুন কাস্টমার</h3>
@@ -541,7 +541,7 @@ export default function AdminCustomersPage() {
                 <input
                   value={addForm.name}
                   onChange={e => setAddForm({ ...addForm, name: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               <div>
@@ -550,7 +550,7 @@ export default function AdminCustomersPage() {
                   value={addForm.phone}
                   onChange={e => setAddForm({ ...addForm, phone: e.target.value })}
                   placeholder="01XXXXXXXXX"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                 />
               </div>
               <div>
@@ -558,7 +558,7 @@ export default function AdminCustomersPage() {
                 <input
                   value={addForm.address}
                   onChange={e => setAddForm({ ...addForm, address: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
               <div>
@@ -570,7 +570,7 @@ export default function AdminCustomersPage() {
                   value={addForm.dueAmount}
                   onChange={e => setAddForm({ ...addForm, dueAmount: e.target.value })}
                   placeholder="0"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
               <div>
@@ -578,7 +578,7 @@ export default function AdminCustomersPage() {
                 <input
                   value={addForm.note}
                   onChange={e => setAddForm({ ...addForm, note: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
               <button

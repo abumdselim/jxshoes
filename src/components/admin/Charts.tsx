@@ -106,7 +106,7 @@ export function DonutChart({ segments, centerLabel, centerValue }: { segments: D
 
   return (
     <div className="flex items-center gap-5">
-      <svg viewBox="0 0 160 160" className="w-36 h-36 flex-shrink-0 -rotate-90 animate-fade-in">
+      <svg viewBox="0 0 160 160" className="w-36 h-36 shrink-0 -rotate-90 animate-fade-in">
         <circle cx="80" cy="80" r={R} fill="none" stroke="#e2e8f0" strokeWidth="24" />
         {total > 0 &&
           segments.map((s, i) => {
@@ -143,7 +143,7 @@ export function DonutChart({ segments, centerLabel, centerValue }: { segments: D
         </div>
         {segments.map((s, i) => (
           <div key={i} className="flex items-center gap-2 text-xs">
-            <span className="w-2.5 h-2.5 rounded-sm flex-shrink-0" style={{ backgroundColor: s.color }} />
+            <span className="w-2.5 h-2.5 rounded-xs shrink-0" style={{ backgroundColor: s.color }} />
             <span className="text-slate-600 truncate">{s.label}</span>
             <span className="ml-auto font-bold text-slate-900 whitespace-nowrap">
               {s.value.toLocaleString('en-BD')}
@@ -178,9 +178,9 @@ export function BarList({ items, color = '#ea580c', muted = '#94a3b8' }: { items
             <span className="font-bold text-slate-700 truncate pr-2">{i + 1}. {it.label}</span>
             <span className="font-bold text-slate-900 whitespace-nowrap">{it.display}</span>
           </div>
-          <div className="h-2 bg-slate-100 rounded-sm overflow-hidden">
+          <div className="h-2 bg-slate-100 rounded-xs overflow-hidden">
             <div
-              className="bar-fill h-full rounded-sm"
+              className="bar-fill h-full rounded-xs"
               style={{
                 width: on ? `${Math.max((it.value / max) * 100, 2)}%` : '0%',
                 backgroundColor: i === 0 ? color : muted,

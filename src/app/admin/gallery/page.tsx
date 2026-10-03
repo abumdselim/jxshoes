@@ -250,7 +250,7 @@ export default function AdminGalleryPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="প্রোডাক্টের নাম বা SKU দিয়ে খুঁজুন..."
-            className="w-full bg-white border border-slate-200 rounded-md pl-10 pr-4 py-3 text-xs sm:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+            className="w-full bg-white border border-slate-200 rounded-md pl-10 pr-4 py-3 text-xs sm:text-sm shadow-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
           />
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
         </div>
@@ -274,7 +274,7 @@ export default function AdminGalleryPage() {
           <select
             value={uploadTargetId}
             onChange={(e) => setUploadTargetId(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-md px-3 py-3 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
+            className="w-full bg-white border border-slate-200 rounded-md px-3 py-3 text-xs sm:text-sm font-semibold text-slate-700 shadow-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500"
           >
             <option value="">🖼️ নতুন ছবি — লাইব্রেরিতে জমা হবে (ডিফল্ট)</option>
               {products.map(p => (
@@ -321,7 +321,7 @@ export default function AdminGalleryPage() {
             onChange={(e) => setPendingUrl(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddByUrl(); } }}
             placeholder="অথবা ছবির লিংক দিয়ে যোগ করুন (https://...)"
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-orange-500 font-mono"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-2.5 text-xs focus:outline-hidden focus:ring-2 focus:ring-orange-500 font-mono"
           />
           <button
             type="button"
@@ -387,7 +387,7 @@ export default function AdminGalleryPage() {
                       const pid = e.target.value;
                       if (pid) attachLibraryImage(url, pid);
                     }}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-1.5 text-[11px] font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-md px-2 py-1.5 text-[11px] font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-orange-500"
                   >
                     <option value="">একটি প্রোডাক্টে যুক্ত করুন…</option>
                     {products.map(p => (

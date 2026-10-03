@@ -32,7 +32,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const hasSecondImage = product.images && product.images.length > 1;
 
   return (
-    <div className="group relative bg-white rounded-2xl border border-slate-200/80 hover:border-orange-500/40 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
+    <div className="group relative bg-white rounded-2xl border border-slate-200/80 hover:border-orange-500/40 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden">
       {/* Product Image Container */}
       <a href={`/product/${product.id}`} className="relative block aspect-square overflow-hidden bg-slate-100">
         {/* Main Image */}
@@ -93,7 +93,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                     <span
                       key={i}
                       title={c.name}
-                      className="w-2.5 h-2.5 rounded-full border border-white shadow-xs inline-block"
+                      className="w-2.5 h-2.5 rounded-full border border-white shadow-2xs inline-block"
                       style={{ backgroundColor: c.hex }}
                     />
                   ))}
@@ -121,7 +121,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.sizes.slice(0, 3).map((s) => (
               <span
                 key={s}
-                className="text-[10px] font-semibold bg-slate-100 text-slate-700 px-1 sm:px-1.5 py-0.5 rounded border border-slate-200"
+                className="text-[10px] font-semibold bg-slate-100 text-slate-700 px-1 sm:px-1.5 py-0.5 rounded-sm border border-slate-200"
               >
                 {s}
               </span>
@@ -148,7 +148,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleQuickAdd}
             disabled={added}
-            className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-sm ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
               added
                 ? 'bg-emerald-600 text-white'
                 : 'bg-orange-50 hover:bg-orange-600 text-orange-600 hover:text-white'

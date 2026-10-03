@@ -584,7 +584,7 @@ export default function AdminAssistantPage() {
           {messages.map((m, i) => (
             <div key={i} className={`flex flex-wrap gap-3 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               {m.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-md bg-orange-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-md bg-orange-600 flex items-center justify-center shrink-0">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               )}
@@ -667,7 +667,7 @@ export default function AdminAssistantPage() {
 
           {error && (
             <div className="flex gap-2 bg-red-50 border border-red-200 rounded-md p-4 text-xs text-red-700 max-w-lg mx-auto">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <AlertTriangle className="w-4 h-4 shrink-0" />
               <div>
                 <p className="font-bold">{error}</p>
               </div>
@@ -676,13 +676,13 @@ export default function AdminAssistantPage() {
         </div>
 
         {/* ইনপুট */}
-        <div className="p-4 border-t border-slate-100 bg-white flex items-center gap-2.5 flex-shrink-0">
+        <div className="p-4 border-t border-slate-100 bg-white flex items-center gap-2.5 shrink-0">
           <button
             onClick={toggleRecording}
             disabled={streaming || voiceBusy}
             title={recording ? 'রেকর্ডিং শেষ করুন' : 'মুখে বলুন — বাংলা ভয়েস কমান্ড'}
             aria-label="ভয়েস কমান্ড"
-            className={'p-3 rounded-md transition-colors flex-shrink-0 ' + (
+            className={'p-3 rounded-md transition-colors shrink-0 ' + (
               recording
                 ? 'bg-red-600 text-white animate-pulse'
                 : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
@@ -702,7 +702,7 @@ export default function AdminAssistantPage() {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send(input)}
             placeholder={recording ? 'শুনছি… কথা বলুন' : 'প্রশ্ন লিখুন বা প্রোডাক্ট কোড পাঠান…'}
-            className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="flex-1 bg-slate-50 border border-slate-200 rounded-md px-4 py-3 text-sm focus:outline-hidden focus:ring-2 focus:ring-orange-500"
             disabled={streaming || recording}
           />
           <button

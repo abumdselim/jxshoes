@@ -327,9 +327,9 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] bg-slate-950/95 backdrop-blur-sm flex flex-col">
+    <div className="fixed inset-0 z-60 bg-slate-950/95 backdrop-blur-xs flex flex-col">
       {/* হেডার */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900 border-b border-white/10 flex-shrink-0">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-slate-900 border-b border-white/10 shrink-0">
         <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
           <SlidersHorizontal className="w-4 h-4 text-orange-400" />
           ছবি এডিট করুন
@@ -372,7 +372,7 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
                 alt=""
                 draggable={false}
                 style={{ width: fitted.w, height: fitted.h }}
-                className="block rounded-sm"
+                className="block rounded-xs"
               />
               <div
                 ref={cropBoxRef}
@@ -398,11 +398,11 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
                   <div
                     key={h.id}
                     onPointerDown={onCropPointerDown(h.id)}
-                    className={`absolute w-${HANDLE / 2} h-${HANDLE / 2} bg-white rounded-sm shadow ${h.cls} ${h.cur}`}
+                    className={`absolute w-${HANDLE / 2} h-${HANDLE / 2} bg-white rounded-xs shadow-sm ${h.cls} ${h.cur}`}
                     style={{ width: HANDLE, height: HANDLE }}
                   />
                 ))}
-                <span className="absolute -top-6 left-0 text-[10px] font-bold text-white bg-slate-900/80 rounded px-1.5 py-0.5">
+                <span className="absolute -top-6 left-0 text-[10px] font-bold text-white bg-slate-900/80 rounded-sm px-1.5 py-0.5">
                   {Math.round(displayRect.w / fitted.scale)} × {Math.round(displayRect.h / fitted.scale)}
                 </span>
               </div>
@@ -410,12 +410,12 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
           )}
 
           {loadState !== 'error' && loadState !== 'loading' && !cropMode && (
-            <canvas ref={canvasRef} className="rounded-sm shadow-2xl max-w-full" />
+            <canvas ref={canvasRef} className="rounded-xs shadow-2xl max-w-full" />
           )}
         </div>
 
         {/* টুল প্যানেল */}
-        <aside className="w-full lg:w-80 flex-shrink-0 bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto max-h-[46vh] lg:max-h-none">
+        <aside className="w-full lg:w-80 shrink-0 bg-slate-900 border-t lg:border-t-0 lg:border-l border-white/10 overflow-y-auto max-h-[46vh] lg:max-h-none">
           <div className="p-4 sm:p-5 space-y-6 text-slate-200">
             {/* ক্রপ */}
             <section>
@@ -505,7 +505,7 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
                     step={0.5}
                     value={Math.round(rotation * 10) / 10}
                     onChange={(e) => setRotation(Number(e.target.value) || 0)}
-                    className="w-16 bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-xs font-bold text-white focus:outline-none focus:border-orange-500"
+                    className="w-16 bg-white/5 border border-white/10 rounded-md px-2 py-1.5 text-xs font-bold text-white focus:outline-hidden focus:border-orange-500"
                   />
                   <span className="text-xs text-slate-400 font-bold">°</span>
                 </div>
@@ -575,7 +575,7 @@ export default function ImageEditor({ src, onClose, onSave }: ImageEditorProps) 
       </div>
 
       {/* ফুটার */}
-      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 bg-slate-900 border-t border-white/10 flex-shrink-0">
+      <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3.5 bg-slate-900 border-t border-white/10 shrink-0">
         <button
           type="button"
           onClick={resetAll}

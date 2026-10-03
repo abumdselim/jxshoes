@@ -220,7 +220,7 @@ export default function AdminFinancePage() {
               <button
                 key={p.key}
                 onClick={() => setPeriod(p.key)}
-                className={`px-3 py-1.5 rounded-sm text-xs font-bold transition-colors ${
+                className={`px-3 py-1.5 rounded-xs text-xs font-bold transition-colors ${
                   period === p.key ? 'bg-slate-900 text-white' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                 }`}
               >
@@ -408,8 +408,8 @@ export default function AdminFinancePage() {
                         <span className="text-slate-700">{c.label}</span>
                         <span className="text-slate-500">{formatPrice(Math.round(c.value))} ({pct}%)</span>
                       </div>
-                      <div className="h-2 bg-slate-100 rounded-sm overflow-hidden">
-                        <div className="h-full rounded-sm" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: channelColors[c.label] || '#94a3b8' }} />
+                      <div className="h-2 bg-slate-100 rounded-xs overflow-hidden">
+                        <div className="h-full rounded-xs" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: channelColors[c.label] || '#94a3b8' }} />
                       </div>
                     </div>
                   </div>
@@ -437,8 +437,8 @@ export default function AdminFinancePage() {
                         <span className="text-slate-700">{c.label}</span>
                         <span className="text-slate-500">{formatPrice(Math.round(c.value))} ({pct}%)</span>
                       </div>
-                      <div className="h-2 bg-slate-100 rounded-sm overflow-hidden">
-                        <div className="h-full rounded-sm" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: cityColors[c.label] || '#94a3b8' }} />
+                      <div className="h-2 bg-slate-100 rounded-xs overflow-hidden">
+                        <div className="h-full rounded-xs" style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: cityColors[c.label] || '#94a3b8' }} />
                       </div>
                     </div>
                   </div>

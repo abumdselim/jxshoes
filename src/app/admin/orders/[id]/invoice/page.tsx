@@ -148,9 +148,9 @@ export default function InvoicePage() {
                   </div>
                 </div>
                 <div className="mt-3 text-[11px] text-orange-100 space-y-1">
-                  <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>ঢাকা, বাংলাদেশ</span></div>
-                  <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>01XXXXXXXXX</span></div>
-                  <div className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-orange-200 flex-shrink-0" /> <span>shopkeeperbd.pages.dev</span></div>
+                  <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-orange-200 shrink-0" /> <span>ঢাকা, বাংলাদেশ</span></div>
+                  <div className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-orange-200 shrink-0" /> <span>01XXXXXXXXX</span></div>
+                  <div className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-orange-200 shrink-0" /> <span>shopkeeperbd.pages.dev</span></div>
                 </div>
               </div>
 
@@ -184,8 +184,8 @@ export default function InvoicePage() {
                 <div className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2">প্রাপক / Recipient</div>
                 <div className="font-bold text-slate-900 text-base">{order.customerName}</div>
                 <div className="text-slate-500 text-xs mt-1.5 space-y-1">
-                  <div className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-slate-400 flex-shrink-0" /> <span>{order.phone}</span></div>
-                  <div className="flex items-start gap-1.5"><MapPin className="w-3 h-3 text-slate-400 flex-shrink-0 mt-0.5" /> <span>{order.address}</span></div>
+                  <div className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-slate-400 shrink-0" /> <span>{order.phone}</span></div>
+                  <div className="flex items-start gap-1.5"><MapPin className="w-3 h-3 text-slate-400 shrink-0 mt-0.5" /> <span>{order.address}</span></div>
                   <div className="font-semibold text-slate-700 pl-4">{order.city}</div>
                 </div>
               </div>

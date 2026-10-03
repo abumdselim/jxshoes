@@ -78,7 +78,7 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   autoFocus
                   required
-                  className="w-full rounded-lg bg-slate-950 border border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-none pl-10 pr-11 py-2.5 text-sm text-white placeholder:text-slate-500 transition-colors"
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/30 outline-hidden pl-10 pr-11 py-2.5 text-sm text-white placeholder:text-slate-500 transition-colors"
                 />
                 <button
                   type="button"
